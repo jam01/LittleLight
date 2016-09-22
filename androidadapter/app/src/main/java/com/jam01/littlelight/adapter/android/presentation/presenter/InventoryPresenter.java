@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation;
+package com.jam01.littlelight.adapter.android.presentation.presenter;
 
 import com.jam01.littlelight.application.DestinyInventoryImportService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;

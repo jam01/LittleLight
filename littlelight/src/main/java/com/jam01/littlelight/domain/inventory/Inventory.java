@@ -25,7 +25,8 @@ public class Inventory {
     }
 
     private List<ItemBag> itemBags() {
-        List<ItemBag> toReturn = new ArrayList<>(characters);
+        List<ItemBag> toReturn = new ArrayList<>();
+        toReturn.addAll(characters);
         toReturn.add(vault);
         return toReturn;
     }
