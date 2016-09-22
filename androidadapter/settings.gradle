@@ -1,0 +1,2 @@
+include ':app', ':littlelight'
+project(':littlelight').projectDir=new File('../littlelight')
