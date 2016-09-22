@@ -14,5 +14,5 @@ public interface User {
 
     void unregisterAccount(AccountId anAccountId);
 
-    DestinyCredentials credentialsOf(AccountId anAccountId);
+    AccountCredentials credentialsOf(AccountId anAccountId);
 }

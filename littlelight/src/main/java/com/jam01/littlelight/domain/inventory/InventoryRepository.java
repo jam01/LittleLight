@@ -5,22 +5,20 @@ import com.jam01.littlelight.domain.identityaccess.AccountId;
 import java.util.Collection;
 
 /**
- * Created by jam01 on 6/9/16.
+ * Created by jam01 on 9/21/16.
  */
 public interface InventoryRepository {
     Collection<Inventory> all();
 
-    Vault vaultOfLegend(AccountId alegendId);
+    Inventory thatContains(String anInventoryId);
 
-    Inventory thatContainsItem(String anItem);
+    Inventory ofAccount(AccountId anAccountId);
 
-    Inventory ofId(String inventoryId);
-
-    void add(Inventory inventory);
+    void add(Inventory Inventory);
 
     void addAll(Collection<Inventory> inventories);
 
-    void remove(Inventory inventory);
+    void remove(AccountId anAccountId);
 
     void removeAll();
 }

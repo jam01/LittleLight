@@ -2,47 +2,74 @@ package com.jam01.littlelight.domain.inventory;
 
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
- * Created by jam01 on 6/9/16.
+ * Created by jam01 on 9/20/16.
  */
-public abstract class Inventory {
+public class Inventory {
     private final AccountId accountId;
-    protected Map<String, Item> items;
-    private final String id;
+    private final List<Character> characters;
+    private final Vault vault;
 
-    public Inventory(Map<String, Item> items, AccountId accountId, String id) {
-        this.items = items;
+    public Inventory(AccountId accountId, List<Character> characters, Vault vault) {
         this.accountId = accountId;
-        this.id = id;
+        this.characters = characters;
+        this.vault = vault;
     }
 
-
-    public String withId() {
-        return id;
-    }
-
-    public boolean containsItem(String anItemId) {
-        return items.containsKey(anItemId);
-    }
-
-    public void updateFrom(Inventory newState) {
-        items.clear();
-        items.putAll(newState.items);
-    }
-
-    public AccountId ofAccount() {
+    public AccountId withAccountId() {
         return accountId;
     }
 
-    public void put(Item anItem) {
-        items.put(anItem.getItemInstanceId(), anItem);
+    private List<ItemBag> itemBags() {
+        List<ItemBag> toReturn = new ArrayList<>(characters);
+        toReturn.add(vault);
+        return toReturn;
     }
 
-    public Item take(String anItemId) {
-        Item itemToReturn = items.get(anItemId);
-        items.remove(anItemId);
-        return itemToReturn;
+    public boolean containsItemBag(String itemBagId) {
+        for (ItemBag instance : itemBags()) {
+            if (instance.withId().equals(itemBagId))
+                return true;
+        }
+        return false;
+    }
+
+    public ItemBag bagWithId(String anId) {
+        for (ItemBag instance : itemBags()) {
+            if (instance.withId().equals(anId))
+                return instance;
+        }
+        return null;
+    }
+
+    public Collection<ItemBag> allItemBags() {
+        return itemBags();
+    }
+
+    public void transferItem(String anItemId, String fromBagId, String toBagId) {
+        bagWithId(toBagId).put(bagWithId(fromBagId).take(anItemId));
+    }
+
+    public void updateFrom(Inventory newState) {
+        for (ItemBag instance : itemBags()) {
+            instance.updateFrom(newState.bagWithId(instance.withId()));
+        }
+    }
+
+    public ItemBag bagThatContains(String anItemId) {
+        for (ItemBag instance : itemBags()) {
+            if (instance.containsItem(anItemId)) {
+                return instance;
+            }
+        }
+        return null;
+    }
+
+    public Vault vault() {
+        return vault;
     }
 }

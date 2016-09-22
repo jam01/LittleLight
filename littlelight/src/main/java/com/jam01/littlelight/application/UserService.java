@@ -12,6 +12,10 @@ import java.util.Collection;
 public class UserService {
     private User user;
 
+    public UserService(User user) {
+        this.user = user;
+    }
+
     public Collection<Account> userAccounts() {
         return user.allRegisteredAccounts();
     }

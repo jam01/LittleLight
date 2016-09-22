@@ -16,8 +16,8 @@ import java.util.Map;
 /**
  * Created by jam01 on 7/26/16.
  */
-public class InventoryTranslator {
-    public Character from(String characterId, List<ItemDefinition> bungieDefinitions, List<ItemInstance> bungieInstances, AccountId accountId) {
+public class ItemBagTranslator {
+    public Character characterFrom(String characterId, List<ItemDefinition> bungieDefinitions, List<ItemInstance> bungieInstances, AccountId accountId) {
         Map<String, Item> itemMap = new HashMap<>(bungieDefinitions.size());
         for (Item item : transform(bungieDefinitions, bungieInstances)) {
             itemMap.put(item.getItemInstanceId(), item);
@@ -26,7 +26,7 @@ public class InventoryTranslator {
         return new Character(characterId, itemMap, accountId, characterId);
     }
 
-    public Vault from(List<ItemDefinition> bungieDefinitions, List<ItemInstance> bungieInstances, AccountId accountId) {
+    public Vault vaultFrom(List<ItemDefinition> bungieDefinitions, List<ItemInstance> bungieInstances, AccountId accountId) {
         Map<String, Item> itemMap = new HashMap<>(bungieDefinitions.size());
         for (Item item : transform(bungieDefinitions, bungieInstances)) {
             itemMap.put(item.getItemInstanceId(), item);

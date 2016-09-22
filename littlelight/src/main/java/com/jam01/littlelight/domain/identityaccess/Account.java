@@ -6,12 +6,12 @@ package com.jam01.littlelight.domain.identityaccess;
  */
 public class Account {
     private final AccountId accountId;
-    private final DestinyCredentials destinyCredentials;
+    private final AccountCredentials accountCredentials;
     private String displayName;
 
-    public Account(AccountId accountId, DestinyCredentials destinyCredentials) {
+    public Account(AccountId accountId, AccountCredentials accountCredentials) {
         this.accountId = accountId;
-        this.destinyCredentials = destinyCredentials;
+        this.accountCredentials = accountCredentials;
     }
 
     protected void setDisplayName(String displayName) {
@@ -26,7 +26,7 @@ public class Account {
         return accountId;
     }
 
-    public DestinyCredentials withCredentials() {
-        return destinyCredentials;
+    public AccountCredentials withCredentials() {
+        return accountCredentials;
     }
 }

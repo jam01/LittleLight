@@ -7,8 +7,6 @@ import android.util.Log;
 
 import com.jam01.littlelight.adapter.android.common.RetrofitDestinyApiFacade;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -87,7 +85,14 @@ public class LocalItemDefinitionService {
             }
 
             //Cleaning it, as to get rid of older DBs
-            FileUtils.cleanDirectory(unzippedFile);
+            //FileUtils.cleanDirectory(unzippedFile);
+            File[] flist;
+            flist = unzippedFile.listFiles();
+            if (flist != null && flist.length > 0) {
+                for (File f : flist) {
+                    f.delete();
+                }
+            }
 
             //Unzip magic
             ZipInputStream zin = new ZipInputStream(new BufferedInputStream(zippedFile));

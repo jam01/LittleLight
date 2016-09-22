@@ -7,10 +7,10 @@ import java.util.Map;
 /**
  * Created by jam01 on 6/9/16.
  */
-public class Character extends Inventory {
+public class Character extends ItemBag {
     private final String characterId;
 
-    public Character(Map<String, Item> items, AccountId accountId, String characterId, String id) {
+    public Character(String characterId, Map<String, Item> items, AccountId accountId, String id) {
         super(items, accountId, id);
         this.characterId = characterId;
     }

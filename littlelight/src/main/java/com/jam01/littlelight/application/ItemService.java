@@ -1,10 +1,10 @@
 package com.jam01.littlelight.application;
 
 import com.jam01.littlelight.domain.identityaccess.User;
-import com.jam01.littlelight.domain.inventory.AccountInventories;
-import com.jam01.littlelight.domain.inventory.AccountInventoriesRepository;
 import com.jam01.littlelight.domain.inventory.Character;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
+import com.jam01.littlelight.domain.inventory.Inventory;
+import com.jam01.littlelight.domain.inventory.InventoryRepository;
 
 /**
  * Created by jam01 on 7/23/16.
@@ -12,21 +12,21 @@ import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
 public class ItemService {
     private DestinyInventoryService destinyService;
     private User user;
-    private AccountInventoriesRepository inventoriesRepo;
+    private InventoryRepository inventoryRepo;
 
-    public ItemService(DestinyInventoryService destinyService, User user, AccountInventoriesRepository inventoriesRepo) {
+    public ItemService(DestinyInventoryService destinyService, User user, InventoryRepository inventoryRepo) {
         this.destinyService = destinyService;
         this.user = user;
-        this.inventoriesRepo = inventoriesRepo;
+        this.inventoryRepo = inventoryRepo;
     }
 
-    public void transferItem(String anItemId, String toInventoryId) {
-        AccountInventories inventories = inventoriesRepo.thatContains(toInventoryId);
-        destinyService.transferItem(anItemId, toInventoryId, inventories, user.credentialsOf(inventories.ofId()));
+    public void transferItem(String anItemId, String toItemBagId) {
+        Inventory onInventory = inventoryRepo.thatContains(toItemBagId);
+        destinyService.transferItem(anItemId, toItemBagId, onInventory, user.ofId(onInventory.withAccountId()));
     }
 
     public void equipItem(String anItemId, String onCharacterId) {
-        Character onCharacter = (Character) inventoriesRepo.thatContains(onCharacterId).withId(onCharacterId);
-        destinyService.equip(anItemId, onCharacter, user.credentialsOf(onCharacter.ofAccount()));
+        Character onCharacter = (Character) inventoryRepo.thatContains(onCharacterId).bagWithId(onCharacterId);
+        destinyService.equip(anItemId, onCharacter, user.ofId(onCharacter.ofAccount()));
     }
 }

@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
+import com.bungie.netplatform.destiny.api.EquipCommand;
+import com.bungie.netplatform.destiny.api.TransferCommand;
 import com.bungie.netplatform.destiny.representation.Account;
 import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.CharacterInventory;
@@ -26,6 +28,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -71,7 +74,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     }
 
     @Override
-    public Vault getVault(String membershipType, String cookies, String xcsrf) {
+    public Vault getVault(int membershipType, String cookies, String xcsrf) {
         Vault vault;
         try {
             vault = bungieApi.requestVault(membershipType, cookies, xcsrf).execute().body().getResponse().getData();
@@ -82,7 +85,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     }
 
     @Override
-    public CharacterInventory getCharacterInventory(String membershipType, String membershipId, String characterId, String cookies, String xcsrf) {
+    public CharacterInventory getCharacterInventory(int membershipType, String membershipId, String characterId, String cookies, String xcsrf) {
         CharacterInventory characterInventory;
         try {
             characterInventory = bungieApi.requestCharacterInventory(membershipType, membershipId, characterId, cookies, xcsrf).execute().body().getResponse().getData();
@@ -93,17 +96,29 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     }
 
     @Override
-    public boolean equipItem() {
-        return false;
+    public boolean equipItem(EquipCommand command, String cookies, String xcsrf) {
+        boolean result = false;
+        try {
+            result = bungieApi.requestEquip(command).execute().body().getErrorCode() == 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
-    public boolean transferItem() {
-        return false;
+    public boolean transferItem(TransferCommand command, String cookies, String xcsrf) {
+        boolean result = false;
+        try {
+            result = bungieApi.requestTransfer(command).execute().body().getErrorCode() == 1;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @Override
-    public Account getAccount(String membershipType, String membershipId, String cookies, String xcsrf) {
+    public Account getAccount(int membershipType, String membershipId, String cookies, String xcsrf) {
         Account account = null;
         try {
             account = bungieApi.requestAccount(membershipType, membershipId, cookies, xcsrf).execute().body().getResponse().getData();
@@ -175,7 +190,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
 
         @Headers("X-API-KEY: " + apiKey)
         @GET("/Platform/Destiny/{membershipType}/Account/{membershipId}/Character/{characterId}/Inventory")
-        Call<BungieResponse<CharacterInventory>> requestCharacterInventory(@Path("membershipType") String membershipType,
+        Call<BungieResponse<CharacterInventory>> requestCharacterInventory(@Path("membershipType") int membershipType,
                                                                            @Path("membershipId") String membershipId,
                                                                            @Path("characterId") String characterId,
                                                                            @Header("Cookie") String cookie,
@@ -183,21 +198,21 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
 
         @Headers("X-API-KEY: " + apiKey)
         @GET("/Platform/Destiny/{membershipType}/MyAccount/Vault")
-        Call<BungieResponse<Vault>> requestVault(@Path("membershipType") String membershipType,
+        Call<BungieResponse<Vault>> requestVault(@Path("membershipType") int membershipType,
                                                  @Header("Cookie") String cookie,
                                                  @Header("X-CSRF") String xcsrf);
 
         @Headers("X-API-KEY: " + apiKey)
         @POST("/Platform/Destiny/EquipItem")
-        Call<BungieResponse<Vault>> requestEquip();
+        Call<BungieResponse<Integer>> requestEquip(@Body EquipCommand command);
 
         @Headers("X-API-KEY: " + apiKey)
         @POST("/Platform/Destiny/TransferItem")
-        Call<BungieResponse<Vault>> requestTransfer();
+        Call<BungieResponse<Integer>> requestTransfer(@Body TransferCommand command);
 
         @Headers("X-API-KEY: " + apiKey)
         @GET("/Platform/Destiny/{membershipType}/Account/{membershipId}")
-        Call<BungieResponse<Account>> requestAccount(@Path("membershipType") String membershipType,
+        Call<BungieResponse<Account>> requestAccount(@Path("membershipType") int membershipType,
                                                      @Path("membershipId") String membershipId,
                                                      @Header("Cookie") String cookie,
                                                      @Header("X-CSRF") String xcsrf);

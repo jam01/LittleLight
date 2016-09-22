@@ -13,15 +13,15 @@ import java.util.List;
  * Created by jam01 on 8/10/16.
  */
 public interface DestinyApi {
-    Vault getVault(String membershipType, String cookies, String xcsrf);
+    Vault getVault(int membershipType, String cookies, String xcsrf);
 
-    CharacterInventory getCharacterInventory(String membershipType, String membershipId, String characterId, String cookies, String xcsrf);
+    CharacterInventory getCharacterInventory(int membershipType, String membershipId, String characterId, String cookies, String xcsrf);
 
-    boolean equipItem();
+    boolean equipItem(EquipCommand command, String cookies, String xcsrf);
 
-    boolean transferItem();
+    boolean transferItem(TransferCommand command, String cookies, String xcsrf);
 
-    Account getAccount(String membershipType, String membershipId, String cookies, String xcsrf);
+    Account getAccount(int membershipType, String membershipId, String cookies, String xcsrf);
 
     User getUser(String cookies, String xcsrf);
 

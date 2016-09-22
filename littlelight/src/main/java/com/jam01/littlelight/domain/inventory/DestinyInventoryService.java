@@ -1,15 +1,14 @@
 package com.jam01.littlelight.domain.inventory;
 
-import com.jam01.littlelight.domain.identityaccess.AccountId;
-import com.jam01.littlelight.domain.identityaccess.DestinyCredentials;
+import com.jam01.littlelight.domain.identityaccess.Account;
 
 /**
  * Created by jam01 on 7/25/16.
  */
 public interface DestinyInventoryService {
-    AccountInventories ofAccount(AccountId anAccountId);
+    Inventory ofAccount(Account anAccount);
 
-    void transferItem(String anItemId, String toInventoryId, AccountInventories onAccInventories, DestinyCredentials credentials);
+    void transferItem(String anItemId, String toBagId, Inventory inventory, Account anAccount);
 
-    boolean equip(String anItemId, Character onCharacter, DestinyCredentials credentials);
+    boolean equip(String anItemId, Character onCharacter, Account anAccount);
 }

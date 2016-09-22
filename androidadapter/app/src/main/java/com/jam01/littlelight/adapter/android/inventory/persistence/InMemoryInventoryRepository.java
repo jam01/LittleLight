@@ -3,7 +3,6 @@ package com.jam01.littlelight.adapter.android.inventory.persistence;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.InventoryRepository;
-import com.jam01.littlelight.domain.inventory.Vault;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.Map;
  * Created by jam01 on 7/23/16.
  */
 public class InMemoryInventoryRepository implements InventoryRepository {
-    private Map<String, Inventory> inventoryMap;
+    private Map<AccountId, Inventory> inventoryMap;
 
     public InMemoryInventoryRepository() {
         this.inventoryMap = new HashMap<>();
@@ -25,9 +24,9 @@ public class InMemoryInventoryRepository implements InventoryRepository {
     }
 
     @Override
-    public Inventory thatContainsItem(String anItemId) {
+    public Inventory thatContains(String anItemBagId) {
         for (Inventory instance : inventoryMap.values()) {
-            if (instance.containsItem(anItemId)) {
+            if (instance.containsItemBag(anItemBagId)) {
                 return instance;
             }
         }
@@ -35,20 +34,13 @@ public class InMemoryInventoryRepository implements InventoryRepository {
     }
 
     @Override
-    public Inventory ofId(String inventoryId) {
-        return inventoryMap.get(inventoryId);
-    }
-
-    @Override
-    public Vault vaultOfLegend(AccountId accountId) {
-        return (Vault) inventoryMap.get(accountId.withMembershipType() + accountId.withMembershipId());
+    public Inventory ofAccount(AccountId anAccountId) {
+        return inventoryMap.get(anAccountId);
     }
 
     @Override
     public void add(Inventory inventory) {
-        if (!inventoryMap.containsKey(inventory.withId())) {
-            inventoryMap.put(inventory.withId(), inventory);
-        }
+        inventoryMap.put(inventory.withAccountId(), inventory);
     }
 
     @Override
@@ -59,8 +51,8 @@ public class InMemoryInventoryRepository implements InventoryRepository {
     }
 
     @Override
-    public void remove(Inventory inventory) {
-        inventoryMap.remove(inventory.withId());
+    public void remove(AccountId anAccountId) {
+        inventoryMap.remove(anAccountId);
     }
 
     @Override
