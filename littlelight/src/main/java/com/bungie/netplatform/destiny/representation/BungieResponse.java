@@ -11,13 +11,13 @@ public class BungieResponse<T> {
 
     @SerializedName("Response")
     @Expose
-    private com.bungie.netplatform.destiny.representation.Response<T> Response;
+    private T Response;
     @SerializedName("ThrottleSeconds")
     @Expose
     private Long ThrottleSeconds;
     @SerializedName("MessageData")
     @Expose
-    private com.bungie.netplatform.destiny.representation.MessageData MessageData;
+    private MessageData MessageData;
     @SerializedName("ErrorCode")
     @Expose
     private Long ErrorCode;
@@ -31,14 +31,14 @@ public class BungieResponse<T> {
     /**
      * @return The Response
      */
-    public com.bungie.netplatform.destiny.representation.Response<T> getResponse() {
+    public T getResponse() {
         return Response;
     }
 
     /**
      * @param Response The Response
      */
-    public void setResponse(com.bungie.netplatform.destiny.representation.Response<T> Response) {
+    public void setResponse(T Response) {
         this.Response = Response;
     }
 
@@ -59,14 +59,14 @@ public class BungieResponse<T> {
     /**
      * @return The MessageData
      */
-    public com.bungie.netplatform.destiny.representation.MessageData getMessageData() {
+    public MessageData getMessageData() {
         return MessageData;
     }
 
     /**
      * @param MessageData The MessageData
      */
-    public void setMessageData(com.bungie.netplatform.destiny.representation.MessageData MessageData) {
+    public void setMessageData(MessageData MessageData) {
         this.MessageData = MessageData;
     }
 

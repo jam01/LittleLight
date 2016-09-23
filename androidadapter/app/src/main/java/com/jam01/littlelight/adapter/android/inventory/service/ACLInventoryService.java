@@ -37,6 +37,7 @@ public class ACLInventoryService implements DestinyInventoryService {
         AccountCredentials credentials = anAccount.withCredentials();
 
         if (characterIds == null) {
+            characterIds = new ArrayList<>();
             for (com.bungie.netplatform.destiny.representation.Character bungieCharacter : destinyApi.getAccount(anAccountId.withMembershipType(), anAccountId.withMembershipId(),
                     credentials.asCookieVal(), credentials.xcsrf()).getCharacters()) {
                 characterIds.add(bungieCharacter.getCharacterBase().getCharacterId());

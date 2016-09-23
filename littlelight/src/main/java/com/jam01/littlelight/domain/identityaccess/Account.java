@@ -7,14 +7,11 @@ package com.jam01.littlelight.domain.identityaccess;
 public class Account {
     private final AccountId accountId;
     private final AccountCredentials accountCredentials;
-    private String displayName;
+    private final String displayName;
 
-    public Account(AccountId accountId, AccountCredentials accountCredentials) {
+    public Account(AccountId accountId, AccountCredentials accountCredentials, String displayName) {
         this.accountId = accountId;
         this.accountCredentials = accountCredentials;
-    }
-
-    protected void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 

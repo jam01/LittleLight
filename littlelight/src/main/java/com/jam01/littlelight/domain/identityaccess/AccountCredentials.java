@@ -13,10 +13,11 @@ public class AccountCredentials {
     }
 
     public String asCookieVal() {
-        return "bungled=" + bungled + "; bungleatk=" + bungleatk;
+        return "bungled=" + bungled + "bungleatk=" + bungleatk;
     }
 
     public String xcsrf() {
-        return bungled.substring(8);
+        return bungled.substring(0, bungled.length() - 1);
+
     }
 }

@@ -2,6 +2,7 @@ package com.jam01.littlelight.application;
 
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
 
 import java.util.Collection;
@@ -11,6 +12,7 @@ import java.util.Collection;
  */
 public class UserService {
     private User user;
+    private DestinyAccountService destinyService;
 
     public UserService(User user) {
         this.user = user;
@@ -20,11 +22,7 @@ public class UserService {
         return user.allRegisteredAccounts();
     }
 
-    public void register(Account anAccount) {
-        user.registerAccount(anAccount);
-    }
-
-    public void unregister(AccountId anAccountId){
+    public void unregister(AccountId anAccountId) {
         user.unregisterAccount(anAccountId);
     }
 }

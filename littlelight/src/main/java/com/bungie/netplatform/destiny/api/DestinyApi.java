@@ -6,6 +6,7 @@ import com.bungie.netplatform.destiny.representation.ItemDefinition;
 import com.bungie.netplatform.destiny.representation.ItemInstance;
 import com.bungie.netplatform.destiny.representation.User;
 import com.bungie.netplatform.destiny.representation.Vault;
+import com.google.gson.JsonObject;
 
 import java.util.List;
 
@@ -24,6 +25,8 @@ public interface DestinyApi {
     Account getAccount(int membershipType, String membershipId, String cookies, String xcsrf);
 
     User getUser(String cookies, String xcsrf);
+
+    JsonObject membershipIds(String cookies, String xcsrf);
 
     String latestManifestUrl();
 
