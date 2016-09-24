@@ -13,10 +13,10 @@ import android.webkit.WebViewClient;
 
 import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.R;
-import com.jam01.littlelight.adapter.android.common.RetrofitDestinyApiFacade;
-import com.jam01.littlelight.adapter.android.identityaccess.persistence.SingletonDiskUser;
-import com.jam01.littlelight.adapter.android.identityaccess.service.ACLAccountService;
+import com.jam01.littlelight.adapter.android.persistence.identityaccess.persistence.SingletonDiskUser;
 import com.jam01.littlelight.adapter.android.presentation.presenter.SignInPresenter;
+import com.jam01.littlelight.adapter.android.service.common.RetrofitDestinyApiFacade;
+import com.jam01.littlelight.adapter.common.service.identityaccess.service.ACLAccountService;
 import com.jam01.littlelight.application.DestinyAccountImportService;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 

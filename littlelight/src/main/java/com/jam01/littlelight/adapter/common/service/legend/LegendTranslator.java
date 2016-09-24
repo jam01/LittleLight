@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.legend.service;
+package com.jam01.littlelight.adapter.common.service.legend;
 
 import com.bungie.netplatform.destiny.representation.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountId;

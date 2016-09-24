@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.identityaccess.persistence;
+package com.jam01.littlelight.adapter.android.persistence.identityaccess;
 
 import android.content.Context;
 import android.content.SharedPreferences;

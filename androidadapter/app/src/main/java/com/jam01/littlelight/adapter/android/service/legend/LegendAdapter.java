@@ -1,10 +1,10 @@
-//package com.jam01.littlelight.adapter.android.legend.service;
+//package com.jam01.littlelight.adapter.android.service.legend.service;
 //
 //
 //import com.bungie.netplatform.destiny.api.DestinyApi;
 //import com.bungie.netplatform.destiny.representation.Account;
 //import com.bungie.netplatform.destiny.representation.User;
-//import com.jam01.littlelight.adapter.android.common.RetrofitDestinyApiFacade;
+//import com.jam01.littlelight.adapter.android.service.common.RetrofitDestinyApiFacade;
 //import com.jam01.littlelight.domain.identityaccess.AccountId;
 //import com.jam01.littlelight.domain.identityaccess.CredentialsService;
 //import com.jam01.littlelight.domain.legend.Legend;

@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.identityaccess.service;
+package com.jam01.littlelight.adapter.common.service.identityaccess;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.google.gson.JsonElement;

@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.inventory.service;
+package com.jam01.littlelight.adapter.common.service.inventory.service;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.api.EquipCommand;

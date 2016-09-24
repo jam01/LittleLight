@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.inventory.persistence;
+package com.jam01.littlelight.adapter.common.persistence.inventory;
 
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.Inventory;

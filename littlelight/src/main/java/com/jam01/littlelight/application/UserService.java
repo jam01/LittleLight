@@ -2,7 +2,6 @@ package com.jam01.littlelight.application;
 
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
-import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
 
 import java.util.Collection;
@@ -12,7 +11,6 @@ import java.util.Collection;
  */
 public class UserService {
     private User user;
-    private DestinyAccountService destinyService;
 
     public UserService(User user) {
         this.user = user;
