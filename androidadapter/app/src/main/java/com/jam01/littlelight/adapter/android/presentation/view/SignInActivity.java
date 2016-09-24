@@ -13,16 +13,15 @@ import android.webkit.WebViewClient;
 
 import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.R;
-import com.jam01.littlelight.adapter.android.persistence.identityaccess.persistence.SingletonDiskUser;
+import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.presenter.SignInPresenter;
-import com.jam01.littlelight.adapter.android.service.common.RetrofitDestinyApiFacade;
-import com.jam01.littlelight.adapter.common.service.identityaccess.service.ACLAccountService;
-import com.jam01.littlelight.application.DestinyAccountImportService;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 
-public class SignInActivity extends AppCompatActivity implements SignInPresenter.SignInView {
+import javax.inject.Inject;
 
-    private SignInPresenter presenter;
+public class SignInActivity extends AppCompatActivity implements SignInPresenter.SignInView {
+    @Inject
+    SignInPresenter presenter;
     private ProgressDialog progressDialog;
     private WebView webView;
 
@@ -36,10 +35,12 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
         progressDialog.setTitle("Little Light");
         progressDialog.setMessage("Logging In");
 
-        if (presenter == null)
-            presenter = new SignInPresenter(new DestinyAccountImportService(
-                    new ACLAccountService(RetrofitDestinyApiFacade.getInstance()),
-                    new SingletonDiskUser(this)));
+        if (presenter == null) {
+            presenter = ((LittleLight) getApplication()).getComponent().provideSignInPresenter();
+        }
+//            presenter = new SignInPresenter(new DestinyAccountImportService(
+//                    new ACLAccountService(RetrofitDestinyApiFacade.getInstance()),
+//                    new SingletonDiskUser(this)));
         presenter.bindView(this);
     }
 

@@ -63,7 +63,8 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     private Gson gson;
     private Future<SQLiteDatabase> database;
 
-    private RetrofitDestinyApiFacade(Context mContext) {
+    public RetrofitDestinyApiFacade(Context mContext) {
+        Log.d(TAG, "RetrofitDestinyApiFacade: instantiated!");
         this.context = mContext;
         gson = new Gson();
 
@@ -106,9 +107,11 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
             checkDB.close();
         } catch (SQLiteException e) {
             //Could not open DB so it does not exist
+            Log.i(TAG, "hasDb: false");
             return false;
         }
         //DB exists
+        Log.i(TAG, "hasDb: " + databaseName);
         return true;
     }
 
@@ -178,7 +181,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
                 }
             } finally {
                 zin.close();
-                Log.d(TAG, "Saved manifest DB to file at: " + location);
+                Log.d(TAG, "Saved manifest DB to file at: " + location + unzippedFile.getName());
             }
         } catch (IOException e) {
             e.printStackTrace();

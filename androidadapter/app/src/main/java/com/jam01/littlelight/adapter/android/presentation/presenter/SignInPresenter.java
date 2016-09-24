@@ -6,6 +6,8 @@ import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.application.DestinyAccountImportService;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 
+import javax.inject.Inject;
+
 /**
  * Created by jam01 on 9/22/16.
  */
@@ -15,6 +17,7 @@ public class SignInPresenter {
     private DestinyAccountImportService service;
     private int membershipType;
 
+    @Inject
     public SignInPresenter(DestinyAccountImportService service) {
         this.service = service;
     }

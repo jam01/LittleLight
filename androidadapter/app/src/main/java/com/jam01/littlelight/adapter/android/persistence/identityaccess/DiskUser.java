@@ -18,12 +18,12 @@ import java.util.Set;
 /**
  * Created by jam01 on 8/6/16.
  */
-public class SingletonDiskUser implements User {
+public class DiskUser implements User {
     private final SharedPreferences disk;
     private final Map<AccountId, Account> accountMap;
     private final Gson gson;
 
-    public SingletonDiskUser(Context mContext) {
+    public DiskUser(Context mContext) {
         disk = mContext.getSharedPreferences("user", Context.MODE_PRIVATE);
         this.gson = new Gson();
         accountMap = new HashMap<>();

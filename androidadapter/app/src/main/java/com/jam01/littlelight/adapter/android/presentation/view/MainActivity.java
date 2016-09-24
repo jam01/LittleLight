@@ -12,20 +12,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.jam01.littlelight.R;
+import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.presenter.MainPresenter;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MainPresenter.MainView {
+import javax.inject.Inject;
 
-    private MainPresenter presenter;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainPresenter.MainView {
+    @Inject
+    MainPresenter presenter;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (presenter == null)
-            presenter = new MainPresenter();
+        if (presenter == null) {
+            presenter = ((LittleLight) getApplication()).getComponent().provideMainPresenter();
+        }
         presenter.bindView(this);
 
         setContentView(R.layout.activity_main);
