@@ -1,9 +1,12 @@
 package com.jam01.littlelight.adapter.android.di.module;
 
-import com.jam01.littlelight.application.DestinyAccountImportService;
+import com.jam01.littlelight.application.InventoryService;
+import com.jam01.littlelight.application.ItemService;
 import com.jam01.littlelight.application.UserService;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
+import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
+import com.jam01.littlelight.domain.inventory.InventoryRepository;
 
 import javax.inject.Singleton;
 
@@ -18,13 +21,19 @@ import dagger.Provides;
 public class ApplicationModule {
     @Provides
     @Singleton
-    DestinyAccountImportService providesAccountImportService(DestinyAccountService destinyService, User user) {
-        return new DestinyAccountImportService(destinyService, user);
+    UserService providesUserService(DestinyAccountService destinyService, User user) {
+        return new UserService(destinyService, user);
     }
 
     @Provides
     @Singleton
-    UserService providesUserService(User user) {
-        return new UserService(user);
+    InventoryService providesInventoryService(DestinyInventoryService destinyService, InventoryRepository inventoryRepo, User user) {
+        return new InventoryService(destinyService, inventoryRepo, user);
+    }
+
+    @Provides
+    @Singleton
+    ItemService providesItemService(DestinyInventoryService destinyService, InventoryRepository inventoryRepo, User user) {
+        return new ItemService(destinyService, inventoryRepo, user);
     }
 }

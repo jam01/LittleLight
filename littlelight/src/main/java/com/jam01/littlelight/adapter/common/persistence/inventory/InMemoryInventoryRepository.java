@@ -24,9 +24,14 @@ public class InMemoryInventoryRepository implements InventoryRepository {
     }
 
     @Override
-    public Inventory thatContains(String anItemBagId) {
+    public boolean hasOfAccount(AccountId anAccountId) {
+        return inventoryMap.containsKey(anAccountId);
+    }
+
+    @Override
+    public Inventory thatContains(String aBagId) {
         for (Inventory instance : inventoryMap.values()) {
-            if (instance.containsItemBag(anItemBagId)) {
+            if (instance.containsItemBag(aBagId)) {
                 return instance;
             }
         }

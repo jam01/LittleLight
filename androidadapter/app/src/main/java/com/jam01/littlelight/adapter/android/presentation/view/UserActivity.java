@@ -13,23 +13,25 @@ import android.view.MenuItem;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
-import com.jam01.littlelight.adapter.android.presentation.presenter.MainPresenter;
+import com.jam01.littlelight.adapter.android.presentation.presenter.UserPresenter;
+import com.jam01.littlelight.domain.identityaccess.Account;
+import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.jam01.littlelight.domain.identityaccess.User;
 
-import javax.inject.Inject;
+public class UserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, UserPresenter.MainView {
+    UserPresenter presenter;
+    AccountId accountId;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, MainPresenter.MainView {
-    @Inject
-    MainPresenter presenter;
-
+    @Override
+    protected void onDestroy() {
+        presenter.unbindView();
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (presenter == null) {
-            presenter = ((LittleLight) getApplication()).getComponent().provideMainPresenter();
-        }
-        presenter.bindView(this);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -43,6 +45,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        if (presenter == null) {
+            presenter = ((LittleLight) getApplication()).getComponent().provideMainPresenter();
+        }
+        presenter.bindView(this);
+
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -66,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.test, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
@@ -93,6 +102,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.account_frame, InventoryFragment.newInstance(accountId))
+                    .commit();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -113,5 +126,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void loadSignInView() {
         startActivity(new Intent(this, SignInActivity.class));
+    }
+
+    @Override
+    public void setUser(User user) {
+        accountId = ((Account) user.allRegisteredAccounts().toArray()[0]).withId();
     }
 }

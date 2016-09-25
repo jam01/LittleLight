@@ -6,8 +6,10 @@ import com.jam01.littlelight.adapter.android.di.module.AdapterModule;
 import com.jam01.littlelight.adapter.android.di.module.AndroidModule;
 import com.jam01.littlelight.adapter.android.di.module.ApplicationModule;
 import com.jam01.littlelight.adapter.android.di.module.DomainModule;
-import com.jam01.littlelight.adapter.android.presentation.presenter.MainPresenter;
+import com.jam01.littlelight.adapter.android.presentation.presenter.InventoryPresenter;
+import com.jam01.littlelight.adapter.android.presentation.presenter.ItemBagPresenter;
 import com.jam01.littlelight.adapter.android.presentation.presenter.SignInPresenter;
+import com.jam01.littlelight.adapter.android.presentation.presenter.UserPresenter;
 
 import javax.inject.Singleton;
 
@@ -34,8 +36,12 @@ public class LittleLight extends Application {
     @Singleton
     @Component(modules = {AndroidModule.class, AdapterModule.class, ApplicationModule.class, DomainModule.class})
     public interface LittleLightComponent {
-        MainPresenter provideMainPresenter();
+        UserPresenter provideMainPresenter();
 
         SignInPresenter provideSignInPresenter();
+
+        InventoryPresenter provideInventoryPresenter();
+
+        ItemBagPresenter provideItemBagPresenter();
     }
 }

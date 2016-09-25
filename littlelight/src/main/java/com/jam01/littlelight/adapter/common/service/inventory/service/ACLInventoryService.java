@@ -44,7 +44,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             }
         }
 
-        List<Character> characters = new ArrayList<>(characterIds.size() + 1);
+        List<Character> characters = new ArrayList<>(characterIds.size());
         Vault vault;
         ItemBagTranslator translator = new ItemBagTranslator();
         List<ItemInstance> instances = new ArrayList<>();

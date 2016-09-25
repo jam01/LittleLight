@@ -106,8 +106,8 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         presenter.unbindView();
+        super.onDestroy();
     }
 
     private AccountCredentials collect() {

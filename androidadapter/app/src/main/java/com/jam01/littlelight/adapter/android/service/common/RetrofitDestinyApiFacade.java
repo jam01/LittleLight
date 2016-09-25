@@ -91,6 +91,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
                 if (!hasDb(dbName)) {
                     addDbFrom(manifestDb(latestDbPath).byteStream());
                 }
+                Log.i(TAG, "call: " + dbName);
                 return SQLiteDatabase.openDatabase(context.getDatabasePath(dbName).getPath(),
                         null,
                         SQLiteDatabase.OPEN_READONLY);
@@ -101,7 +102,6 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     private boolean hasDb(String databaseName) {
         //See http://stackoverflow.com/questions/3386667/query-if-android-database-exists
         SQLiteDatabase checkDB;
-
         try {
             checkDB = SQLiteDatabase.openDatabase(context.getDatabasePath(databaseName).getPath(), null, SQLiteDatabase.OPEN_READONLY);
             checkDB.close();
@@ -289,7 +289,6 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     @Override
     public List<ItemDefinition> getDefinitionsFor(List<ItemInstance> instanceList) {
         List<ItemDefinition> definitions = new ArrayList<>(instanceList.size());
-
         try {
             SQLiteDatabase definitionsDb = database.get();
             for (ItemInstance instance : instanceList) {
@@ -302,7 +301,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
                 }
                 resultSet.close();
             }
-            definitionsDb.close();
+//            definitionsDb.close();
         } catch (SQLiteException exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         } catch (InterruptedException e) {

@@ -10,7 +10,9 @@ import java.util.Collection;
 public interface InventoryRepository {
     Collection<Inventory> all();
 
-    Inventory thatContains(String anInventoryId);
+    boolean hasOfAccount(AccountId anAccountId);
+
+    Inventory thatContains(String aBagId);
 
     Inventory ofAccount(AccountId anAccountId);
 

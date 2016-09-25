@@ -20,4 +20,18 @@ public class AccountId {
         return membershipId;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        boolean result = ((AccountId) obj).membershipId.equals(this.membershipId);
+        result = result && ((AccountId) obj).membershipType == this.membershipType;
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + membershipId.hashCode();
+        result = 31 * result + membershipType;
+        return result;
+    }
 }

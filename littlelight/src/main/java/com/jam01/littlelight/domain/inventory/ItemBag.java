@@ -2,6 +2,8 @@ package com.jam01.littlelight.domain.inventory;
 
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -10,10 +12,13 @@ import java.util.Map;
 public abstract class ItemBag {
     private final AccountId accountId;
     private final String id;
-    protected Map<String, Item> items;
+    protected Map<String, Item> itemMap;
 
-    public ItemBag(Map<String, Item> items, AccountId accountId, String id) {
-        this.items = items;
+    public ItemBag(Collection<Item> items, AccountId accountId, String id) {
+        itemMap = new HashMap<>(items.size());
+        for (Item item : items) {
+            itemMap.put(item.getItemInstanceId(), item);
+        }
         this.accountId = accountId;
         this.id = id;
     }
@@ -24,12 +29,12 @@ public abstract class ItemBag {
     }
 
     public boolean containsItem(String anItemId) {
-        return items.containsKey(anItemId);
+        return itemMap.containsKey(anItemId);
     }
 
     protected void updateFrom(ItemBag newState) {
-        items.clear();
-        items.putAll(newState.items);
+        itemMap.clear();
+        itemMap.putAll(newState.itemMap);
     }
 
     public AccountId ofAccount() {
@@ -37,16 +42,20 @@ public abstract class ItemBag {
     }
 
     public Item itemOfId(String anItemId) {
-        return items.get(anItemId);
+        return itemMap.get(anItemId);
     }
 
     protected void put(Item anItem) {
-        items.put(anItem.getItemInstanceId(), anItem);
+        itemMap.put(anItem.getItemInstanceId(), anItem);
     }
 
     protected Item take(String anItemId) {
-        Item itemToReturn = items.get(anItemId);
-        items.remove(anItemId);
+        Item itemToReturn = itemMap.get(anItemId);
+        itemMap.remove(anItemId);
         return itemToReturn;
+    }
+
+    public Collection<Item> items() {
+        return itemMap.values();
     }
 }

@@ -3,7 +3,7 @@ package com.jam01.littlelight.adapter.android.presentation.presenter;
 import android.os.AsyncTask;
 
 import com.bungie.netplatform.destiny.representation.Endpoints;
-import com.jam01.littlelight.application.DestinyAccountImportService;
+import com.jam01.littlelight.application.UserService;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 
 import javax.inject.Inject;
@@ -14,11 +14,11 @@ import javax.inject.Inject;
 public class SignInPresenter {
     private final String TAG = getClass().getSimpleName();
     private SignInView view;
-    private DestinyAccountImportService service;
+    private UserService service;
     private int membershipType;
 
     @Inject
-    public SignInPresenter(DestinyAccountImportService service) {
+    public SignInPresenter(UserService service) {
         this.service = service;
     }
 
@@ -41,7 +41,7 @@ public class SignInPresenter {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                service.loadAccountFrom(membershipType, credentials);
+                service.registerFromCredentials(membershipType, credentials);
                 return null;
             }
 

@@ -9,30 +9,22 @@ import com.jam01.littlelight.domain.inventory.Vault;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by jam01 on 7/26/16.
  */
 public class ItemBagTranslator {
     public Character characterFrom(String characterId, List<ItemDefinition> bungieDefinitions, List<ItemInstance> bungieInstances, AccountId accountId) {
-        Map<String, Item> itemMap = new HashMap<>(bungieDefinitions.size());
-        for (Item item : transform(bungieDefinitions, bungieInstances)) {
-            itemMap.put(item.getItemInstanceId(), item);
-        }
-
-        return new Character(characterId, itemMap, accountId, characterId);
+        List<Item> items = new ArrayList<>(bungieDefinitions.size());
+        items.addAll(transform(bungieDefinitions, bungieInstances));
+        return new Character(characterId, items, accountId, characterId);
     }
 
     public Vault vaultFrom(List<ItemDefinition> bungieDefinitions, List<ItemInstance> bungieInstances, AccountId accountId) {
-        Map<String, Item> itemMap = new HashMap<>(bungieDefinitions.size());
-        for (Item item : transform(bungieDefinitions, bungieInstances)) {
-            itemMap.put(item.getItemInstanceId(), item);
-        }
-
-        return new Vault(accountId.withMembershipType() + accountId.withMembershipId(), itemMap, accountId);
+        List<Item> items = new ArrayList<>(bungieDefinitions.size());
+        items.addAll(transform(bungieDefinitions, bungieInstances));
+        return new Vault(accountId.withMembershipType() + accountId.withMembershipId(), items, accountId);
     }
 
     private Item transform(ItemDefinition definition, ItemInstance instance) {
@@ -78,12 +70,10 @@ public class ItemBagTranslator {
         if (definitions.size() != instances.size()) {
             throw new IllegalArgumentException("Definition and Instance collections are not the same size");
         }
-
         Collection<Item> items = new ArrayList<>(definitions.size());
         for (int i = 0; i < instances.size(); i++) {
             items.add(transform(definitions.get(i), instances.get(i)));
         }
-
         return items;
     }
 
