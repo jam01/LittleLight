@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.common.service.inventory.service;
+package com.jam01.littlelight.adapter.common.service.inventory;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.api.EquipCommand;
@@ -13,6 +13,7 @@ import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.Character;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
 import com.jam01.littlelight.domain.inventory.Inventory;
+import com.jam01.littlelight.domain.inventory.InventoryRepository;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
 import com.jam01.littlelight.domain.inventory.Vault;
@@ -25,19 +26,23 @@ import java.util.List;
  */
 public class ACLInventoryService implements DestinyInventoryService {
     private final DestinyApi destinyApi;
-    private List<String> characterIds;
 
     public ACLInventoryService(DestinyApi destinyApi1) {
         this.destinyApi = destinyApi1;
     }
 
     @Override
-    public Inventory ofAccount(Account anAccount) {
+    public void synchronizeIventoryFor(Account anAccount, InventoryRepository repository) {
         AccountId anAccountId = anAccount.withId();
         AccountCredentials credentials = anAccount.withCredentials();
-
-        if (characterIds == null) {
-            characterIds = new ArrayList<>();
+        Inventory toUpdate = null;
+        List<String> characterIds = new ArrayList<>();
+        if (repository.hasOfAccount(anAccountId)) {
+            toUpdate = repository.ofAccount(anAccountId);
+            characterIds = new ArrayList<>(toUpdate.characters().size() + 1);
+            for (Character instance : toUpdate.characters())
+                characterIds.add(instance.characterId());
+        } else {
             for (com.bungie.netplatform.destiny.representation.Character bungieCharacter : destinyApi.getAccount(anAccountId.withMembershipType(), anAccountId.withMembershipId(),
                     credentials.asCookieVal(), credentials.xcsrf()).getCharacters()) {
                 characterIds.add(bungieCharacter.getCharacterBase().getCharacterId());
@@ -90,7 +95,11 @@ public class ACLInventoryService implements DestinyInventoryService {
         instances.clear();
         definitions.clear();
 
-        return new Inventory(anAccountId, characters, vault);
+        if (toUpdate != null) {
+            toUpdate.updateFrom(new Inventory(anAccountId, characters, vault));
+        } else {
+            repository.add(new Inventory(anAccountId, characters, vault));
+        }
     }
 
     @Override

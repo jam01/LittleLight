@@ -1,12 +1,17 @@
 package com.jam01.littlelight.adapter.android.presentation.presenter;
 
-import android.os.AsyncTask;
-
 import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.application.UserService;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 
 import javax.inject.Inject;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.Subscriptions;
 
 /**
  * Created by jam01 on 9/22/16.
@@ -16,6 +21,7 @@ public class SignInPresenter {
     private SignInView view;
     private UserService service;
     private int membershipType;
+    private Subscription subscription = Subscriptions.empty();
 
     @Inject
     public SignInPresenter(UserService service) {
@@ -29,6 +35,9 @@ public class SignInPresenter {
 
     public void unbindView() {
         view = null;
+        if (!subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+        }
     }
 
     public void onMembershipTypeSelected(int membershipType) {
@@ -37,42 +46,29 @@ public class SignInPresenter {
     }
 
     public void onBungieUrlIntercepted(final AccountCredentials credentials) {
-
-        new AsyncTask<Void, Void, Void>() {
+        subscription = Observable.create(new Observable.OnSubscribe<Void>() {
             @Override
-            protected Void doInBackground(Void... voids) {
+            public void call(Subscriber<? super Void> subscriber) {
                 service.registerFromCredentials(membershipType, credentials);
-                return null;
             }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Void>() {
+                    @Override
+                    public void onCompleted() {
+                        view.navigateToHome();
+                    }
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                view.showLoading(true);
-            }
+                    @Override
+                    public void onError(Throwable e) {
+                        view.showLoginDialog();
+                    }
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                view.showLoading(false);
-                view.navigateToHome();
-            }
-        }.execute();
-
-//        Callable<Void> task = new Callable<Void>() {
-//            @Override
-//            public Void call() throws Exception {
-//                view.navigateToHome();
-//                return null;
-//            }
-//        };
-//
-//        try {
-//            Executors.newSingleThreadExecutor().submit(task);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        view.navigateToHome();
+                    @Override
+                    public void onNext(Void aVoid) {
+                    }
+                });
     }
 
     public interface SignInView {

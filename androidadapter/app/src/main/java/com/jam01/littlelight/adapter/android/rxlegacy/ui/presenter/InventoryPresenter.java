@@ -57,7 +57,7 @@
 //    }
 //
 //    public interface InventoryView {
-//        void renderLegends(Collection<CharacterLegend> legendsCollection);
+//        void renderInventory(Collection<CharacterLegend> legendsCollection);
 //        void renderEmblem(String url);
 //        void showLoading(boolean show);
 //    }
@@ -78,7 +78,7 @@
 //        @Override
 //        public void onNext(Collection<Character> characters) {
 //            Log.d(TAG, "onNext");
-//            view.renderLegends(CharacterLegendMapper.transform(characters));
+//            view.renderInventory(CharacterLegendMapper.transform(characters));
 //            view.showLoading(false);
 //        }
 //    }

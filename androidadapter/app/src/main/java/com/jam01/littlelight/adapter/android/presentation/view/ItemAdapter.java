@@ -16,8 +16,6 @@ import com.jam01.littlelight.domain.inventory.Item;
 import com.squareup.picasso.Picasso;
 import com.tonicartos.widget.stickygridheaders.StickyGridHeadersSimpleAdapter;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -25,26 +23,33 @@ import java.util.List;
 /**
  * Created by jam01 on 4/3/15.
  */
-public class InventoryItemAdapter extends BaseAdapter implements StickyGridHeadersSimpleAdapter {
-    private LayoutInflater inflater;
-    private List<Item> items;
-    private Context mContext;
+public class ItemAdapter extends BaseAdapter implements StickyGridHeadersSimpleAdapter {
+    private final LayoutInflater inflater;
+    private final List<Item> items;
+    private final Context mContext;
 
 
-    public InventoryItemAdapter(List<Item> items, Context mContext) {
-        this.items = items;
-        this.mContext = mContext;
-    }
-
-    public void addItems(Collection<Item> items) {
-        List<Item> itemList = new ArrayList<Item>(items);
-        Collections.sort(itemList, new Comparator<Item>() {
+    public ItemAdapter(List<Item> items, Context mContext) {
+        Collections.sort(items, new Comparator<Item>() {
             @Override
             public int compare(Item inventoryItem, Item inventoryItem2) {
                 return ((Long) inventoryItem.getBucketTypeHash()).compareTo(inventoryItem2.getBucketTypeHash());
             }
         });
-        this.items.addAll(itemList);
+        this.items = items;
+        this.mContext = mContext;
+        inflater = LayoutInflater.from(mContext);
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        Collections.sort(items, new Comparator<Item>() {
+            @Override
+            public int compare(Item inventoryItem, Item inventoryItem2) {
+                return ((Long) inventoryItem.getBucketTypeHash()).compareTo(inventoryItem2.getBucketTypeHash());
+            }
+        });
+        super.notifyDataSetChanged();
     }
 
     @Override
@@ -65,8 +70,6 @@ public class InventoryItemAdapter extends BaseAdapter implements StickyGridHeade
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
-        if (inflater == null)
-            inflater = (LayoutInflater.from(mContext));
 
         if (convertView == null) {
             viewHolder = new ViewHolder();
@@ -121,9 +124,6 @@ public class InventoryItemAdapter extends BaseAdapter implements StickyGridHeade
     @Override
     public View getHeaderView(int position, View convertView, ViewGroup parent) {
         HeaderViewHolder mHeaderHolder;
-        if (inflater == null)
-            inflater = (LayoutInflater) mContext
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
             mHeaderHolder = new HeaderViewHolder();
             convertView = inflater.inflate(R.layout.header, parent, false);
@@ -138,9 +138,31 @@ public class InventoryItemAdapter extends BaseAdapter implements StickyGridHeade
         return convertView;
     }
 
+    public void addItems(List<Item> newItems) {
+        items.addAll(newItems);
+    }
+
+    public void removeItem(Item anItem) {
+        for (Item instance : items) {
+            if (instance.getItemInstanceId().equals(anItem.getItemInstanceId())) {
+                items.remove(instance);
+                break;
+            }
+        }
+    }
+
     public void clear() {
         this.items.clear();
-        this.notifyDataSetChanged();
+    }
+
+    public void updateItem(Item anItem) {
+        for (Item instance : items) {
+            if (instance.getItemInstanceId().equals(anItem.getItemInstanceId())) {
+                items.remove(instance);
+                items.add(instance);
+                break;
+            }
+        }
     }
 
     static class HeaderViewHolder {

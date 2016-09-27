@@ -14,14 +14,14 @@ public class Item {
     private final long bucketTypeHash;
     private final int tierType;
     private final boolean isGridComplete;
-    private final int damageType;
+    private final String damageType;
     private final int damage;
     private final int maxDamage;
     private final int classType;
     private int stackSize;
     private boolean isEquipped;
 
-    public Item(String itemInstanceId, long itemHash, int stackSize, int maxStackSize, String icon, String itemName, int itemType, boolean isEquippable, boolean isEquipped, long bucketTypeHash, int tierType, boolean isGridComplete, int damageType, int damage, int maxDamage, int classType) {
+    public Item(String itemInstanceId, long itemHash, int stackSize, int maxStackSize, String icon, String itemName, int itemType, boolean isEquippable, boolean isEquipped, long bucketTypeHash, int tierType, boolean isGridComplete, String damageType, int damage, int maxDamage, int classType) {
         this.itemInstanceId = itemInstanceId;
         this.itemHash = itemHash;
         this.stackSize = stackSize;
@@ -103,7 +103,7 @@ public class Item {
         return isGridComplete;
     }
 
-    public int getDamageType() {
+    public String getDamageType() {
         return damageType;
     }
 
@@ -147,7 +147,7 @@ public class Item {
         private boolean isEquipped;
         private int tierType;
         private boolean isGridComplete;
-        private int damageType;
+        private String damageType;
         private int damage;
         private int maxDamage;
         private int classType;
@@ -199,7 +199,7 @@ public class Item {
             return this;
         }
 
-        public Builder damageType(int val) {
+        public Builder damageType(String val) {
             damageType = val;
             return this;
         }

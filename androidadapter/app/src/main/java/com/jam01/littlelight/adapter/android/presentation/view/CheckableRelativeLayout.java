@@ -22,7 +22,7 @@ import android.widget.Checkable;
 import android.widget.RelativeLayout;
 
 /**
- * This is a simple wrapper for {@link android.widget.LinearLayout} that implements the {@link Checkable}
+ * This is a simple wrapper for {@link android.widget.RelativeLayout} that implements the {@link Checkable}
  * interface by keeping an internal 'checked' state flag.
  * <p/>
  * This can be used as the root view for a custom list item layout for

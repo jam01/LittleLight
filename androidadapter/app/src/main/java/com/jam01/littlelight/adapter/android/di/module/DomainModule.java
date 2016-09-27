@@ -6,7 +6,7 @@ import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.jam01.littlelight.adapter.android.persistence.identityaccess.DiskUser;
 import com.jam01.littlelight.adapter.common.persistence.inventory.InMemoryInventoryRepository;
 import com.jam01.littlelight.adapter.common.service.identityaccess.ACLAccountService;
-import com.jam01.littlelight.adapter.common.service.inventory.service.ACLInventoryService;
+import com.jam01.littlelight.adapter.common.service.inventory.ACLInventoryService;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;

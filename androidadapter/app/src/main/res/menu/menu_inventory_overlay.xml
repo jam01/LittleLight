@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--<item-->
+    <!--android:icon="@drawable/filter"-->
+    <!--android:id="@+id/menu_overlay_spinner"-->
+    <!--android:title="Spinner"-->
+    <!--app:actionViewClass="android.widget.Spinner"-->
+    <!--app:showAsAction="ifRoom"-->
+    <!--android:actionLayout="@layout/action_sort" />-->
+
+    <item
+        android:id="@+id/menu_send"
+        android:icon="@drawable/ic_menu_send"
+        android:title="Send"
+        app:showAsAction="ifRoom" />
+</menu>

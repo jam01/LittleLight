@@ -60,7 +60,7 @@
 //    }
 //
 //    public interface LegendView {
-//        void renderLegends(Collection<CharacterLegend> legendsCollection);
+//        void renderInventory(Collection<CharacterLegend> legendsCollection);
 //
 //        void renderEmblem(String url);
 //
@@ -83,7 +83,7 @@
 //        @Override
 //        public void onNext(List<CharacterLegend> characters) {
 //            Log.d(TAG, "onNext");
-//            view.renderLegends(characters);
+//            view.renderInventory(characters);
 //            view.showLoading(false);
 //        }
 //    }

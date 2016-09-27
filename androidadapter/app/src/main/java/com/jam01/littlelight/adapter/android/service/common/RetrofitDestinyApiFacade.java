@@ -72,6 +72,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
         okHttpClient = new OkHttpClient.Builder()
+                .retryOnConnectionFailure(true)
                 .addInterceptor(httpLoggingInterceptor)
                 .build();
 
@@ -203,7 +204,12 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     public CharacterInventory getCharacterInventory(int membershipType, String membershipId, String characterId, String cookies, String xcsrf) {
         CharacterInventory characterInventory;
         try {
-            characterInventory = bungieApi.requestCharacterInventory(membershipType, membershipId, characterId, cookies, xcsrf).execute().body().getResponse().getData();
+            BungieResponse<DataResponse<CharacterInventory>> response = bungieApi.requestCharacterInventory(membershipType, membershipId, characterId, cookies, xcsrf)
+                    .execute()
+                    .body();
+
+            Log.i(TAG, "getCharacterInventory: " + response.getErrorStatus());
+            characterInventory = response.getResponse().getData();
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -214,7 +220,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     public boolean equipItem(EquipCommand command, String cookies, String xcsrf) {
         boolean result = false;
         try {
-            result = bungieApi.requestEquip(command).execute().body().getErrorCode() == 1;
+            result = bungieApi.requestEquip(command, cookies, xcsrf).execute().body().getErrorCode() == 1;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -225,7 +231,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     public boolean transferItem(TransferCommand command, String cookies, String xcsrf) {
         boolean result = false;
         try {
-            result = bungieApi.requestTransfer(command).execute().body().getErrorCode() == 1;
+            result = bungieApi.requestTransfer(command, cookies, xcsrf).execute().body().getErrorCode() == 1;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -271,6 +277,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             dbUrl = bungieApi.requestManifestUrl().execute().body().getResponse().getAsJsonObject("mobileWorldContentPaths").get("en").getAsString();
         } catch (IOException e) {
+            e.printStackTrace();
             throw new IllegalStateException(e.getMessage(), e);
         }
         return dbUrl;
@@ -335,12 +342,16 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
                                                              @Header("X-CSRF") String xcsrf);
 
         @Headers("X-API-KEY: " + apiKey)
-        @POST("/Platform/Destiny/EquipItem")
-        Call<BungieResponse<Integer>> requestEquip(@Body EquipCommand command);
+        @POST("/Platform/Destiny/EquipItem/")
+        Call<BungieResponse<Integer>> requestEquip(@Body EquipCommand command,
+                                                   @Header("Cookie") String cookie,
+                                                   @Header("X-CSRF") String xcsrf);
 
         @Headers("X-API-KEY: " + apiKey)
-        @POST("/Platform/Destiny/TransferItem")
-        Call<BungieResponse<Integer>> requestTransfer(@Body TransferCommand command);
+        @POST("/Platform/Destiny/TransferItem/")
+        Call<BungieResponse<Integer>> requestTransfer(@Body TransferCommand command,
+                                                      @Header("Cookie") String cookie,
+                                                      @Header("X-CSRF") String xcsrf);
 
         @Headers("X-API-KEY: " + apiKey)
         @GET("/Platform/Destiny/{membershipType}/Account/{membershipId}")

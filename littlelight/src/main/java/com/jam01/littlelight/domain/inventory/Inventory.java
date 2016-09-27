@@ -13,11 +13,14 @@ public class Inventory {
     private final AccountId accountId;
     private final List<Character> characters;
     private final Vault vault;
-
     public Inventory(AccountId accountId, List<Character> characters, Vault vault) {
         this.accountId = accountId;
         this.characters = characters;
         this.vault = vault;
+    }
+
+    public List<Character> characters() {
+        return characters;
     }
 
     public AccountId withAccountId() {

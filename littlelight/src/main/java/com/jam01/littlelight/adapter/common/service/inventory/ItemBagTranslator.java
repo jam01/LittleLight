@@ -1,5 +1,6 @@
-package com.jam01.littlelight.adapter.common.service.inventory.service;
+package com.jam01.littlelight.adapter.common.service.inventory;
 
+import com.bungie.netplatform.destiny.representation.Globals;
 import com.bungie.netplatform.destiny.representation.ItemDefinition;
 import com.bungie.netplatform.destiny.representation.ItemInstance;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -44,7 +45,7 @@ public class ItemBagTranslator {
                     .isEquipped(instance.getIsEquipped())
                     .tierType(definition.getTierType().intValue())
                     .isGridComplete(instance.getIsGridComplete())
-                    .damageType(instance.getDamageType().intValue())
+                    .damageType(Globals.damageTypes.get(instance.getDamageType().intValue()))
                     .classType(definition.getClassType().intValue());
 
             // Some items do not have a primaryStat such as engrams or class items

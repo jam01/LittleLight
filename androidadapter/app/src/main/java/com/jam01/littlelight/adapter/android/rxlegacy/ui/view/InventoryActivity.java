@@ -93,7 +93,7 @@
 //    }
 //
 //    @Override
-//    public void renderLegends(Collection<CharacterLegend> legendsCollection) {
+//    public void renderInventory(Collection<CharacterLegend> legendsCollection) {
 //        legendPagerAdapter.setCharacterLegendList((List<CharacterLegend>) legendsCollection);
 //        legendPagerAdapter.notifyDataSetChanged();
 //    }
