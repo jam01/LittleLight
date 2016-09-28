@@ -1,6 +1,7 @@
 package com.jam01.littlelight.adapter.android.presentation.view;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -9,7 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -177,12 +178,9 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                       @Override
                                       public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
                                           Item tmp = (Item) bagView.getAdapter().getItem(position);
-                                          Log.d("onCheck", "item selected is " + tmp.getItemName());
                                           if (checked) {
-                                              Log.d(TAG, "Adding" + tmp.getItemName());
                                               toTransfer.add(tmp);
                                           } else {
-                                              Log.d(TAG, "Removing" + tmp.getItemName());
                                               toTransfer.remove(tmp);
                                           }
                                           mode.setSubtitle(toTransfer.size() + " selected items");
@@ -201,34 +199,34 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
                                       @Override
                                       public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                                          for (int i = 0; i < bagView.getCount(); i++) {
-                                              if (bagView.getChildAt(i) != null && bagView.getChildAt(i).findViewById(R.id.cbCheck) != null)
-                                                  bagView.getChildAt(i).findViewById(R.id.cbCheck).setVisibility(View.VISIBLE);
-                                          }
-                                          return true;
+                                          return false;
                                       }
 
                                       @Override
                                       public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                                           switch (item.getItemId()) {
                                               case R.id.menu_send:
-                                                  presenter.sendItems(toTransfer, "2305843009217042777");
+                                                  String[] colors_array = new String[inventory.allItemBags().size()];
+                                                  for (int i = 0; i < inventory.allItemBags().size(); i++) {
+                                                      colors_array[i] = ((ItemBag) inventory.allItemBags().toArray()[i]).withId();
+                                                  }
+                                                  AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                                  builder.setTitle("Transfer to")
+                                                          .setItems(colors_array, new DialogInterface.OnClickListener() {
+                                                              public void onClick(DialogInterface dialog, int which) {
+                                                                  presenter.sendItems(toTransfer, ((ItemBag) inventory.allItemBags().toArray()[which]).withId());
+                                                                  toTransfer = null;
+                                                              }
+                                                          });
+                                                  builder.create().show();
                                                   mode.finish();
                                           }
-                                          Log.d(TAG, "returningTrue");
                                           return true;
                                       }
 
                                       @Override
                                       public void onDestroyActionMode(ActionMode mode) {
-                                          Log.d(TAG, "onDestroyActionMode");
                                           sendMode = null;
-                                          bagView.clearChoices();
-                                          toTransfer = null;
-                                          for (int i = 0; i < bagView.getCount(); i++) {
-                                              if (bagView.getChildAt(i) != null && bagView.getChildAt(i).findViewById(R.id.cbCheck) != null)
-                                                  bagView.getChildAt(i).findViewById(R.id.cbCheck).setVisibility(View.INVISIBLE);
-                                          }
                                       }
                                   });
                                   container.addView(bagView);
@@ -255,7 +253,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                   collection.removeView((View) view);
                               }
                           }
-
         );
     }
 
@@ -275,5 +272,10 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     @Override
     public void showError(String localizedMessage) {
         Toast.makeText(getContext(), localizedMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void setRefreshing(boolean bool) {
+        swipeContainer.setRefreshing(false);
     }
 }

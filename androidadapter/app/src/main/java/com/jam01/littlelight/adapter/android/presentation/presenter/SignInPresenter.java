@@ -50,6 +50,7 @@ public class SignInPresenter {
             @Override
             public void call(Subscriber<? super Void> subscriber) {
                 service.registerFromCredentials(membershipType, credentials);
+                subscriber.onCompleted();
             }
         })
                 .subscribeOn(Schedulers.io())

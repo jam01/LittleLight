@@ -11,10 +11,9 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.Subscriber;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.Subscriptions;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * Created by jam01 on 9/5/16.
@@ -23,7 +22,7 @@ public class InventoryPresenter {
     private final String TAG = getClass().getSimpleName();
     private InventoryService service;
     private InventoryView view;
-    private Subscription subscription = Subscriptions.empty();
+    private CompositeSubscription subscriptions = new CompositeSubscription();
 
     @Inject
     public InventoryPresenter(InventoryService inventoryService) {
@@ -33,37 +32,69 @@ public class InventoryPresenter {
     public void bindView(InventoryView inventoryView, final AccountId anAccountId) {
         this.view = inventoryView;
         view.showLoading(true);
-        subscription = Observable.just(service.ofAccount(anAccountId))
+
+        subscriptions.add(Observable.create(new Observable.OnSubscribe<Inventory>() {
+            @Override
+            public void call(Subscriber<? super Inventory> subscriber) {
+                subscriber.onNext(service.ofAccount(anAccountId));
+                subscriber.onCompleted();
+            }
+        })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new InventorySubscriber());
+                .subscribe(new InventorySubscriber()));
     }
 
     public void unbindView() {
         view = null;
-        if (!subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
+        if (!subscriptions.isUnsubscribed()) {
+            subscriptions.unsubscribe();
         }
     }
 
     public void sendItems(final List<Item> toTransfer, final String toItemBagId) {
         view.showLoading(true);
 
-        subscription = Observable.create(new Observable.OnSubscribe<Void>() {
+        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
             @Override
             public void call(Subscriber<? super Void> subscriber) {
                 for (Item instance : toTransfer) {
                     service.transferItem(instance.getItemInstanceId(), toItemBagId);
                 }
+                subscriber.onCompleted();
             }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new TransferSubscriber());
+                .subscribe(new TransferSubscriber()));
     }
 
-    public void refresh(AccountId anAccountId) {
-        service.synchronizeInventoryOf(anAccountId);
+    public void refresh(final AccountId anAccountId) {
+        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                service.synchronizeInventoryOf(anAccountId);
+                subscriber.onCompleted();
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Void>() {
+                    @Override
+                    public void onCompleted() {
+                        view.setRefreshing(false);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        view.showError(e.getLocalizedMessage());
+                        view.setRefreshing(false);
+                    }
+
+                    @Override
+                    public void onNext(Void aVoid) {
+                    }
+                }));
     }
 
     public interface InventoryView {
@@ -74,6 +105,8 @@ public class InventoryPresenter {
         void showLoading(boolean show);
 
         void showError(String localizedMessage);
+
+        void setRefreshing(boolean bool);
     }
 
     private class InventorySubscriber extends Subscriber<Inventory> {
@@ -102,6 +135,7 @@ public class InventoryPresenter {
         @Override
         public void onError(Throwable e) {
             view.showError(e.getLocalizedMessage());
+            view.showLoading(false);
         }
 
         @Override

@@ -19,7 +19,7 @@ public class Character extends ItemBag {
         return characterId;
     }
 
-    protected void equip(String anItemId) {
+    public void equip(String anItemId) {
         if (!this.containsItem(anItemId)) {
             throw new IllegalArgumentException("Character does not have item: " + anItemId);
         }
@@ -30,7 +30,9 @@ public class Character extends ItemBag {
             if (instance.getItemType() == toEquip.getItemType()) {
                 instance.setEquipped(false);
                 toEquip.setEquipped(true);
+                break;
             }
         }
+
     }
 }

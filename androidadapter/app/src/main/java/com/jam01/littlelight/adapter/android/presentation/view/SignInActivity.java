@@ -30,6 +30,7 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
+
         webView = (WebView) findViewById(R.id.webView);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Little Light");

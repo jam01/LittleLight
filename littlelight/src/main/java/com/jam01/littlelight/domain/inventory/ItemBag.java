@@ -55,6 +55,10 @@ public abstract class ItemBag {
         return itemToReturn;
     }
 
+    protected Item get(String anItemId) {
+        return itemMap.get(anItemId);
+    }
+
     public Collection<Item> items() {
         return itemMap.values();
     }

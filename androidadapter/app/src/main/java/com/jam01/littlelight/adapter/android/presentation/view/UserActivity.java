@@ -31,8 +31,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -131,5 +129,9 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void setUser(User user) {
         accountId = ((Account) user.allRegisteredAccounts().toArray()[0]).withId();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.account_frame, InventoryFragment.newInstance(accountId))
+                .commit();
     }
 }

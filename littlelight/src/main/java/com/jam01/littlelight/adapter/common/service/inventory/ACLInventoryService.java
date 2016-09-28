@@ -112,6 +112,9 @@ public class ACLInventoryService implements DestinyInventoryService {
 
         Item item = fromBag.itemOfId(anItemId);
 
+        if (toBagId.equals(fromBag.withId())) {
+            return;
+        }
         if (toBag instanceof Vault) {
             destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
@@ -164,11 +167,13 @@ public class ACLInventoryService implements DestinyInventoryService {
 
     @Override
     public boolean equip(String anItemId, Character onCharacter, Account anAccount) {
-        return destinyApi.equipItem(
+        destinyApi.equipItem(
                 new EquipCommand(anAccount.withId().withMembershipType(),
                         anItemId,
                         onCharacter.characterId()),
                 anAccount.withCredentials().asCookieVal(),
                 anAccount.withCredentials().xcsrf());
+        onCharacter.equip(anItemId);
+        return true;
     }
 }

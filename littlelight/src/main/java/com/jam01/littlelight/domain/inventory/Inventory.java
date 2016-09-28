@@ -1,5 +1,6 @@
 package com.jam01.littlelight.domain.inventory;
 
+import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ public class Inventory {
     private final AccountId accountId;
     private final List<Character> characters;
     private final Vault vault;
+
     public Inventory(AccountId accountId, List<Character> characters, Vault vault) {
         this.accountId = accountId;
         this.characters = characters;
@@ -56,11 +58,13 @@ public class Inventory {
 
     public void transferItem(String anItemId, String fromBagId, String toBagId) {
         bagWithId(toBagId).put(bagWithId(fromBagId).take(anItemId));
+        DomainEventPublisher.instanceOf().publish(new ItemTransferred(bagWithId(toBagId).get(anItemId), fromBagId, toBagId));
     }
 
     public void updateFrom(Inventory newState) {
         for (ItemBag instance : itemBags()) {
             instance.updateFrom(newState.bagWithId(instance.withId()));
+            DomainEventPublisher.instanceOf().publish(new ItemBagUpdated(instance));
         }
     }
 

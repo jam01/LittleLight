@@ -365,7 +365,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         Call<BungieResponse<UserResponse>> requestUser(@Header("Cookie") String cookie,
                                                        @Header("X-CSRF") String xcsrf);
 
-
+        @Headers("X-API-KEY: " + apiKey)
         @GET("/Platform/Destiny/Manifest")
         Call<BungieResponse<JsonObject>> requestManifestUrl();
 

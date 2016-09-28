@@ -21,14 +21,20 @@ import com.tonicartos.widget.stickygridheaders.StickyGridHeadersBaseAdapterWrapp
 import com.tonicartos.widget.stickygridheaders.StickyGridHeadersGridView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by jam01 on 9/24/16.
  */
 public class ItemBagView extends StickyGridHeadersGridView implements ItemBagPresenter.ItemBagView {
+    private String itemBagId;
     private ItemBagPresenter presenter;
     private ItemAdapter itemAdapter;
     private ProgressDialog progressDialog;
+
+    public ItemBagView(Context context) {
+        super(context);
+    }
 
     public ItemBagView(final Context context, final ItemBag itemBag) {
         super(context);
@@ -40,6 +46,7 @@ public class ItemBagView extends StickyGridHeadersGridView implements ItemBagPre
         setStretchMode(STRETCH_SPACING_UNIFORM);
         setVerticalSpacing((int) (5 * context.getResources().getDisplayMetrics().density));
 
+        itemBagId = itemBag.withId();
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Little Light");
         progressDialog.setMessage("ItemBag Dialog");
@@ -115,12 +122,16 @@ public class ItemBagView extends StickyGridHeadersGridView implements ItemBagPre
     }
 
     @Override
+    public String itemBagRendering() {
+        return itemBagId;
+    }
+
+    @Override
     public void replaceItems(ItemBag itemBag) {
         itemAdapter.clear();
         itemAdapter.addItems(new ArrayList<>(itemBag.items()));
         itemAdapter.notifyDataSetChanged();
     }
-
 
     @Override
     public void clearItems() {
@@ -143,5 +154,11 @@ public class ItemBagView extends StickyGridHeadersGridView implements ItemBagPre
     @Override
     public void showError(String localizedMessage) {
         Toast.makeText(getContext(), localizedMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void addItem(Item itemTransferred) {
+        itemAdapter.addItems(Collections.singletonList(itemTransferred));
+        itemAdapter.notifyDataSetChanged();
     }
 }
