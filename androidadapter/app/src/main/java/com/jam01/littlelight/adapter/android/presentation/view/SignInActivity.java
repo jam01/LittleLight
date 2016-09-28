@@ -29,8 +29,6 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-
-
         webView = (WebView) findViewById(R.id.webView);
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Little Light");
@@ -39,9 +37,11 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
         if (presenter == null) {
             presenter = ((LittleLight) getApplication()).getComponent().provideSignInPresenter();
         }
-//            presenter = new SignInPresenter(new DestinyAccountImportService(
-//                    new ACLAccountService(RetrofitDestinyApiFacade.getInstance()),
-//                    new SingletonDiskUser(this)));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         presenter.bindView(this);
     }
 
@@ -106,9 +106,9 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onStop() {
         presenter.unbindView();
-        super.onDestroy();
+        super.onStop();
     }
 
     private AccountCredentials collect() {

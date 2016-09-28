@@ -1,5 +1,6 @@
 package com.jam01.littlelight.domain.inventory;
 
+import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.Collection;
@@ -19,20 +20,13 @@ public class Character extends ItemBag {
         return characterId;
     }
 
-    public void equip(String anItemId) {
-        if (!this.containsItem(anItemId)) {
-            throw new IllegalArgumentException("Character does not have item: " + anItemId);
-        }
+    public void equip(String toEquipId, String toUnequipId) {
+        Item toEquip = itemMap.get(toEquipId);
+        Item toUnequip = itemMap.get(toUnequipId);
 
-        Item toEquip = itemMap.get(anItemId);
+        toEquip.setEquipped(true);
+        toUnequip.setEquipped(false);
 
-        for (Item instance : itemMap.values()) {
-            if (instance.getItemType() == toEquip.getItemType()) {
-                instance.setEquipped(false);
-                toEquip.setEquipped(true);
-                break;
-            }
-        }
-
+        DomainEventPublisher.instanceOf().publish(new ItemEquipped(toEquip, toUnequip, ofAccount(), withId()));
     }
 }

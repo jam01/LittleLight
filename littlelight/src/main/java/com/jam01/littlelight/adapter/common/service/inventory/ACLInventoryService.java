@@ -115,6 +115,20 @@ public class ACLInventoryService implements DestinyInventoryService {
         if (toBagId.equals(fromBag.withId())) {
             return;
         }
+        if (item.isEquipped()) {
+            for (Item instance : fromBag.items()) {
+                if (instance != item && (instance.getBucketTypeHash() == item.getBucketTypeHash()) && instance.getTierType() < 6) {
+                    destinyApi.equipItem(
+                            new EquipCommand(anAccount.withId().withMembershipType(),
+                                    instance.getItemInstanceId(),
+                                    ((Character) fromBag).characterId()),
+                            anAccount.withCredentials().asCookieVal(),
+                            anAccount.withCredentials().xcsrf());
+                    ((Character) fromBag).equip(instance.getItemInstanceId(), item.getItemInstanceId());
+                    break;
+                }
+            }
+        }
         if (toBag instanceof Vault) {
             destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
@@ -167,13 +181,13 @@ public class ACLInventoryService implements DestinyInventoryService {
 
     @Override
     public boolean equip(String anItemId, Character onCharacter, Account anAccount) {
-        destinyApi.equipItem(
-                new EquipCommand(anAccount.withId().withMembershipType(),
-                        anItemId,
-                        onCharacter.characterId()),
-                anAccount.withCredentials().asCookieVal(),
-                anAccount.withCredentials().xcsrf());
-        onCharacter.equip(anItemId);
+//        destinyApi.equipItem(
+//                new EquipCommand(anAccount.withId().withMembershipType(),
+//                        anItemId,
+//                        onCharacter.characterId()),
+//                anAccount.withCredentials().asCookieVal(),
+//                anAccount.withCredentials().xcsrf());
+//        onCharacter.equip(anItemId);
         return true;
     }
 }

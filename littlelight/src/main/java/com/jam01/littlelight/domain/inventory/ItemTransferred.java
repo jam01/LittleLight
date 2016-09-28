@@ -1,6 +1,7 @@
 package com.jam01.littlelight.domain.inventory;
 
 import com.jam01.littlelight.domain.DomainEvent;
+import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.Date;
 
@@ -9,12 +10,14 @@ import java.util.Date;
  */
 public class ItemTransferred implements DomainEvent {
     private final Item itemTransferred;
+    private final AccountId accountId;
     private final String fromItemBagId;
     private final String toItemBagId;
     private final Date occuredOn;
 
-    public ItemTransferred(Item itemTransferred, String fromItemBagId, String toItemBagId) {
+    public ItemTransferred(Item itemTransferred, AccountId accountId, String fromItemBagId, String toItemBagId) {
         this.itemTransferred = itemTransferred;
+        this.accountId = accountId;
         this.fromItemBagId = fromItemBagId;
         this.toItemBagId = toItemBagId;
         this.occuredOn = new Date();
@@ -35,5 +38,9 @@ public class ItemTransferred implements DomainEvent {
 
     public String getToItemBagId() {
         return toItemBagId;
+    }
+
+    public AccountId onAccountId() {
+        return accountId;
     }
 }

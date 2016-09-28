@@ -1,9 +1,14 @@
 package com.jam01.littlelight.adapter.android.presentation.presenter;
 
 import com.jam01.littlelight.application.InventoryService;
+import com.jam01.littlelight.domain.DomainEvent;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.Item;
+import com.jam01.littlelight.domain.inventory.ItemBag;
+import com.jam01.littlelight.domain.inventory.ItemBagUpdated;
+import com.jam01.littlelight.domain.inventory.ItemEquipped;
+import com.jam01.littlelight.domain.inventory.ItemTransferred;
 
 import java.util.List;
 
@@ -12,6 +17,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -29,8 +35,12 @@ public class InventoryPresenter {
         this.service = inventoryService;
     }
 
-    public void bindView(InventoryView inventoryView, final AccountId anAccountId) {
+    public void bindView(InventoryView inventoryView) {
         this.view = inventoryView;
+    }
+
+
+    public void loadInventory(final AccountId anAccountId) {
         view.showLoading(true);
 
         subscriptions.add(Observable.create(new Observable.OnSubscribe<Inventory>() {
@@ -42,7 +52,51 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new InventorySubscriber()));
+                .subscribe(new Action1<Inventory>() {
+                    @Override
+                    public void call(Inventory inventory) {
+                        view.renderInventory(inventory);
+                        view.showLoading(false);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        view.showLoading(false);
+                        view.showError(throwable.getLocalizedMessage());
+                    }
+                }));
+
+        subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<DomainEvent>() {
+                               @Override
+                               public void call(DomainEvent domainEvent) {
+                                   if (domainEvent instanceof ItemTransferred) {
+                                       ItemTransferred itemTransferred = (ItemTransferred) domainEvent;
+                                       view.removeItem(itemTransferred.getItemTransferred(), itemTransferred.getFromItemBagId());
+                                       view.addItem(itemTransferred.getItemTransferred(), itemTransferred.getToItemBagId());
+                                   }
+                                   if (domainEvent instanceof ItemEquipped) {
+                                       ItemEquipped itemEquipped = (ItemEquipped) domainEvent;
+                                       view.updateItem(itemEquipped.getItemEquipped(), itemEquipped.getOnBagId());
+                                       view.updateItem(itemEquipped.getItemUnequipped(), itemEquipped.getOnBagId());
+                                   }
+                                   if (domainEvent instanceof ItemBagUpdated) {
+                                       ItemBagUpdated itemBagUpdated = (ItemBagUpdated) domainEvent;
+                                       view.replaceItems(itemBagUpdated.getItemBagUpdated());
+                                   }
+                               }
+                           }
+
+                        , new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                throwable.printStackTrace();
+                                view.showError(throwable.getLocalizedMessage());
+                            }
+                        }
+                ));
     }
 
     public void unbindView() {
@@ -61,12 +115,47 @@ public class InventoryPresenter {
                 for (Item instance : toTransfer) {
                     service.transferItem(instance.getItemInstanceId(), toItemBagId);
                 }
+                subscriber.onNext(null);
                 subscriber.onCompleted();
             }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new TransferSubscriber()));
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        view.showLoading(false);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        view.showLoading(false);
+                        view.showError(throwable.getLocalizedMessage());
+                    }
+                }));
+    }
+
+    public void equipItem(final Item item, final String characterId) {
+        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                service.equipItem(item.getItemInstanceId(), characterId);
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void aVoid) {
+                        view.showLoading(false);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                        view.showError(throwable.getLocalizedMessage());
+                    }
+                }));
     }
 
     public void refresh(final AccountId anAccountId) {
@@ -82,13 +171,13 @@ public class InventoryPresenter {
                 .subscribe(new Subscriber<Void>() {
                     @Override
                     public void onCompleted() {
-                        view.setRefreshing(false);
+                        view.showLoading(false);
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         view.showError(e.getLocalizedMessage());
-                        view.setRefreshing(false);
+                        view.showLoading(false);
                     }
 
                     @Override
@@ -106,40 +195,12 @@ public class InventoryPresenter {
 
         void showError(String localizedMessage);
 
-        void setRefreshing(boolean bool);
-    }
+        void removeItem(Item itemTransferred, String fromItemBagId);
 
-    private class InventorySubscriber extends Subscriber<Inventory> {
-        @Override
-        public void onCompleted() {
-            view.showLoading(false);
-        }
+        void addItem(Item itemTransferred, String toItemBagId);
 
-        @Override
-        public void onError(Throwable e) {
-            view.showError(e.getLocalizedMessage());
-        }
+        void updateItem(Item itemUnequipped, String onBagId);
 
-        @Override
-        public void onNext(Inventory inventory) {
-            view.renderInventory(inventory);
-        }
-    }
-
-    private class TransferSubscriber extends Subscriber<Void> {
-        @Override
-        public void onCompleted() {
-            view.showLoading(false);
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            view.showError(e.getLocalizedMessage());
-            view.showLoading(false);
-        }
-
-        @Override
-        public void onNext(Void aVoid) {
-        }
+        void replaceItems(ItemBag itemBagUpdated);
     }
 }

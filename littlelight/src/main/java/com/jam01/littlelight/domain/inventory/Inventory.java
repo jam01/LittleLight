@@ -58,7 +58,7 @@ public class Inventory {
 
     public void transferItem(String anItemId, String fromBagId, String toBagId) {
         bagWithId(toBagId).put(bagWithId(fromBagId).take(anItemId));
-        DomainEventPublisher.instanceOf().publish(new ItemTransferred(bagWithId(toBagId).get(anItemId), fromBagId, toBagId));
+        DomainEventPublisher.instanceOf().publish(new ItemTransferred(bagWithId(toBagId).get(anItemId), accountId, fromBagId, toBagId));
     }
 
     public void updateFrom(Inventory newState) {

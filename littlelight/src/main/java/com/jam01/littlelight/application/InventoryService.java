@@ -4,15 +4,17 @@ import com.jam01.littlelight.domain.DomainEvent;
 import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.identityaccess.User;
+import com.jam01.littlelight.domain.inventory.Character;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.InventoryRepository;
+import com.jam01.littlelight.domain.inventory.ItemBagUpdated;
+import com.jam01.littlelight.domain.inventory.ItemEquipped;
 import com.jam01.littlelight.domain.inventory.ItemTransferred;
 
 import java.util.List;
 
-import rx.Subscriber;
-import rx.Subscription;
+import rx.Observable;
 import rx.functions.Func1;
 
 /**
@@ -51,15 +53,26 @@ public class InventoryService {
         }
     }
 
-    public Subscription subscribeToInventoryEvents(final String itemBagId, Subscriber<DomainEvent> subscriber) {
+    public void equipItem(String anItemId, String onCharacterId) {
+        Character onCharacter = (Character) inventoryRepo.thatContains(onCharacterId).bagWithId(onCharacterId);
+        destinyService.equip(anItemId, onCharacter, user.ofId(onCharacter.ofAccount()));
+    }
+
+
+    public Observable<DomainEvent> subscribeToInventoryEvents(final AccountId subscriberAccountId) {
         return DomainEventPublisher.instanceOf().getEvents()
                 .filter(new Func1<DomainEvent, Boolean>() {
                     @Override
                     public Boolean call(DomainEvent domainEvent) {
-                        boolean result = domainEvent instanceof ItemTransferred;
-                        result = result && (((ItemTransferred) domainEvent).getFromItemBagId().equals(itemBagId) || ((ItemTransferred) domainEvent).getToItemBagId().equals(itemBagId));
-                        return result;
+                        if (domainEvent instanceof ItemTransferred)
+                            return (((ItemTransferred) domainEvent).onAccountId().equals(subscriberAccountId)
+                                    || ((ItemTransferred) domainEvent).onAccountId().equals(subscriberAccountId));
+                        if (domainEvent instanceof ItemEquipped)
+                            return ((ItemEquipped) domainEvent).getAccountId().equals(subscriberAccountId);
+                        if (domainEvent instanceof ItemBagUpdated)
+                            return ((ItemBagUpdated) domainEvent).getItemBagUpdated().ofAccount().equals(subscriberAccountId);
+                        return false;
                     }
-                }).subscribe(subscriber);
+                });
     }
 }

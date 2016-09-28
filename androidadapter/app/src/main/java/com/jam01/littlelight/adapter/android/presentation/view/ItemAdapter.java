@@ -140,6 +140,7 @@ public class ItemAdapter extends BaseAdapter implements StickyGridHeadersSimpleA
 
     public void addItems(List<Item> newItems) {
         items.addAll(newItems);
+        notifyDataSetChanged();
     }
 
     public void removeItem(Item anItem) {
@@ -149,6 +150,7 @@ public class ItemAdapter extends BaseAdapter implements StickyGridHeadersSimpleA
                 break;
             }
         }
+        notifyDataSetChanged();
     }
 
     public void clear() {
@@ -163,6 +165,7 @@ public class ItemAdapter extends BaseAdapter implements StickyGridHeadersSimpleA
                 break;
             }
         }
+        notifyDataSetChanged();
     }
 
     static class HeaderViewHolder {
