@@ -15,7 +15,7 @@ public class Buckets {
     @Expose
     private List<Invisible> Invisible = new ArrayList<Invisible>();
     @Expose
-    private List<com.bungie.netplatform.destiny.representation.Currency> Currency = new ArrayList<com.bungie.netplatform.destiny.representation.Currency>();
+    private List<Currency> Currency = new ArrayList<com.bungie.netplatform.destiny.representation.Currency>();
     @Expose
     private List<Equippable> Equippable = new ArrayList<Equippable>();
 
@@ -50,14 +50,14 @@ public class Buckets {
     /**
      * @return The Currency
      */
-    public List<com.bungie.netplatform.destiny.representation.Currency> getCurrency() {
+    public List<Currency> getCurrency() {
         return Currency;
     }
 
     /**
      * @param Currency The Currency
      */
-    public void setCurrency(List<com.bungie.netplatform.destiny.representation.Currency> Currency) {
+    public void setCurrency(List<Currency> Currency) {
         this.Currency = Currency;
     }
 

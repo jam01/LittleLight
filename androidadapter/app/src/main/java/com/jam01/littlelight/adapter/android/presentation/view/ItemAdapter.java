@@ -145,7 +145,7 @@ public class ItemAdapter extends BaseAdapter implements StickyGridHeadersSimpleA
 
     public void removeItem(Item anItem) {
         for (Item instance : items) {
-            if (instance.getItemInstanceId().equals(anItem.getItemInstanceId())) {
+            if (instance.getItemId().equals(anItem.getItemId())) {
                 items.remove(instance);
                 break;
             }
@@ -159,7 +159,7 @@ public class ItemAdapter extends BaseAdapter implements StickyGridHeadersSimpleA
 
     public void updateItem(Item anItem) {
         for (Item instance : items) {
-            if (instance.getItemInstanceId().equals(anItem.getItemInstanceId())) {
+            if (instance.getItemId().equals(anItem.getItemId())) {
                 items.remove(instance);
                 items.add(instance);
                 break;

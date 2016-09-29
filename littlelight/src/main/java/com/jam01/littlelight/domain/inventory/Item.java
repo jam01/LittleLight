@@ -4,6 +4,7 @@ package com.jam01.littlelight.domain.inventory;
  * Created by jam01 on 5/11/16.
  */
 public class Item {
+    private final String itemId;
     private final String itemInstanceId;
     private final long itemHash;
     private final int maxStackSize;
@@ -21,7 +22,8 @@ public class Item {
     private int stackSize;
     private boolean isEquipped;
 
-    public Item(String itemInstanceId, long itemHash, int stackSize, int maxStackSize, String icon, String itemName, int itemType, boolean isEquippable, boolean isEquipped, long bucketTypeHash, int tierType, boolean isGridComplete, String damageType, int damage, int maxDamage, int classType) {
+    public Item(String itemId, String itemInstanceId, long itemHash, int stackSize, int maxStackSize, String icon, String itemName, int itemType, boolean isEquippable, boolean isEquipped, long bucketTypeHash, int tierType, boolean isGridComplete, String damageType, int damage, int maxDamage, int classType) {
+        this.itemId = itemId;
         this.itemInstanceId = itemInstanceId;
         this.itemHash = itemHash;
         this.stackSize = stackSize;
@@ -41,6 +43,8 @@ public class Item {
     }
 
     private Item(Builder builder) {
+        itemId = builder.itemId;
+
         itemInstanceId = builder.itemInstanceId;
         itemHash = builder.itemHash;
         itemName = builder.itemName;
@@ -57,6 +61,14 @@ public class Item {
         damage = builder.damage;
         maxDamage = builder.maxDamage;
         classType = builder.classType;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public boolean isGridComplete() {
+        return isGridComplete;
     }
 
     public String getItemInstanceId() {
@@ -133,6 +145,7 @@ public class Item {
 
     public static class Builder {
         //Required parameters
+        private final String itemId;
         private final String itemInstanceId;
         private final long itemHash;
         private final String itemName;
@@ -152,7 +165,8 @@ public class Item {
         private int maxDamage;
         private int classType;
 
-        public Builder(String itemInstanceId, long itemHash, String itemName, long bucketTypeHash) {
+        public Builder(String itemId, String itemInstanceId, long itemHash, String itemName, long bucketTypeHash) {
+            this.itemId = itemId;
             this.itemInstanceId = itemInstanceId;
             this.itemHash = itemHash;
             this.itemName = itemName;

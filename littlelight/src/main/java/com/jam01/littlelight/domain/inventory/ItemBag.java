@@ -17,7 +17,7 @@ public abstract class ItemBag {
     public ItemBag(Collection<Item> items, AccountId accountId, String id) {
         itemMap = new HashMap<>(items.size());
         for (Item item : items) {
-            itemMap.put(item.getItemInstanceId(), item);
+            itemMap.put(item.getItemId(), item);
         }
         this.accountId = accountId;
         this.id = id;
@@ -46,7 +46,7 @@ public abstract class ItemBag {
     }
 
     protected void put(Item anItem) {
-        itemMap.put(anItem.getItemInstanceId(), anItem);
+        itemMap.put(anItem.getItemId(), anItem);
     }
 
     protected Item take(String anItemId) {

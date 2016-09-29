@@ -40,8 +40,11 @@ public class InventoryPresenter {
     }
 
 
-    public void loadInventory(final AccountId anAccountId) {
+    public void onStart(final AccountId anAccountId) {
         view.showLoading(true);
+        if (subscriptions.isUnsubscribed()) {
+            subscriptions = new CompositeSubscription();
+        }
 
         subscriptions.add(Observable.create(new Observable.OnSubscribe<Inventory>() {
             @Override
@@ -52,19 +55,7 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Inventory>() {
-                    @Override
-                    public void call(Inventory inventory) {
-                        view.renderInventory(inventory);
-                        view.showLoading(false);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        view.showLoading(false);
-                        view.showError(throwable.getLocalizedMessage());
-                    }
-                }));
+                .subscribe(new OnInventoryAction(), new OnErrorAction()));
 
         subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
                 .subscribeOn(Schedulers.io())
@@ -89,13 +80,7 @@ public class InventoryPresenter {
                                }
                            }
 
-                        , new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                throwable.printStackTrace();
-                                view.showError(throwable.getLocalizedMessage());
-                            }
-                        }
+                        , new OnErrorAction()
                 ));
     }
 
@@ -113,7 +98,7 @@ public class InventoryPresenter {
             @Override
             public void call(Subscriber<? super Void> subscriber) {
                 for (Item instance : toTransfer) {
-                    service.transferItem(instance.getItemInstanceId(), toItemBagId);
+                    service.transferItem(instance.getItemId(), toItemBagId);
                 }
                 subscriber.onNext(null);
                 subscriber.onCompleted();
@@ -121,18 +106,7 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        view.showLoading(false);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        view.showLoading(false);
-                        view.showError(throwable.getLocalizedMessage());
-                    }
-                }));
+                .subscribe(new CompletedAction(), new OnErrorAction()));
     }
 
     public void equipItem(final Item item, final String characterId) {
@@ -144,12 +118,7 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        view.showLoading(false);
-                    }
-                }, new Action1<Throwable>() {
+                .subscribe(new CompletedAction(), new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         throwable.printStackTrace();
@@ -163,27 +132,13 @@ public class InventoryPresenter {
             @Override
             public void call(Subscriber<? super Void> subscriber) {
                 service.synchronizeInventoryOf(anAccountId);
+                subscriber.onNext(null);
                 subscriber.onCompleted();
             }
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Void>() {
-                    @Override
-                    public void onCompleted() {
-                        view.showLoading(false);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        view.showError(e.getLocalizedMessage());
-                        view.showLoading(false);
-                    }
-
-                    @Override
-                    public void onNext(Void aVoid) {
-                    }
-                }));
+                .subscribe(new CompletedAction(), new OnErrorAction()));
     }
 
     public interface InventoryView {
@@ -203,4 +158,29 @@ public class InventoryPresenter {
 
         void replaceItems(ItemBag itemBagUpdated);
     }
+
+    private class CompletedAction implements Action1<Void> {
+        @Override
+        public void call(Void aVoid) {
+            view.showLoading(false);
+        }
+    }
+
+    private class OnErrorAction implements Action1<Throwable> {
+        @Override
+        public void call(Throwable throwable) {
+            throwable.printStackTrace();
+            view.showError(throwable.getLocalizedMessage());
+            view.showLoading(false);
+        }
+    }
+
+    private class OnInventoryAction implements Action1<Inventory> {
+        @Override
+        public void call(Inventory inventory) {
+            view.renderInventory(inventory);
+            view.showLoading(false);
+        }
+    }
 }
+

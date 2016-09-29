@@ -7,7 +7,6 @@ import com.jam01.littlelight.adapter.android.di.module.AndroidModule;
 import com.jam01.littlelight.adapter.android.di.module.ApplicationModule;
 import com.jam01.littlelight.adapter.android.di.module.DomainModule;
 import com.jam01.littlelight.adapter.android.presentation.presenter.InventoryPresenter;
-import com.jam01.littlelight.adapter.android.presentation.presenter.ItemBagPresenter;
 import com.jam01.littlelight.adapter.android.presentation.presenter.SignInPresenter;
 import com.jam01.littlelight.adapter.android.presentation.presenter.UserPresenter;
 
@@ -41,7 +40,5 @@ public class LittleLight extends Application {
         SignInPresenter provideSignInPresenter();
 
         InventoryPresenter provideInventoryPresenter();
-
-        ItemBagPresenter provideItemBagPresenter();
     }
 }

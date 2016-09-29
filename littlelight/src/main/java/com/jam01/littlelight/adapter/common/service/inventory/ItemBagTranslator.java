@@ -35,6 +35,7 @@ public class ItemBagTranslator {
         //TODO: consider using illegalArgumentExceptions
         if (instance != null && definition != null && (instance.getItemHash().equals(definition.getItemHash()))) {
             Item.Builder builder = new Item.Builder(
+                    instance.getItemInstanceId() + "-" + instance.getItemHash(),
                     instance.getItemInstanceId(),
                     instance.getItemHash(),
                     definition.getItemName(),
@@ -63,7 +64,13 @@ public class ItemBagTranslator {
             }
 
             item = builder.build();
+
+            //Debugging
+//            System.out.println("Item id" + item.getItemInstanceId());
+        } else {
+            System.out.println("Something went wrong!");
         }
+
         return item;
     }
 
@@ -73,6 +80,8 @@ public class ItemBagTranslator {
         }
         Collection<Item> items = new ArrayList<>(definitions.size());
         for (int i = 0; i < instances.size(); i++) {
+//            if (instances.get(i).getItemHash().equals(2254123540L))
+//                System.out.println("Debugging");
             items.add(transform(definitions.get(i), instances.get(i)));
         }
         return items;

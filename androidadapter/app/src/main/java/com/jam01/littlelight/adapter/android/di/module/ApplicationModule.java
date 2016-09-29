@@ -1,7 +1,6 @@
 package com.jam01.littlelight.adapter.android.di.module;
 
 import com.jam01.littlelight.application.InventoryService;
-import com.jam01.littlelight.application.ItemService;
 import com.jam01.littlelight.application.UserService;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
@@ -29,11 +28,5 @@ public class ApplicationModule {
     @Singleton
     InventoryService providesInventoryService(DestinyInventoryService destinyService, InventoryRepository inventoryRepo, User user) {
         return new InventoryService(destinyService, inventoryRepo, user);
-    }
-
-    @Provides
-    @Singleton
-    ItemService providesItemService(DestinyInventoryService destinyService, InventoryRepository inventoryRepo, User user) {
-        return new ItemService(destinyService, inventoryRepo, user);
     }
 }
