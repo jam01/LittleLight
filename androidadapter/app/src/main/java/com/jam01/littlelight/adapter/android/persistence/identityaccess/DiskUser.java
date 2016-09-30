@@ -57,6 +57,12 @@ public class DiskUser implements User {
         return ofId(anAccountId).withCredentials();
     }
 
+    @Override
+    public void updateAccount(AccountId accountId, String displayName, String profilePath) {
+        accountMap.get(accountId).updateAccount(displayName, profilePath);
+        save();
+    }
+
     private void load() {
         if (disk.contains("accounts")) {
             Set<String> serializedLegends = disk.getStringSet("accounts", null);

@@ -15,4 +15,6 @@ public interface User {
     void unregisterAccount(AccountId anAccountId);
 
     AccountCredentials credentialsOf(AccountId anAccountId);
+
+    void updateAccount(AccountId accountId, String displayName, String profilePath);
 }

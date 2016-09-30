@@ -3,11 +3,14 @@ package com.jam01.littlelight.adapter.android.presentation.view;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -101,7 +104,7 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
         webView.loadUrl(url);
     }
 
-    public void navigateToHome() {
+    public void closeView() {
         finish();
     }
 
@@ -113,7 +116,6 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
 
     private AccountCredentials collect() {
         String bungled = null, bungleatk = null;
-
         String cookies = android.webkit.CookieManager.getInstance().getCookie(Endpoints.BASE_URL);
 
         if (cookies == null || cookies.isEmpty()) {
@@ -128,6 +130,20 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
                 bungleatk = ar1.substring(10);
                 Log.d("bungleatk=", ar1);
             }
+        }
+
+        //See: http://stackoverflow.com/questions/28998241/how-to-clear-cookies-and-cache-of-webview-on-android-when-not-in-webview
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            CookieManager.getInstance().removeAllCookies(null);
+            CookieManager.getInstance().flush();
+        } else {
+            CookieSyncManager cookieSyncMngr = CookieSyncManager.createInstance(getApplicationContext());
+            cookieSyncMngr.startSync();
+            CookieManager cookieManager = CookieManager.getInstance();
+            cookieManager.removeAllCookie();
+            cookieManager.removeSessionCookie();
+            cookieSyncMngr.stopSync();
+            cookieSyncMngr.sync();
         }
 
         return new AccountCredentials(bungled, bungleatk);

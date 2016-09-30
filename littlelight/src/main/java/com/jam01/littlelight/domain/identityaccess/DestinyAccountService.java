@@ -5,4 +5,7 @@ package com.jam01.littlelight.domain.identityaccess;
  */
 public interface DestinyAccountService {
     Account accountOf(int membershipType, AccountCredentials credentials);
+
+    void synchronizeAccountsFor(User user);
+
 }

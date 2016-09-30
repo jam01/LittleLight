@@ -58,11 +58,12 @@ public class SignInPresenter {
                 .subscribe(new Subscriber<Void>() {
                     @Override
                     public void onCompleted() {
-                        view.navigateToHome();
+                        view.closeView();
                     }
 
                     @Override
                     public void onError(Throwable e) {
+                        e.printStackTrace();
                         view.showLoginDialog();
                     }
 
@@ -79,6 +80,6 @@ public class SignInPresenter {
 
         void loadWebView(String url);
 
-        void navigateToHome();
+        void closeView();
     }
 }
