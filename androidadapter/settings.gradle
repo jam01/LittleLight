@@ -1,3 +1,2 @@
-include ':app', ':littlelight', ':StickyGridHeaders'
+include ':app', ':littlelight'
 project(':littlelight').projectDir=new File('../littlelight')
-project(':StickyGridHeaders').projectDir = new File('../StickyGridHeaders')

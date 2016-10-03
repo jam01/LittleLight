@@ -12,12 +12,12 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,10 +31,8 @@ import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
 import com.jam01.littlelight.domain.inventory.Vault;
-import com.tonicartos.widget.stickygridheaders.StickyGridHeadersBaseAdapterWrapper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +55,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private AccountId accountId;
     private ActionMode sendMode = null;
     private List<Item> toTransfer = null;
-    private Map<String, ItemAdapter> itemAdapterMap;
+    private Map<String, SectionedItemRecyclerAdapter> itemAdapterMap;
 
 
     public InventoryFragment() {
@@ -72,6 +70,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
      * @return A new instance of fragment BlankFragment.
      */
     public static InventoryFragment newInstance(AccountId accountId) {
+        Log.d(TAG, "newInstance: ");
         InventoryFragment fragment = new InventoryFragment();
         Bundle args = new Bundle();
         args.putInt(MEMBERSHIP_TYPE, accountId.withMembershipType());
@@ -178,13 +177,22 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                   RecyclerView recyclerView = new RecyclerView(getContext());
                                   final SectionedItemRecyclerAdapter testAdapter =
                                           new SectionedItemRecyclerAdapter(new ArrayList<>(bags.get(position).items()), getContext());
-                                  GridLayoutManager gridManager = new GridLayoutManager(getContext(), 4);
+
+                                  final int noOfColumns;
+                                  {
+                                      DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                                      float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+                                      noOfColumns = (int) (dpWidth / 90);
+                                  }
+
+
+                                  GridLayoutManager gridManager = new GridLayoutManager(getContext(), noOfColumns);
                                   gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                                       @Override
                                       public int getSpanSize(int position) {
                                           switch (testAdapter.getItemViewType(position)) {
                                               case SectionedItemRecyclerAdapter.SECTION_TYPE:
-                                                  return 4;
+                                                  return noOfColumns;
                                               case SectionedItemRecyclerAdapter.ITEM_TYPE:
                                                   return 1;
                                               default:
@@ -240,23 +248,23 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void removeItem(Item itemTransferred, String fromItemBagId) {
-        itemAdapterMap.get(fromItemBagId).removeItem(itemTransferred);
+//        itemAdapterMap.get(fromItemBagId).removeItem(itemTransferred);
     }
 
     @Override
     public void addItem(Item itemTransferred, String toItemBagId) {
-        itemAdapterMap.get(toItemBagId).addItems(Collections.singletonList(itemTransferred));
+//        itemAdapterMap.get(toItemBagId).addItems(Collections.singletonList(itemTransferred));
     }
 
     @Override
     public void updateItem(Item itemUnequipped, String onBagId) {
-        itemAdapterMap.get(onBagId).updateItem(itemUnequipped);
+//        itemAdapterMap.get(onBagId).updateItem(itemUnequipped);
     }
 
     @Override
     public void replaceItems(ItemBag itemBagUpdated) {
-        itemAdapterMap.get(itemBagUpdated.withId()).clear();
-        itemAdapterMap.get(itemBagUpdated.withId()).addItems(new ArrayList<>(itemBagUpdated.items()));
+//        itemAdapterMap.get(itemBagUpdated.withId()).clear();
+//        itemAdapterMap.get(itemBagUpdated.withId()).addItems(new ArrayList<>(itemBagUpdated.items()));
     }
 
 
@@ -269,7 +277,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
             final AlertDialog dialog = builder.create();
             dialog.show();
 
-            final Item selectedItem = ((Item) ((StickyGridHeadersBaseAdapterWrapper) parent.getAdapter()).getWrappedAdapter().getItem(position));
+            final Item selectedItem = null;// = ((Item) ((StickyGridHeadersBaseAdapterWrapper) parent.getAdapter()).getWrappedAdapter().getItem(position));
             TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
             TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
             TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
@@ -309,22 +317,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 //                });
 //                equip.setVisibility(View.VISIBLE);
 //            }
-        }
-    }
-
-
-    private class SwipeContainerCompatibleScrollListener implements AbsListView.OnScrollListener {
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-
-        }
-
-        @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            //See: http://stackoverflow.com/questions/25270171/scroll-up-does-not-work-with-swiperefreshlayout-in-listview
-            if (view.getChildAt(0) != null) {
-                swipeContainer.setEnabled(view.getFirstVisiblePosition() == 0 && view.getChildAt(0).getTop() == 0);
-            }
         }
     }
 }
