@@ -85,6 +85,7 @@ public class InventoryPresenter {
     }
 
     public void unbindView() {
+        view.showLoading(false);
         view = null;
         if (!subscriptions.isUnsubscribed()) {
             subscriptions.unsubscribe();

@@ -47,9 +47,8 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
         ((TextView) toReturn.findViewById(R.id.tvAccountName)).setText(toDraw.withName());
         Picasso.with(mContext)
                 .load(toDraw.profilePath())
-                .resize(90, 90)
-                .placeholder(R.mipmap.ic_launcher)
-                .centerCrop()
+                .transform(new CircleTransform())
+                .fit()
                 .into((ImageView) toReturn.findViewById(R.id.ivAccountIcon));
         return toReturn;
     }

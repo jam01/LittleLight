@@ -9,7 +9,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,7 +28,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class UserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, UserPresenter.MainView {
-    //    private Account accountSelectedId;
     private static final String MEMBERSHIP_TYPE = "param1";
     private static final String MEMBERSHIP_ID = "param2";
     private AccountId accountSelectedId;
@@ -47,7 +45,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
             accountSelectedId = new AccountId(savedInstanceState.getInt(MEMBERSHIP_TYPE), savedInstanceState.getString(MEMBERSHIP_ID));
         }
 
-        Log.d(TAG, "onCreate: ");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -87,7 +84,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                                               }
                                           }
                                       }
-
         );
 
         accountListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -95,13 +91,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                                        Account toDraw = ((Account) parent.getItemAtPosition(position));
                                                        accountSelectedId = toDraw.withId();
-                                                       ((TextView) headerView.findViewById(R.id.tvAccountNameSelected)).setText(toDraw.withName());
-                                                       Picasso.with(getApplicationContext())
-                                                               .load(toDraw.profilePath())
-                                                               .resize(48, 48)
-                                                               .placeholder(R.mipmap.ic_launcher)
-                                                               .centerCrop()
-                                                               .into(accountPic);
+                                                       drawSelectedAccount(toDraw);
                                                        View toHide = headerView.findViewById(R.id.accountsView);
                                                        if (toHide.getVisibility() == View.GONE)
                                                            toHide.setVisibility(View.VISIBLE);
@@ -113,7 +103,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                                                        drawer.closeDrawers();
                                                    }
                                                }
-
         );
 
         if (presenter == null) {
@@ -132,17 +121,10 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
 //        });
     }
 
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
         presenter.onStart();
-        Log.d(TAG, "onStart: ");
     }
 
     @Override
@@ -161,7 +143,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy: ");
         presenter.unbindView();
         super.onDestroy();
     }
@@ -229,26 +210,23 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         } else {
             toDraw = user.ofId(accountSelectedId);
         }
-        ((TextView) headerView.findViewById(R.id.tvAccountNameSelected)).setText(toDraw.withName());
-        Picasso.with(getApplicationContext())
-                .load(toDraw.profilePath())
-                .placeholder(R.mipmap.ic_launcher)
-                .resize(48, 48)
-                .centerCrop()
-                .into(accountPic);
+        drawSelectedAccount(toDraw);
     }
 
     @Override
     public void updateAccount(Account accountUpdated) {
         if (accountSelectedId.equals(accountUpdated.withId())) {
-            ((TextView) headerView.findViewById(R.id.tvAccountNameSelected)).setText(accountUpdated.withName());
-            Picasso.with(getApplicationContext())
-                    .load(accountUpdated.profilePath())
-                    .resize(48, 48)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .centerCrop()
-                    .into(accountPic);
+            drawSelectedAccount(accountUpdated);
         }
         ((AccountsAdapter) accountListView.getAdapter()).updateAccount(accountUpdated);
+    }
+
+    private void drawSelectedAccount(Account anAccount) {
+        ((TextView) headerView.findViewById(R.id.tvAccountNameSelected)).setText(anAccount.withName());
+        Picasso.with(getApplicationContext())
+                .load(anAccount.profilePath())
+                .transform(new CircleTransform())
+                .fit()
+                .into(accountPic);
     }
 }
