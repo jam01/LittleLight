@@ -80,12 +80,19 @@ public class UserPresenter {
         view.loadSignInView();
     }
 
+    public void onRemoveAccount(Account account) {
+        service.unregister(account.withId());
+        view.removeAccount(account);
+    }
+
     public interface MainView {
         void loadSignInView();
 
         void setUser(User user);
 
         void updateAccount(Account accountUpdated);
+
+        void removeAccount(Account account);
     }
 
     private class OnErrorAction implements Action1<Throwable> {

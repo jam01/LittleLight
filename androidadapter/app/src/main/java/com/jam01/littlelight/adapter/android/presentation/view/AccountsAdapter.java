@@ -21,12 +21,17 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
     private final LayoutInflater inflater;
     private final List<Account> accounts;
     private final Context mContext;
+    private OnItemRemoveClickListener itemRemoveClickListener;
 
     public AccountsAdapter(Context context, int resource, List<Account> objects) {
         super(context, resource, objects);
         inflater = LayoutInflater.from(context);
         accounts = objects;
         mContext = context;
+    }
+
+    public void setOnItemRemoveClickListener(OnItemRemoveClickListener itemRemoveClickListener) {
+        this.itemRemoveClickListener = itemRemoveClickListener;
     }
 
     public void updateAccount(Account account) {
@@ -41,15 +46,38 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         Account toDraw = accounts.get(position);
-        View toReturn = inflater.inflate(R.layout.account_row, parent, false);
+        final View toReturn = inflater.inflate(R.layout.account_row, parent, false);
         ((TextView) toReturn.findViewById(R.id.tvAccountName)).setText(toDraw.withName());
         Picasso.with(mContext)
                 .load(toDraw.profilePath())
                 .transform(new CircleTransform())
                 .fit()
                 .into((ImageView) toReturn.findViewById(R.id.ivAccountIcon));
+        toReturn.findViewById(R.id.ivRemove).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (itemRemoveClickListener != null) {
+                    itemRemoveClickListener.onItemRemoveClick(toReturn, position);
+                }
+            }
+        });
         return toReturn;
+    }
+
+    @Override
+    public void remove(Account object) {
+        for (Account instance : accounts) {
+            if (instance.withId().equals(object.withId())) {
+                accounts.remove(instance);
+                break;
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public interface OnItemRemoveClickListener {
+        void onItemRemoveClick(View view, int position);
     }
 }

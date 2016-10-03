@@ -18,7 +18,6 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -203,6 +202,57 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                   recyclerView.setHasFixedSize(true);
                                   recyclerView.setLayoutManager(gridManager);
                                   recyclerView.setAdapter(testAdapter);
+
+                                  ItemClickSupport.addTo(recyclerView)
+                                          .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                                              @Override
+                                              public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                                                  AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                                  View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
+                                                  builder.setView(dialogView);
+                                                  final AlertDialog dialog = builder.create();
+                                                  dialog.show();
+
+                                                  final Item selectedItem = ((SectionedItemRecyclerAdapter) recyclerView.getAdapter()).getItem(position);
+                                                  if (selectedItem != null) {
+                                                      TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
+                                                      TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
+                                                      TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
+
+                                                      title.setText(selectedItem.getItemName());
+
+                                                      switch (selectedItem.getItemType()) {
+                                                          case 2:
+                                                              second.setText("Defense: " + selectedItem.getDamage());
+                                                              second.setVisibility(View.VISIBLE);
+                                                              break;
+                                                          case 3:
+                                                              second.setText("Attack: " + selectedItem.getDamage());
+                                                              second.setVisibility(View.VISIBLE);
+                                                              third.setText("Damage Type: ");
+                                                              third.append(selectedItem.getDamageType());
+                                                              third.setVisibility(View.VISIBLE);
+                                                              break;
+                                                      }
+
+                                                      switch (selectedItem.getTierType()) {
+                                                          case 5:
+                                                              title.setBackgroundColor(0xff5a1bff);
+                                                              break;
+                                                          case 6:
+                                                              title.setBackgroundColor(0xffffb200);
+                                                              break;
+                                                      }
+                                                  }
+                                              }
+                                          })
+                                          .setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
+                                              @Override
+                                              public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+                                                  return false;
+                                              }
+                                          });
+
                                   container.addView(recyclerView);
                                   return recyclerView;
                               }
@@ -265,58 +315,5 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     public void replaceItems(ItemBag itemBagUpdated) {
 //        itemAdapterMap.get(itemBagUpdated.withId()).clear();
 //        itemAdapterMap.get(itemBagUpdated.withId()).addItems(new ArrayList<>(itemBagUpdated.items()));
-    }
-
-
-    private class ItemClickListener implements AdapterView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
-            builder.setView(dialogView);
-            final AlertDialog dialog = builder.create();
-            dialog.show();
-
-            final Item selectedItem = null;// = ((Item) ((StickyGridHeadersBaseAdapterWrapper) parent.getAdapter()).getWrappedAdapter().getItem(position));
-            TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
-            TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
-            TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
-
-            title.setText(selectedItem.getItemName());
-
-            switch (selectedItem.getItemType()) {
-                case 2:
-                    second.setText("Defense: " + selectedItem.getDamage());
-                    second.setVisibility(View.VISIBLE);
-                    break;
-                case 3:
-                    second.setText("Attack: " + selectedItem.getDamage());
-                    second.setVisibility(View.VISIBLE);
-                    third.setText("Damage Type: ");
-                    third.append(selectedItem.getDamageType());
-                    third.setVisibility(View.VISIBLE);
-                    break;
-            }
-
-            switch (selectedItem.getTierType()) {
-                case 5:
-                    title.setBackgroundColor(0xff5a1bff);
-                    break;
-                case 6:
-                    title.setBackgroundColor(0xffffb200);
-                    break;
-            }
-//            if ((!tmp.isEquipped()) && (tmp.getItemType() == 2 || tmp.getItemType() == 3)) {
-//                Button equip = (Button) dialogView.findViewById(R.id.bIDetail);
-//                equip.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        presenter.equipItem(tmp, ((Character) itemBag).withId());
-//                        dialog.dismiss();
-//                    }
-//                });
-//                equip.setVisibility(View.VISIBLE);
-//            }
-        }
     }
 }

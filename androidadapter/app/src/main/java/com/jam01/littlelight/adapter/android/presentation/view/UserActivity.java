@@ -1,5 +1,7 @@
 package com.jam01.littlelight.adapter.android.presentation.view;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,6 +9,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -198,7 +201,31 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void setUser(User user) {
-        accountListView.setAdapter(new AccountsAdapter(getApplicationContext(), R.layout.account_row, new ArrayList<>(user.allRegisteredAccounts())));
+        final Context context = this;
+        final AccountsAdapter accountsAdapter = new AccountsAdapter(getApplicationContext(), R.layout.account_row, new ArrayList<>(user.allRegisteredAccounts()));
+        accountsAdapter.setOnItemRemoveClickListener(new AccountsAdapter.OnItemRemoveClickListener() {
+            @Override
+            public void onItemRemoveClick(View view, final int position) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(context);
+                dialogBuilder.setMessage("Are you sure?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                presenter.onRemoveAccount(accountsAdapter.getItem(position));
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+//                        .create()
+                        .show();
+            }
+        });
+        accountListView.setAdapter(accountsAdapter);
+
         Account toDraw;
         if (accountSelectedId == null) {
             toDraw = ((Account) accountListView.getItemAtPosition(0));
@@ -219,6 +246,16 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
             drawSelectedAccount(accountUpdated);
         }
         ((AccountsAdapter) accountListView.getAdapter()).updateAccount(accountUpdated);
+    }
+
+    @Override
+    public void removeAccount(Account account) {
+        ((AccountsAdapter) accountListView.getAdapter()).remove(account);
+        if (account.withId().equals(accountSelectedId)) {
+            if (!accountListView.getAdapter().isEmpty()) {
+
+            }
+        }
     }
 
     private void drawSelectedAccount(Account anAccount) {

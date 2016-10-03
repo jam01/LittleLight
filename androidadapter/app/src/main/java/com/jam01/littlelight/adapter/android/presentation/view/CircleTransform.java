@@ -10,6 +10,7 @@ import com.squareup.picasso.Transformation;
 // enables hardware accelerated rounded corners
 // original idea here : http://www.curious-creature.org/2012/12/11/android-recipe-1-image-with-rounded-corners/
 
+// See: http://stackoverflow.com/a/26112408/4814697
 public class CircleTransform implements Transformation {
     @Override
     public Bitmap transform(Bitmap source) {

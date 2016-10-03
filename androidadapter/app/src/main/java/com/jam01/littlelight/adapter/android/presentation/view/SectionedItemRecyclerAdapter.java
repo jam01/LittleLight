@@ -64,13 +64,13 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder sectionViewHolder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         if (isPositionHeader(position)) {
-            ((HeaderViewHolder) sectionViewHolder).mTextView.setText(Globals.buckets.get(mItems.get(positionToItemPosition(position)).getBucketTypeHash()));
+            ((HeaderViewHolder) viewHolder).mTextView.setText(Globals.buckets.get(mItems.get(positionToItemPosition(position)).getBucketTypeHash()));
         } else {
-            ItemViewHolder viewHolder = (ItemViewHolder) sectionViewHolder;
-            ImageView icon = viewHolder.imageView;
-            TextView amount = viewHolder.textView;
+            ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
+            ImageView icon = itemViewHolder.imageView;
+            TextView amount = itemViewHolder.textView;
 
             Item item = mItems.get(positionToItemPosition(position));
             Picasso.with(mContext)
@@ -100,7 +100,6 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
                 icon.setPadding(0, 0, 0, 0);
                 icon.setBackgroundColor(Color.TRANSPARENT);
             }
-
         }
     }
 
@@ -109,11 +108,11 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
         return isPositionHeader(position) ? SECTION_TYPE : ITEM_TYPE;
     }
 
-    boolean isPositionHeader(int position) {
+    private boolean isPositionHeader(int position) {
         return headerPositions.contains(position);
     }
 
-    int positionToItemPosition(int position) {
+    private int positionToItemPosition(int position) {
         int itemPosition = position;
         for (int headerPosition : headerPositions) {
             if (headerPosition < position) {
@@ -123,10 +122,15 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
         return itemPosition;
     }
 
-
     @Override
     public int getItemCount() {
         return (mValid ? mItems.size() + headerPositions.size() : 0);
+    }
+
+    public Item getItem(int position) {
+        if (isPositionHeader(position))
+            return null;
+        return mItems.get(positionToItemPosition(position));
     }
 
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
