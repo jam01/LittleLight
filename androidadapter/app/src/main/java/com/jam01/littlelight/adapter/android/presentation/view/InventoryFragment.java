@@ -1,7 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.view;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,16 +10,15 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -166,8 +164,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     @Override
     public void renderInventory(final Inventory inventory) {
         itemAdapterMap = new HashMap<>(inventory.allItemBags().size());
-        final AbsListView.OnScrollListener scrollListener = new SwipeContainerCompatibleScrollListener();
-        final AdapterView.OnItemClickListener clickListener = new ItemClickListener();
         mPager.setAdapter(new PagerAdapter() {
                               List<ItemBag> bags = new ArrayList<>(inventory.allItemBags());
 
@@ -178,76 +174,29 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
                               @Override
                               public Object instantiateItem(ViewGroup container, int position) {
-                                  final GridView bagView = (GridView) LayoutInflater.from(getContext()).inflate(R.layout.item_bag, null);
-                                  ItemAdapter bagAdapter = new ItemAdapter(new ArrayList<>(bags.get(position).items()), getContext());
-                                  bagView.setAdapter(bagAdapter);
-                                  bagView.setOnScrollListener(scrollListener);
-                                  bagView.setOnItemClickListener(clickListener);
-                                  bagView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
-                                                                         @Override
-                                                                         public void onItemCheckedStateChanged(ActionMode mode, int position, long id,
-                                                                                                               boolean checked) {
-                                                                             Item tmp = (Item) bagView.getAdapter().getItem(position);
-                                                                             if (checked) {
-                                                                                 toTransfer.add(tmp);
-                                                                             } else {
-                                                                                 toTransfer.remove(tmp);
-                                                                             }
-                                                                             mode.setSubtitle(toTransfer.size() + " selected items");
-                                                                         }
 
-                                                                         @Override
-                                                                         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                                                                             mode.getMenuInflater().inflate(R.menu.menu_inventory_overlay, menu);
-                                                                             mode.setTitle("Send ");
-                                                                             sendMode = mode;
-                                                                             if (toTransfer == null) {
-                                                                                 toTransfer = new ArrayList<>();
-                                                                             }
-                                                                             return true;
-                                                                         }
-
-                                                                         @Override
-                                                                         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                                                                             return false;
-                                                                         }
-
-                                                                         @Override
-                                                                         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                                                                             switch (item.getItemId()) {
-                                                                                 case R.id.menu_send:
-                                                                                     String[] colors_array = new String[inventory.allItemBags().size()];
-                                                                                     for (int i = 0; i < inventory.allItemBags().size(); i++) {
-                                                                                         colors_array[i] = ((ItemBag) inventory.allItemBags().toArray()[i]).withId();
-                                                                                     }
-                                                                                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                                                                     builder.setTitle("Transfer to")
-                                                                                             .setItems(colors_array, new DialogInterface.OnClickListener() {
-                                                                                                 public void onClick(DialogInterface dialog, int which) {
-                                                                                                     presenter.sendItems(toTransfer, ((ItemBag) inventory.allItemBags().toArray()[which]).withId());
-                                                                                                     toTransfer = null;
-                                                                                                 }
-                                                                                             });
-                                                                                     builder.create().show();
-                                                                                     mode.finish();
-                                                                             }
-                                                                             return true;
-                                                                         }
-
-                                                                         @Override
-                                                                         public void onDestroyActionMode(ActionMode mode) {
-                                                                             sendMode = null;
-                                                                         }
-                                                                     }
-
-                                  );
-                                  container.addView(bagView);
-                                  itemAdapterMap.put(bags.get(position).
-
-                                          withId(), bagAdapter
-
-                                  );
-                                  return bagView;
+                                  RecyclerView recyclerView = new RecyclerView(getContext());
+                                  final SectionedItemRecyclerAdapter testAdapter =
+                                          new SectionedItemRecyclerAdapter(new ArrayList<>(bags.get(position).items()), getContext());
+                                  GridLayoutManager gridManager = new GridLayoutManager(getContext(), 4);
+                                  gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                                      @Override
+                                      public int getSpanSize(int position) {
+                                          switch (testAdapter.getItemViewType(position)) {
+                                              case SectionedItemRecyclerAdapter.SECTION_TYPE:
+                                                  return 4;
+                                              case SectionedItemRecyclerAdapter.ITEM_TYPE:
+                                                  return 1;
+                                              default:
+                                                  return -1;
+                                          }
+                                      }
+                                  });
+                                  recyclerView.setHasFixedSize(true);
+                                  recyclerView.setLayoutManager(gridManager);
+                                  recyclerView.setAdapter(testAdapter);
+                                  container.addView(recyclerView);
+                                  return recyclerView;
                               }
 
                               @Override

@@ -64,9 +64,6 @@ public class ItemBagTranslator {
             }
 
             item = builder.build();
-
-            //Debugging
-//            System.out.println("Item id" + item.getItemInstanceId());
         } else {
             System.out.println("Something went wrong!");
         }
