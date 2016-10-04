@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Created by jam01 on 10/2/16.
  */
-public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView.ViewHolder> {
 
     static final int SECTION_TYPE = 0;
     static final int ITEM_TYPE = 1;
@@ -55,6 +55,16 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
     }
 
     @Override
+    public int getItemCount() {
+        return (mValid ? mItems.size() + headerPositions.size() : 0);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return isPositionHeader(position) ? SECTION_TYPE : ITEM_TYPE;
+    }
+
+    @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int typeView) {
         if (typeView == SECTION_TYPE) {
             return new HeaderViewHolder(mLayoutInflater.inflate(R.layout.header, parent, false));
@@ -71,6 +81,7 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
             ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
             ImageView icon = itemViewHolder.imageView;
             TextView amount = itemViewHolder.textView;
+            CheckBox checkBox = itemViewHolder.checkBox;
 
             Item item = mItems.get(positionToItemPosition(position));
             Picasso.with(mContext)
@@ -100,12 +111,15 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
                 icon.setPadding(0, 0, 0, 0);
                 icon.setBackgroundColor(Color.TRANSPARENT);
             }
-        }
-    }
 
-    @Override
-    public int getItemViewType(int position) {
-        return isPositionHeader(position) ? SECTION_TYPE : ITEM_TYPE;
+            // Highlight the item if it's selected
+            if (isSelected(position)) {
+                checkBox.setVisibility(View.VISIBLE);
+                checkBox.setChecked(true);
+            } else {
+                checkBox.setVisibility(View.INVISIBLE);
+            }
+        }
     }
 
     private boolean isPositionHeader(int position) {
@@ -122,15 +136,77 @@ public class SectionedItemRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
         return itemPosition;
     }
 
-    @Override
-    public int getItemCount() {
-        return (mValid ? mItems.size() + headerPositions.size() : 0);
+    private int itemPositionToPosition(int itemPosition) {
+        int position = itemPosition;
+        for (int headerPosition : headerPositions) {
+            if (headerPosition < itemPosition) {
+                position++;
+            } else break;
+        }
+        return position;
     }
 
     public Item getItem(int position) {
         if (isPositionHeader(position))
             return null;
         return mItems.get(positionToItemPosition(position));
+    }
+
+    public void removeItem(Item itemToRemove) {
+        for (int i = 0, mItemsSize = mItems.size(); i < mItemsSize; i++) {
+            Item instance = mItems.get(i);
+            if (instance.getItemId().equals(itemToRemove.getItemId())) {
+                mItems.remove(instance);
+                int position = itemPositionToPosition(i);
+
+                for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
+                    int headerPosition = headerPositions.get(i1);
+                    if (headerPosition > position) {
+                        headerPositions.set(i1, headerPosition - 1);
+                        break;
+                    }
+                }
+
+                notifyItemRemoved(position);
+                break;
+            }
+        }
+    }
+
+
+    public void addItem(Item itemToAdd) {
+
+    }
+
+    public void updateItem(Item itemToUpdate) {
+        for (int i = 0, mItemsSize = mItems.size(); i < mItemsSize; i++) {
+            Item instance = mItems.get(i);
+            if (instance.getItemId().equals(itemToUpdate.getItemId())) {
+                mItems.set(i, instance);
+                notifyItemChanged(itemPositionToPosition(i));
+            }
+        }
+    }
+
+    public void replaceAll(List<Item> newItems) {
+        mItems.clear();
+        headerPositions.clear();
+        Collections.sort(newItems, new Comparator<Item>() {
+            @Override
+            public int compare(Item inventoryItem, Item inventoryItem2) {
+                return ((Long) inventoryItem.getBucketTypeHash()).compareTo(inventoryItem2.getBucketTypeHash());
+            }
+        });
+        mItems = newItems;
+        if (!newItems.isEmpty()) {
+            headerPositions.add(0);
+            for (int i = 1; i < mItems.size(); i++) {
+                if (mItems.get(i).getBucketTypeHash() != mItems.get(i - 1).getBucketTypeHash()) {
+                    headerPositions.add(i + headerPositions.size());
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     static class HeaderViewHolder extends RecyclerView.ViewHolder {

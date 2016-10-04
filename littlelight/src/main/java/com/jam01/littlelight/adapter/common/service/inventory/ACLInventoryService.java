@@ -133,7 +133,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
-                            anItemId,
+                            item.getItemInstanceId(),
                             item.getStackSize(),
                             ((Character) fromBag).characterId(),
                             true),
@@ -144,7 +144,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
-                            anItemId,
+                            item.getItemInstanceId(),
                             item.getStackSize(),
                             ((Character) toBag).characterId(),
                             false),
@@ -157,7 +157,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
-                            anItemId,
+                            item.getItemInstanceId(),
                             item.getStackSize(),
                             ((Character) fromBag).characterId(),
                             true),
@@ -169,7 +169,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
-                            anItemId,
+                            item.getItemInstanceId(),
                             item.getStackSize(),
                             ((Character) toBag).characterId(),
                             false),

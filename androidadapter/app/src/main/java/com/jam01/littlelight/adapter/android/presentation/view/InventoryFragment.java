@@ -1,6 +1,7 @@
 package com.jam01.littlelight.adapter.android.presentation.view;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,12 +11,15 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -52,8 +56,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private TabLayout tabs;
     private SwipeRefreshLayout swipeContainer;
     private AccountId accountId;
-    private ActionMode sendMode = null;
-    private List<Item> toTransfer = null;
+    private ActionMode actionMode = null;
     private Map<String, SectionedItemRecyclerAdapter> itemAdapterMap;
 
 
@@ -147,8 +150,8 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     public void setUserVisibleHint(boolean isVisibleToUser) {
         Log.d(TAG, "setUserVisibleHint: ");
         super.setUserVisibleHint(isVisibleToUser);
-        if (!isVisibleToUser && sendMode != null) {
-            sendMode.finish();
+        if (!isVisibleToUser && actionMode != null) {
+            actionMode.finish();
         }
     }
 
@@ -199,6 +202,8 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                           }
                                       }
                                   });
+
+                                  itemAdapterMap.put(bags.get(position).withId(), testAdapter);
                                   recyclerView.setHasFixedSize(true);
                                   recyclerView.setLayoutManager(gridManager);
                                   recyclerView.setAdapter(testAdapter);
@@ -207,41 +212,44 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                           .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                                               @Override
                                               public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                                                  AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                                  View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
-                                                  builder.setView(dialogView);
-                                                  final AlertDialog dialog = builder.create();
-                                                  dialog.show();
-
                                                   final Item selectedItem = ((SectionedItemRecyclerAdapter) recyclerView.getAdapter()).getItem(position);
                                                   if (selectedItem != null) {
-                                                      TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
-                                                      TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
-                                                      TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
+                                                      if (actionMode != null) {
+                                                          toggleSelection((SelectableAdapter) recyclerView.getAdapter(), position);
+                                                      } else {
+                                                          View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
+                                                          TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
+                                                          TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
+                                                          TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
 
-                                                      title.setText(selectedItem.getItemName());
+                                                          title.setText(selectedItem.getItemName());
 
-                                                      switch (selectedItem.getItemType()) {
-                                                          case 2:
-                                                              second.setText("Defense: " + selectedItem.getDamage());
-                                                              second.setVisibility(View.VISIBLE);
-                                                              break;
-                                                          case 3:
-                                                              second.setText("Attack: " + selectedItem.getDamage());
-                                                              second.setVisibility(View.VISIBLE);
-                                                              third.setText("Damage Type: ");
-                                                              third.append(selectedItem.getDamageType());
-                                                              third.setVisibility(View.VISIBLE);
-                                                              break;
-                                                      }
+                                                          switch (selectedItem.getItemType()) {
+                                                              case 2:
+                                                                  second.setText("Defense: " + selectedItem.getDamage());
+                                                                  second.setVisibility(View.VISIBLE);
+                                                                  break;
+                                                              case 3:
+                                                                  second.setText("Attack: " + selectedItem.getDamage());
+                                                                  second.setVisibility(View.VISIBLE);
+                                                                  third.setText("Damage Type: ");
+                                                                  third.append(selectedItem.getDamageType());
+                                                                  third.setVisibility(View.VISIBLE);
+                                                                  break;
+                                                          }
 
-                                                      switch (selectedItem.getTierType()) {
-                                                          case 5:
-                                                              title.setBackgroundColor(0xff5a1bff);
-                                                              break;
-                                                          case 6:
-                                                              title.setBackgroundColor(0xffffb200);
-                                                              break;
+                                                          switch (selectedItem.getTierType()) {
+                                                              case 5:
+                                                                  title.setBackgroundColor(0xff5a1bff);
+                                                                  break;
+                                                              case 6:
+                                                                  title.setBackgroundColor(0xffffb200);
+                                                                  break;
+                                                          }
+                                                          new AlertDialog.Builder(getContext())
+                                                                  .setView(dialogView)
+                                                                  .create()
+                                                                  .show();
                                                       }
                                                   }
                                               }
@@ -249,7 +257,11 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                           .setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
                                               @Override
                                               public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-                                                  return false;
+                                                  if (actionMode == null) {
+                                                      actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new SendModeCallback());
+                                                  }
+                                                  toggleSelection((SelectableAdapter) recyclerView.getAdapter(), position);
+                                                  return true;
                                               }
                                           });
 
@@ -277,7 +289,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                   collection.removeView((View) view);
                               }
                           }
-
         );
     }
 
@@ -298,22 +309,99 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void removeItem(Item itemTransferred, String fromItemBagId) {
-//        itemAdapterMap.get(fromItemBagId).removeItem(itemTransferred);
+        itemAdapterMap.get(fromItemBagId).removeItem(itemTransferred);
     }
 
     @Override
     public void addItem(Item itemTransferred, String toItemBagId) {
-//        itemAdapterMap.get(toItemBagId).addItems(Collections.singletonList(itemTransferred));
+        itemAdapterMap.get(toItemBagId).addItem(itemTransferred);
     }
 
     @Override
     public void updateItem(Item itemUnequipped, String onBagId) {
-//        itemAdapterMap.get(onBagId).updateItem(itemUnequipped);
+        itemAdapterMap.get(onBagId).updateItem(itemUnequipped);
     }
 
     @Override
     public void replaceItems(ItemBag itemBagUpdated) {
-//        itemAdapterMap.get(itemBagUpdated.withId()).clear();
-//        itemAdapterMap.get(itemBagUpdated.withId()).addItems(new ArrayList<>(itemBagUpdated.items()));
+        itemAdapterMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.items()));
+    }
+
+    /**
+     * Toggle the selection state of an item.
+     * <p/>
+     * If the item was the last one in the selection and is unselected, the selection is stopped.
+     * Note that the selection must already be started (actionMode must not be null).
+     *
+     * @param position Position of the item to toggle the selection state
+     */
+    private void toggleSelection(SelectableAdapter adapter, int position) {
+        adapter.toggleSelection(position);
+        int count = 0;
+        for (SelectableAdapter instance : itemAdapterMap.values()) {
+            count += instance.getSelectedItemCount();
+        }
+        if (count == 0) {
+            actionMode.finish();
+        } else {
+            actionMode.setSubtitle(count + " selected items");
+            actionMode.invalidate();
+        }
+    }
+
+
+    private class SendModeCallback implements ActionMode.Callback {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.menu_inventory_overlay, menu);
+            mode.setTitle("Send ");
+            actionMode = mode;
+//            if (toTransfer == null) {
+//                toTransfer = new ArrayList<>();
+//            }
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.menu_send:
+                    String[] destinationArray = new String[itemAdapterMap.values().size()];
+                    for (int i = 0; i < itemAdapterMap.values().size(); i++) {
+                        destinationArray[i] = (String) itemAdapterMap.keySet().toArray()[i];
+                    }
+                    final List<Item> toTransfer = new ArrayList<>();
+                    for (SectionedItemRecyclerAdapter instance : itemAdapterMap.values()) {
+                        for (Integer itemPosition : instance.getSelectedItems()) {
+                            toTransfer.add(instance.getItem(itemPosition));
+                        }
+                    }
+
+                    new AlertDialog.Builder(getActivity())
+                            .setTitle("Transfer to")
+                            .setItems(destinationArray, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    presenter.sendItems(toTransfer, (String) itemAdapterMap.keySet().toArray()[which]);
+                                }
+                            })
+                            .create()
+                            .show();
+                    mode.finish();
+            }
+            return true;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            for (SelectableAdapter instance : itemAdapterMap.values()) {
+                instance.clearSelection();
+            }
+            actionMode = null;
+        }
     }
 }

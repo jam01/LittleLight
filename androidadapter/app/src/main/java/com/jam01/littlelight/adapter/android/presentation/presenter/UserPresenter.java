@@ -72,7 +72,11 @@ public class UserPresenter {
             })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe());
+                    .subscribe(new Action1<Void>() {
+                        @Override
+                        public void call(Void aVoid) {
+                        }
+                    }, new OnErrorAction()));
         }
     }
 
