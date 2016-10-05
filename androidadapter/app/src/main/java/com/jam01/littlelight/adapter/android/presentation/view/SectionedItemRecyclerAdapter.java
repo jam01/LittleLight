@@ -154,10 +154,11 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     }
 
     public void removeItem(Item itemToRemove) {
-        //Find the item by itemId
         Item toRemove = null;
-        int itemToRemovePos = 0;
+        int itemToRemovePos = -1;
 
+        // TODO: 10/5/16 Consider using the header positions to optimize the search like in Add Item
+        //Find the item by itemId
         for (int i = 0, mItemsSize = mItems.size(); i < mItemsSize; i++) {
             Item instance = mItems.get(i);
             if (instance.getItemId().equals(itemToRemove.getItemId())) {
@@ -169,17 +170,43 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
 
         mItems.remove(toRemove);
 
-        // If this item was surrounded by headers then remove the previous header that would end up empty
+        // If this item was surrounded by headers then remove it with the previous header that would end up empty
         if (headerPositions.contains(itemToRemovePos - 1) && headerPositions.contains(itemToRemovePos + 1)) {
             headerPositions.remove(Integer.valueOf(itemToRemovePos - 1));
             shiftHeadersUpBy(2, itemToRemovePos);
             notifyItemRangeRemoved(itemToRemovePos - 1, 2);
+            // Else just remove the item
         } else {
             shiftHeadersUpBy(1, itemToRemovePos);
             notifyItemRemoved(itemToRemovePos);
         }
     }
 
+    public void addItem(Item itemToAdd) {
+        int itemToAddPos = -1;
+
+        //Find where to add the item
+        for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
+            int headerPosition = headerPositions.get(i1);
+            if (getItem(headerPosition + 1).getBucketTypeHash() == itemToAdd.getBucketTypeHash()) {
+                itemToAddPos = headerPosition + 1;
+            }
+        }
+        // This means we found an items from the same category
+        if (itemToAddPos != -1) {
+            int itemPosition = positionToItemPosition(itemToAddPos);
+            mItems.add(itemPosition, itemToAdd);
+            shiftHeadersDownBy(1, itemToAddPos);
+            notifyItemInserted(itemToAddPos);
+            // Else we make that category at the end
+        } else {
+            headerPositions.add(getItemCount());
+            mItems.add(itemToAdd);
+            notifyItemRangeInserted(getItemCount() - 1, 2);
+        }
+    }
+
+    // TODO: 10/5/16 Make these two methods into one using a direction param
     private void shiftHeadersUpBy(int headerOffset, int itemPosition) {
         //Move subsequent headers positions up
         for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
@@ -191,28 +218,14 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     }
 
 
-    public void addItem(Item itemToAdd) {
-        //Find where to add the item
-        for (int lastItem = mItems.size() - 1, i = lastItem; i >= 0; i--) {
-            Item instance = mItems.get(i);
-            if (instance.getBucketTypeHash() == (itemToAdd.getBucketTypeHash())) {
-                mItems.add(i + 1, itemToAdd);
-
-
-                int position = itemPositionToPosition(i);
-                //Move subsequent header positions down
-                for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
-                    int headerPosition = headerPositions.get(i1);
-                    if (headerPosition > position) {
-                        headerPositions.set(i1, headerPosition + 1);
-                    }
-                }
-
-                notifyItemInserted(position);
-                break;
+    private void shiftHeadersDownBy(int headerOffset, int itemPosition) {
+        //Move subsequent headers positions down
+        for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
+            int headerPosition = headerPositions.get(i1);
+            if (headerPosition > itemPosition) {
+                headerPositions.set(i1, headerPosition + headerOffset);
             }
         }
-
     }
 
     public void updateItem(Item itemToUpdate) {
