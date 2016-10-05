@@ -218,24 +218,29 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
 
     @Override
     public boolean equipItem(EquipCommand command, String cookies, String xcsrf) {
-        boolean result = false;
         try {
-            result = bungieApi.requestEquip(command, cookies, xcsrf).execute().body().getErrorCode() == 1;
+            BungieResponse<Integer> response = bungieApi.requestEquip(command, cookies, xcsrf).execute().body();
+            if (response.getErrorCode() != 1) {
+                throw new UnsupportedOperationException(response.getMessage());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
+
+        return true;
     }
 
     @Override
     public boolean transferItem(TransferCommand command, String cookies, String xcsrf) {
-        boolean result = false;
         try {
-            result = bungieApi.requestTransfer(command, cookies, xcsrf).execute().body().getErrorCode() == 1;
+            BungieResponse<Integer> response = bungieApi.requestTransfer(command, cookies, xcsrf).execute().body();//.getErrorCode() == 1;
+            if (response.getErrorCode() != 1) {
+                throw new UnsupportedOperationException(response.getMessage());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
+        return true;
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
@@ -23,7 +24,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
@@ -304,7 +304,8 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void showError(String localizedMessage) {
-        Toast.makeText(getContext(), localizedMessage, Toast.LENGTH_LONG).show();
+        Snackbar.make(getView(), localizedMessage, Snackbar.LENGTH_LONG).show();
+//        Toast.makeText(getContext(), localizedMessage, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -356,9 +357,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
             mode.getMenuInflater().inflate(R.menu.menu_inventory_overlay, menu);
             mode.setTitle("Send ");
             actionMode = mode;
-//            if (toTransfer == null) {
-//                toTransfer = new ArrayList<>();
-//            }
             return true;
         }
 

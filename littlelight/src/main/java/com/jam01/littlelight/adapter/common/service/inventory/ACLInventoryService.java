@@ -116,18 +116,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             return;
         }
         if (item.isEquipped()) {
-            for (Item instance : fromBag.items()) {
-                if (instance != item && (instance.getBucketTypeHash() == item.getBucketTypeHash()) && instance.getTierType() < 6) {
-                    destinyApi.equipItem(
-                            new EquipCommand(anAccount.withId().withMembershipType(),
-                                    instance.getItemInstanceId(),
-                                    ((Character) fromBag).characterId()),
-                            anAccount.withCredentials().asCookieVal(),
-                            anAccount.withCredentials().xcsrf());
-                    ((Character) fromBag).equip(instance.getItemInstanceId(), item.getItemInstanceId());
-                    break;
-                }
-            }
+            unequip(anItemId, (Character) fromBag, anAccount);
         }
         if (toBag instanceof Vault) {
             destinyApi.transferItem(
@@ -181,13 +170,37 @@ public class ACLInventoryService implements DestinyInventoryService {
 
     @Override
     public boolean equip(String anItemId, Character onCharacter, Account anAccount) {
-//        destinyApi.equipItem(
-//                new EquipCommand(anAccount.withId().withMembershipType(),
-//                        anItemId,
-//                        onCharacter.characterId()),
-//                anAccount.withCredentials().asCookieVal(),
-//                anAccount.withCredentials().xcsrf());
-//        onCharacter.equip(anItemId);
+        Item item = onCharacter.itemOfId(anItemId);
+        for (Item instance : onCharacter.items()) {
+            if (instance.isEquipped() && (instance.getBucketTypeHash() == item.getBucketTypeHash())) {
+                destinyApi.equipItem(
+                        new EquipCommand(anAccount.withId().withMembershipType(),
+                                item.getItemInstanceId(),
+                                onCharacter.characterId()),
+                        anAccount.withCredentials().asCookieVal(),
+                        anAccount.withCredentials().xcsrf());
+                onCharacter.equip(anItemId, instance.getItemId());
+                break;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unequip(String anItemId, Character onCharacter, Account anAccount) {
+        Item item = onCharacter.itemOfId(anItemId);
+        for (Item instance : onCharacter.items()) {
+            if (instance != item && (instance.getBucketTypeHash() == item.getBucketTypeHash()) && instance.getTierType() < 6) {
+                destinyApi.equipItem(
+                        new EquipCommand(anAccount.withId().withMembershipType(),
+                                instance.getItemInstanceId(),
+                                onCharacter.characterId()),
+                        anAccount.withCredentials().asCookieVal(),
+                        anAccount.withCredentials().xcsrf());
+                onCharacter.equip(instance.getItemId(), anItemId);
+                break;
+            }
+        }
         return true;
     }
 }
