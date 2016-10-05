@@ -126,6 +126,17 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         return headerPositions.contains(position);
     }
 
+    private int itemPositionToPosition(int itemPosition) {
+        int position = itemPosition;
+        for (int headerPosition : headerPositions) {
+            position++;
+            if (mItems.get(positionToItemPosition(headerPosition + 1)).getBucketTypeHash() == mItems.get(itemPosition).getBucketTypeHash()) {
+                break;
+            }
+        }
+        return position;
+    }
+
     private int positionToItemPosition(int position) {
         int itemPosition = position;
         for (int headerPosition : headerPositions) {
@@ -136,16 +147,6 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         return itemPosition;
     }
 
-    private int itemPositionToPosition(int itemPosition) {
-        int position = itemPosition;
-        for (int headerPosition : headerPositions) {
-            if (headerPosition < itemPosition) {
-                position++;
-            } else break;
-        }
-        return position;
-    }
-
     public Item getItem(int position) {
         if (isPositionHeader(position))
             return null;
@@ -153,28 +154,64 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     }
 
     public void removeItem(Item itemToRemove) {
+        //Find the item by itemId
+        Item toRemove = null;
+        int itemToRemovePos = 0;
+
         for (int i = 0, mItemsSize = mItems.size(); i < mItemsSize; i++) {
             Item instance = mItems.get(i);
             if (instance.getItemId().equals(itemToRemove.getItemId())) {
-                mItems.remove(instance);
-                int position = itemPositionToPosition(i);
-
-                for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
-                    int headerPosition = headerPositions.get(i1);
-                    if (headerPosition > position) {
-                        headerPositions.set(i1, headerPosition - 1);
-                        break;
-                    }
-                }
-
-                notifyItemRemoved(position);
+                toRemove = instance;
+                itemToRemovePos = itemPositionToPosition(i);
                 break;
+            }
+        }
+
+        mItems.remove(toRemove);
+
+        // If this item was surrounded by headers then remove the previous header that would end up empty
+        if (headerPositions.contains(itemToRemovePos - 1) && headerPositions.contains(itemToRemovePos + 1)) {
+            headerPositions.remove(Integer.valueOf(itemToRemovePos - 1));
+            shiftHeadersUpBy(2, itemToRemovePos);
+            notifyItemRangeRemoved(itemToRemovePos - 1, 2);
+        } else {
+            shiftHeadersUpBy(1, itemToRemovePos);
+            notifyItemRemoved(itemToRemovePos);
+        }
+    }
+
+    private void shiftHeadersUpBy(int headerOffset, int itemPosition) {
+        //Move subsequent headers positions up
+        for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
+            int headerPosition = headerPositions.get(i1);
+            if (headerPosition > itemPosition) {
+                headerPositions.set(i1, headerPosition - headerOffset);
             }
         }
     }
 
 
     public void addItem(Item itemToAdd) {
+        //Find where to add the item
+        for (int lastItem = mItems.size() - 1, i = lastItem; i >= 0; i--) {
+            Item instance = mItems.get(i);
+            if (instance.getBucketTypeHash() == (itemToAdd.getBucketTypeHash())) {
+                mItems.add(i + 1, itemToAdd);
+
+
+                int position = itemPositionToPosition(i);
+                //Move subsequent header positions down
+                for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
+                    int headerPosition = headerPositions.get(i1);
+                    if (headerPosition > position) {
+                        headerPositions.set(i1, headerPosition + 1);
+                    }
+                }
+
+                notifyItemInserted(position);
+                break;
+            }
+        }
 
     }
 

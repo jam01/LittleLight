@@ -314,7 +314,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void addItem(Item itemTransferred, String toItemBagId) {
-        itemAdapterMap.get(toItemBagId).addItem(itemTransferred);
+//        itemAdapterMap.get(toItemBagId).addItem(itemTransferred);
     }
 
     @Override

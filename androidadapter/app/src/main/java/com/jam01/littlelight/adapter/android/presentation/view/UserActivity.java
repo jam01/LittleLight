@@ -228,7 +228,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
 
         Account toDraw;
         if (accountSelectedId == null) {
-            toDraw = ((Account) accountListView.getItemAtPosition(0));
+            toDraw = ((Account) accountListView.getItemAtPosition(1));
             accountSelectedId = toDraw.withId();
             getSupportFragmentManager()
                     .beginTransaction()
