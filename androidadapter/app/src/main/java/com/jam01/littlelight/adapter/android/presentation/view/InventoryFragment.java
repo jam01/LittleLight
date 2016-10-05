@@ -305,7 +305,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     @Override
     public void showError(String localizedMessage) {
         Snackbar.make(getView(), localizedMessage, Snackbar.LENGTH_LONG).show();
-//        Toast.makeText(getContext(), localizedMessage, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -315,7 +314,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void addItem(Item itemTransferred, String toItemBagId) {
-//        itemAdapterMap.get(toItemBagId).addItem(itemTransferred);
+        itemAdapterMap.get(toItemBagId).addItem(itemTransferred);
     }
 
     @Override
