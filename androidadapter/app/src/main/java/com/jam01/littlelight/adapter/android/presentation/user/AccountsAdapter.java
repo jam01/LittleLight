@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.view;
+package com.jam01.littlelight.adapter.android.presentation.user;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -74,6 +74,12 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
                 break;
             }
         }
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public void add(Account object) {
+        accounts.add(object);
         notifyDataSetChanged();
     }
 

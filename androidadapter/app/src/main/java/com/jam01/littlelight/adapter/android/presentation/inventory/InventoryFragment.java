@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.view;
+package com.jam01.littlelight.adapter.android.presentation.inventory;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
-import com.jam01.littlelight.adapter.android.presentation.presenter.InventoryPresenter;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.Character;
 import com.jam01.littlelight.domain.inventory.Inventory;
@@ -72,7 +71,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
      * @return A new instance of fragment BlankFragment.
      */
     public static InventoryFragment newInstance(AccountId accountId) {
-        Log.d(TAG, "newInstance: ");
         InventoryFragment fragment = new InventoryFragment();
         Bundle args = new Bundle();
         args.putInt(MEMBERSHIP_TYPE, accountId.withMembershipType());
@@ -83,7 +81,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             accountId = new AccountId(getArguments().getInt(MEMBERSHIP_TYPE), getArguments().getString(MEMBERSHIP_ID));

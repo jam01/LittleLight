@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.view;
+package com.jam01.littlelight.adapter.android.presentation.user;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;

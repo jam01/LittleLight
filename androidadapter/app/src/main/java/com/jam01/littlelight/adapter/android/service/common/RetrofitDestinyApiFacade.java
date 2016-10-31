@@ -15,7 +15,6 @@ import com.bungie.netplatform.destiny.representation.CharacterInventory;
 import com.bungie.netplatform.destiny.representation.DataResponse;
 import com.bungie.netplatform.destiny.representation.ItemDefinition;
 import com.bungie.netplatform.destiny.representation.ItemInstance;
-import com.bungie.netplatform.destiny.representation.User;
 import com.bungie.netplatform.destiny.representation.UserResponse;
 import com.bungie.netplatform.destiny.representation.Vault;
 import com.google.gson.Gson;
@@ -87,7 +86,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         database = Executors.newCachedThreadPool().submit(new Callable<SQLiteDatabase>() {
             @Override
             public SQLiteDatabase call() throws Exception {
-                String latestDbPath = latestManifestUrl();
+                String latestDbPath = latestManifestUrl().getResponse().getAsJsonObject("mobileWorldContentPaths").get("en").getAsString();
                 String dbName = latestDbPath.substring(34);
                 if (!hasDb(dbName)) {
                     addDbFrom(manifestDb(latestDbPath).byteStream());
@@ -190,102 +189,77 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     }
 
     @Override
-    public Vault getVault(int membershipType, String cookies, String xcsrf) {
-        Vault vault;
+    public BungieResponse<DataResponse<Vault>> getVault(int membershipType, String cookies, String xcsrf) {
         try {
-            vault = bungieApi.requestVault(membershipType, cookies, xcsrf).execute().body().getResponse().getData();
+            return bungieApi.requestVault(membershipType, cookies, xcsrf).execute().body();
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
-        return vault;
     }
 
     @Override
-    public CharacterInventory getCharacterInventory(int membershipType, String membershipId, String characterId, String cookies, String xcsrf) {
-        CharacterInventory characterInventory;
+    public BungieResponse<DataResponse<CharacterInventory>> getCharacterInventory(int membershipType, String membershipId, String characterId, String cookies, String xcsrf) {
         try {
-            BungieResponse<DataResponse<CharacterInventory>> response = bungieApi.requestCharacterInventory(membershipType, membershipId, characterId, cookies, xcsrf)
+            return bungieApi.requestCharacterInventory(membershipType, membershipId, characterId, cookies, xcsrf)
                     .execute()
                     .body();
-
-            Log.i(TAG, "getCharacterInventory: " + response.getErrorStatus());
-            characterInventory = response.getResponse().getData();
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
-        return characterInventory;
     }
 
     @Override
-    public boolean equipItem(EquipCommand command, String cookies, String xcsrf) {
+    public BungieResponse<Integer> equipItem(EquipCommand command, String cookies, String xcsrf) {
         try {
-            BungieResponse<Integer> response = bungieApi.requestEquip(command, cookies, xcsrf).execute().body();
-            if (response.getErrorCode() != 1) {
-                throw new UnsupportedOperationException(response.getMessage());
-            }
+            return bungieApi.requestEquip(command, cookies, xcsrf).execute().body();
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean transferItem(TransferCommand command, String cookies, String xcsrf) {
-        try {
-            BungieResponse<Integer> response = bungieApi.requestTransfer(command, cookies, xcsrf).execute().body();//.getErrorCode() == 1;
-            if (response.getErrorCode() != 1) {
-                throw new UnsupportedOperationException(response.getMessage());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    @Override
-    public Account getAccount(int membershipType, String membershipId, String cookies, String xcsrf) {
-        Account account = null;
-        try {
-            account = bungieApi.requestAccount(membershipType, membershipId, cookies, xcsrf).execute().body().getResponse().getData();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return account;
-    }
-
-    @Override
-    public User getUser(String cookies, String xcsrf) {
-        User user = null;
-        try {
-            user = bungieApi.requestUser(cookies, xcsrf).execute().body().getResponse().getUser();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return user;
-    }
-
-    @Override
-    public JsonObject membershipIds(String cookies, String xcsrf) {
-        JsonObject toReturn = null;
-        try {
-            toReturn = bungieApi.requestMembershiIds(cookies, xcsrf).execute().body().getResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return toReturn;
-    }
-
-    @Override
-    public String latestManifestUrl() {
-        String dbUrl;
-        try {
-            dbUrl = bungieApi.requestManifestUrl().execute().body().getResponse().getAsJsonObject("mobileWorldContentPaths").get("en").getAsString();
-        } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalStateException(e.getMessage(), e);
         }
-        return dbUrl;
+    }
+
+    @Override
+    public BungieResponse<Integer> transferItem(TransferCommand command, String cookies, String xcsrf) {
+        try {
+            return bungieApi.requestTransfer(command, cookies, xcsrf).execute().body();//.getErrorCode() == 1;
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BungieResponse<DataResponse<Account>> getAccount(int membershipType, String membershipId, String cookies, String xcsrf) {
+        try {
+            return bungieApi.requestAccount(membershipType, membershipId, cookies, xcsrf).execute().body();
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BungieResponse<UserResponse> getUser(String cookies, String xcsrf) {
+        try {
+            return bungieApi.requestUser(cookies, xcsrf).execute().body();
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BungieResponse<JsonObject> membershipIds(String cookies, String xcsrf) {
+        try {
+            return bungieApi.requestMembershiIds(cookies, xcsrf).execute().body();
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public BungieResponse<JsonObject> latestManifestUrl() {
+        try {
+            return bungieApi.requestManifestUrl().execute().body();
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
     }
 
     public ResponseBody manifestDb(String manifestUrl) {

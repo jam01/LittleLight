@@ -1,14 +1,14 @@
-package com.jam01.littlelight.adapter.android.presentation.view;
+package com.jam01.littlelight.adapter.android.presentation.user;
 
-import android.app.ProgressDialog;
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
@@ -16,16 +16,9 @@ import android.webkit.WebViewClient;
 
 import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.R;
-import com.jam01.littlelight.adapter.android.LittleLight;
-import com.jam01.littlelight.adapter.android.presentation.presenter.SignInPresenter;
-import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 
-import javax.inject.Inject;
-
-public class SignInActivity extends AppCompatActivity implements SignInPresenter.SignInView {
-    @Inject
-    SignInPresenter presenter;
-    private ProgressDialog progressDialog;
+public class SignInActivity extends AppCompatActivity {
+    Intent resultIntent = new Intent();
     private WebView webView;
 
     @Override
@@ -33,30 +26,17 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
         webView = (WebView) findViewById(R.id.webView);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Little Light");
-        progressDialog.setMessage("Logging In");
 
-        if (presenter == null) {
-            presenter = ((LittleLight) getApplication()).getComponent().provideSignInPresenter();
-        }
+        Intent callingIntent = getIntent();
+        if (callingIntent.hasExtra("membershipType")) {
+            int membershipType = callingIntent.getIntExtra("membershipType", -1);
+            resultIntent.putExtra("membershipType", membershipType)
+                    .putExtra("membershipId", callingIntent.getStringExtra("membershipId"));
+            loadWebView(membershipType == 1 ? Endpoints.XBOX_AUTH_URL : Endpoints.PSN_AUTH_URL);
+        } else
+            showLoginDialog();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        presenter.bindView(this);
-    }
-
-    @Override
-    public void showLoading(boolean show) {
-        if (show)
-            progressDialog.show();
-        else
-            progressDialog.dismiss();
-    }
-
-    @Override
     public void showLoginDialog() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setTitle("Little Light")
@@ -65,20 +45,22 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
                 .setPositiveButton("PSN", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        presenter.onMembershipTypeSelected(2);
+                        resultIntent.putExtra("membershipType", 2);
+                        loadWebView(Endpoints.PSN_AUTH_URL);
                     }
                 })
                 .setNegativeButton("Xbox Live", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        presenter.onMembershipTypeSelected(1);
+                        resultIntent.putExtra("membershipType", 1);
+                        loadWebView(Endpoints.XBOX_AUTH_URL);
                     }
                 })
                 .create()
                 .show();
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
     public void loadWebView(String url) {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setSavePassword(false);
@@ -87,7 +69,9 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 if (url.equals(Endpoints.BASE_URL)) {
-                    presenter.onBungieUrlIntercepted(collect());
+                    resultIntent.putExtra("cookies", collectCookies());
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    finish();
                 } else
                     super.onPageStarted(view, url, favicon);
             }
@@ -95,7 +79,9 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.equals(Endpoints.BASE_URL)) {
-                    presenter.onBungieUrlIntercepted(collect());
+                    resultIntent.putExtra("cookies", collectCookies());
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    finish();
                     return true;
                 }
                 return false;
@@ -104,34 +90,13 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
         webView.loadUrl(url);
     }
 
-    public void closeView() {
-        finish();
-    }
-
-    @Override
-    protected void onStop() {
-        presenter.unbindView();
-        super.onStop();
-    }
-
-    private AccountCredentials collect() {
-        String bungled = null, bungleatk = null;
+    @SuppressWarnings("deprecation")
+    private String[] collectCookies() {
         String cookies = android.webkit.CookieManager.getInstance().getCookie(Endpoints.BASE_URL);
 
         if (cookies == null || cookies.isEmpty()) {
             return null;
         }
-
-        for (String ar1 : cookies.split(" ")) {
-            if (ar1.contains("bungled=")) {
-                bungled = ar1.substring(8);
-                Log.d("bungled=", ar1);
-            } else if (ar1.contains("bungleatk=")) {
-                bungleatk = ar1.substring(10);
-                Log.d("bungleatk=", ar1);
-            }
-        }
-
         //See: http://stackoverflow.com/questions/28998241/how-to-clear-cookies-and-cache-of-webview-on-android-when-not-in-webview
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             CookieManager.getInstance().removeAllCookies(null);
@@ -146,6 +111,6 @@ public class SignInActivity extends AppCompatActivity implements SignInPresenter
             cookieSyncMngr.sync();
         }
 
-        return new AccountCredentials(bungled, bungleatk);
+        return cookies.split(" ");
     }
 }

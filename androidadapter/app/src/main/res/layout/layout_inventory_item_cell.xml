@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.jam01.littlelight.adapter.android.presentation.view.CheckableRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.jam01.littlelight.adapter.android.presentation.inventory.CheckableRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:checkable="true"
@@ -44,4 +44,4 @@
         android:focusableInTouchMode="false"
         android:visibility="invisible" />
 
-</com.jam01.littlelight.adapter.android.presentation.view.CheckableRelativeLayout>
+</com.jam01.littlelight.adapter.android.presentation.inventory.CheckableRelativeLayout>

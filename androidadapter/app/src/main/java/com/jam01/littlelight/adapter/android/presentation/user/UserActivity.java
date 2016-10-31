@@ -1,8 +1,7 @@
-package com.jam01.littlelight.adapter.android.presentation.view;
+package com.jam01.littlelight.adapter.android.presentation.user;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -16,25 +15,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
-import com.jam01.littlelight.adapter.android.presentation.presenter.UserPresenter;
+import com.jam01.littlelight.adapter.android.presentation.inventory.InventoryFragment;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.identityaccess.User;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, UserPresenter.MainView {
     private static final String MEMBERSHIP_TYPE = "param1";
     private static final String MEMBERSHIP_ID = "param2";
     private AccountId accountSelectedId;
     private UserPresenter presenter;
+    private View accountsView;
     private ListView accountListView;
     private View headerView;
     private View spinnerArrow;
@@ -62,7 +65,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         headerView = navigationView.getHeaderView(0);
-
+        accountsView = headerView.findViewById(R.id.accountsView);
         accountListView = (ListView) headerView.findViewById(R.id.lvAccountList);
         spinnerArrow = headerView.findViewById(R.id.ivSpinnerArrow);
         accountPic = (ImageView) headerView.findViewById(R.id.ivAccountPic);
@@ -70,6 +73,9 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         headerView.findViewById(R.id.bAddAccount).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                accountsView.setVisibility(View.GONE);
+                spinnerArrow.setScaleY(1f);
+                drawer.closeDrawers();
                 presenter.onAddAccount();
             }
         });
@@ -77,12 +83,11 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         headerView.setOnClickListener(new View.OnClickListener() {
                                           @Override
                                           public void onClick(View v) {
-                                              View toHide = v.findViewById(R.id.accountsView);
-                                              if (toHide.getVisibility() == View.GONE) {
+                                              if (accountsView.getVisibility() == View.GONE) {
                                                   spinnerArrow.setScaleY(-1f);
-                                                  toHide.setVisibility(View.VISIBLE);
+                                                  accountsView.setVisibility(View.VISIBLE);
                                               } else {
-                                                  toHide.setVisibility(View.GONE);
+                                                  accountsView.setVisibility(View.GONE);
                                                   spinnerArrow.setScaleY(1f);
                                               }
                                           }
@@ -93,16 +98,9 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                                                    @Override
                                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                                        Account toDraw = ((Account) parent.getItemAtPosition(position));
-                                                       accountSelectedId = toDraw.withId();
-                                                       drawSelectedAccount(toDraw);
-                                                       View toHide = headerView.findViewById(R.id.accountsView);
-                                                       if (toHide.getVisibility() == View.GONE)
-                                                           toHide.setVisibility(View.VISIBLE);
-                                                       else toHide.setVisibility(View.GONE);
-                                                       getSupportFragmentManager()
-                                                               .beginTransaction()
-                                                               .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
-                                                               .commit();
+                                                       displayAccount(toDraw);
+                                                       accountsView.setVisibility(View.GONE);
+                                                       spinnerArrow.setScaleY(1f);
                                                        drawer.closeDrawers();
                                                    }
                                                }
@@ -111,22 +109,12 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         if (presenter == null) {
             presenter = ((LittleLight) getApplication()).getComponent().provideMainPresenter();
         }
-
-        presenter.bindView(this);
-
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        presenter.bindView(this);
         presenter.onStart();
     }
 
@@ -139,15 +127,17 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt(MEMBERSHIP_TYPE, accountSelectedId.withMembershipType());
-        outState.putString(MEMBERSHIP_ID, accountSelectedId.withMembershipId());
+        if (accountSelectedId != null) {
+            outState.putInt(MEMBERSHIP_TYPE, accountSelectedId.withMembershipType());
+            outState.putString(MEMBERSHIP_ID, accountSelectedId.withMembershipId());
+        }
         super.onSaveInstanceState(outState);
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onStop() {
         presenter.unbindView();
-        super.onDestroy();
+        super.onStop();
     }
 
     @Override
@@ -175,7 +165,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
@@ -194,15 +183,67 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    // TODO: 10/8/16 Pretty this up
     @Override
-    public void loadSignInView() {
-        startActivity(new Intent(this, SignInActivity.class));
+    public void showWebSignIn() {
+        final int[] membershipType = new int[1];
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Little Light")
+                .setIcon(R.mipmap.ic_launcher)
+                .setMessage("Where should I look for you, Guardian?")
+                .setPositiveButton("PSN", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        membershipType[0] = 2;
+                        final SignInFragment signInFragment = SignInFragment.newInstance(Endpoints.PSN_AUTH_URL);
+                        signInFragment.setOnCookiesInterceptedListener(new SignInFragment.OnCookiesInterceptedListener() {
+                            @Override
+                            public void onCookiesIntercepted(String[] cookies) {
+                                presenter.onWebSignInCompleted(membershipType[0], cookies);
+                                signInFragment.dismiss();
+                            }
+                        });
+                        signInFragment.show(getSupportFragmentManager(), "SignInDialog");
+                    }
+                })
+                .setNegativeButton("Xbox Live", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        membershipType[0] = 1;
+                        final SignInFragment signInFragment = SignInFragment.newInstance(Endpoints.XBOX_AUTH_URL);
+                        signInFragment.setOnCookiesInterceptedListener(new SignInFragment.OnCookiesInterceptedListener() {
+                            @Override
+                            public void onCookiesIntercepted(String[] cookies) {
+                                presenter.onWebSignInCompleted(membershipType[0], cookies);
+                                signInFragment.dismiss();
+                            }
+                        });
+                        signInFragment.show(getSupportFragmentManager(), "SignInDialog");
+                    }
+                })
+                .create()
+                .show();
+
+    }
+
+    @Override
+    public void showWebSignInForUpdatingCredentials(final AccountId accountId) {
+        final SignInFragment signInFragment = SignInFragment.newInstance(accountId.withMembershipType() == 2 ? Endpoints.PSN_AUTH_URL : Endpoints.XBOX_AUTH_URL);
+        signInFragment.setOnCookiesInterceptedListener(new SignInFragment.OnCookiesInterceptedListener() {
+            @Override
+            public void onCookiesIntercepted(String[] cookies) {
+                presenter.onWebCredentialsUpdated(accountId, cookies);
+                signInFragment.dismiss();
+            }
+        });
+        signInFragment.show(getSupportFragmentManager(), "SignInDialog");
     }
 
     @Override
     public void setUser(User user) {
         final Context context = this;
-        final AccountsAdapter accountsAdapter = new AccountsAdapter(getApplicationContext(), R.layout.account_row, new ArrayList<>(user.allRegisteredAccounts()));
+        final List<Account> registeredAccounts = new ArrayList<>(user.allRegisteredAccounts());
+        final AccountsAdapter accountsAdapter = new AccountsAdapter(getApplicationContext(), R.layout.account_row, registeredAccounts);
         accountsAdapter.setOnItemRemoveClickListener(new AccountsAdapter.OnItemRemoveClickListener() {
             @Override
             public void onItemRemoveClick(View view, final int position) {
@@ -220,30 +261,27 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                                 dialog.dismiss();
                             }
                         })
-//                        .create()
                         .show();
             }
         });
         accountListView.setAdapter(accountsAdapter);
 
-        Account toDraw;
-        if (accountSelectedId == null) {
-            toDraw = ((Account) accountListView.getItemAtPosition(1));
-            accountSelectedId = toDraw.withId();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
-                    .commit();
-        } else {
-            toDraw = user.ofId(accountSelectedId);
+        if (!registeredAccounts.isEmpty()) {
+            if (accountSelectedId == null) {
+                displayAccount(registeredAccounts.get(registeredAccounts.size() - 1));
+            }
         }
-        drawSelectedAccount(toDraw);
+    }
+
+    @Override
+    public void addAccount(Account accountToAdd) {
+        ((AccountsAdapter) accountListView.getAdapter()).add(accountToAdd);
     }
 
     @Override
     public void updateAccount(Account accountUpdated) {
         if (accountSelectedId.equals(accountUpdated.withId())) {
-            drawSelectedAccount(accountUpdated);
+            displayAccount(accountUpdated);
         }
         ((AccountsAdapter) accountListView.getAdapter()).updateAccount(accountUpdated);
     }
@@ -253,17 +291,33 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         ((AccountsAdapter) accountListView.getAdapter()).remove(account);
         if (account.withId().equals(accountSelectedId)) {
             if (!accountListView.getAdapter().isEmpty()) {
-
             }
         }
     }
 
-    private void drawSelectedAccount(Account anAccount) {
+    @Override
+    public void displayAccount(Account anAccount) {
+        accountSelectedId = anAccount.withId();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
+                .commit();
+
         ((TextView) headerView.findViewById(R.id.tvAccountNameSelected)).setText(anAccount.withName());
         Picasso.with(getApplicationContext())
                 .load(anAccount.profilePath())
                 .transform(new CircleTransform())
                 .fit()
                 .into(accountPic);
+    }
+
+    @Override
+    public void showLoading(boolean bool) {
+        FrameLayout accountFrame = (FrameLayout) findViewById(R.id.account_frame);
+        if (bool) {
+            accountFrame.findViewById(R.id.pbMain).setVisibility(View.VISIBLE);
+        } else {
+            accountFrame.findViewById(R.id.pbMain).setVisibility(View.GONE);
+        }
     }
 }

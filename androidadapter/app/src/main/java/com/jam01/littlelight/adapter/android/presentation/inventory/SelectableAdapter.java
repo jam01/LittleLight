@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.view;
+package com.jam01.littlelight.adapter.android.presentation.inventory;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;

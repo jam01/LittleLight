@@ -2,11 +2,14 @@ package com.jam01.littlelight.adapter.android.persistence.identityaccess;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
+import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.jam01.littlelight.domain.identityaccess.AccountRegistered;
 import com.jam01.littlelight.domain.identityaccess.User;
 
 import java.util.Collection;
@@ -22,6 +25,7 @@ public class DiskUser implements User {
     private final SharedPreferences disk;
     private final Map<AccountId, Account> accountMap;
     private final Gson gson;
+    private final String TAG = this.getClass().getSimpleName();
 
     public DiskUser(Context mContext) {
         disk = mContext.getSharedPreferences("user", Context.MODE_PRIVATE);
@@ -34,6 +38,8 @@ public class DiskUser implements User {
     public void registerAccount(Account aAccount) {
         accountMap.put(aAccount.withId(), aAccount);
         save();
+        Log.d(TAG, "registerAccount: " + aAccount.withName());
+        DomainEventPublisher.instanceOf().publish(new AccountRegistered(aAccount));
     }
 
     @Override
@@ -63,6 +69,12 @@ public class DiskUser implements User {
         save();
     }
 
+    @Override
+    public void updateAccountCredentials(AccountId accountId, AccountCredentials newCredentials) {
+        accountMap.get(accountId).updateCredentials(newCredentials);
+        save();
+    }
+
     private void load() {
         if (disk.contains("accounts")) {
             Set<String> serializedLegends = disk.getStringSet("accounts", null);
@@ -78,6 +90,7 @@ public class DiskUser implements User {
 
     private void save() {
         if (accountMap.isEmpty()) {
+            disk.edit().remove("accounts").apply();
             return;
         }
 

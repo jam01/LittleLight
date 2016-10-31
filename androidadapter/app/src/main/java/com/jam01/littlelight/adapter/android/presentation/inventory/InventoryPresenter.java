@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.presenter;
+package com.jam01.littlelight.adapter.android.presentation.inventory;
 
 import com.jam01.littlelight.application.InventoryService;
 import com.jam01.littlelight.domain.DomainEvent;
