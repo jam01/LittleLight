@@ -12,13 +12,17 @@ public interface LegendRepository {
 
     Legend ofId(AccountId anAccountId);
 
+    boolean hasOfAccount(AccountId anAccountId);
+
     void save(Legend anLegend);
 
-    void saveAll(Collection<Legend> legends);
+    void addAll(Collection<Legend> legends);
 
     void remove(Legend anLegend);
 
     void removeAll();
 
     Collection<Legend> all();
+
+    void add(Legend aLegend);
 }

@@ -42,4 +42,13 @@ public class Legend {
         return grimoireScore;
     }
 
+    public void updateFrom(Legend newState) {
+        if (newState.withGrimoire() != grimoireScore) {
+            grimoireScore = newState.withGrimoire();
+        }
+        characterMap.clear();
+        for (Character instance : newState.withCharacters()) {
+            characterMap.put(instance.characterId(), instance);
+        }
+    }
 }

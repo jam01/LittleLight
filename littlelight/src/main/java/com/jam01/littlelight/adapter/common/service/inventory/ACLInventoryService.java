@@ -3,7 +3,9 @@ package com.jam01.littlelight.adapter.common.service.inventory;
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.api.EquipCommand;
 import com.bungie.netplatform.destiny.api.TransferCommand;
+import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.CharacterInventory;
+import com.bungie.netplatform.destiny.representation.DataResponse;
 import com.bungie.netplatform.destiny.representation.Equippable;
 import com.bungie.netplatform.destiny.representation.ItemDefinition;
 import com.bungie.netplatform.destiny.representation.ItemInstance;
@@ -36,15 +38,22 @@ public class ACLInventoryService implements DestinyInventoryService {
         AccountId anAccountId = anAccount.withId();
         AccountCredentials credentials = anAccount.withCredentials();
         Inventory toUpdate = null;
-        List<String> characterIds = new ArrayList<>();
+        List<String> characterIds;// = new ArrayList<>();
         if (repository.hasOfAccount(anAccountId)) {
             toUpdate = repository.ofAccount(anAccountId);
             characterIds = new ArrayList<>(toUpdate.characters().size() + 1);
             for (Character instance : toUpdate.characters())
                 characterIds.add(instance.characterId());
         } else {
-            for (com.bungie.netplatform.destiny.representation.Character bungieCharacter : destinyApi.getAccount(anAccountId.withMembershipType(), anAccountId.withMembershipId(),
-                    credentials.asCookieVal(), credentials.xcsrf()).getCharacters()) {
+            BungieResponse<DataResponse<com.bungie.netplatform.destiny.representation.Account>> accountRespose = destinyApi.getAccount(anAccountId.withMembershipType(), anAccountId.withMembershipId(),
+                    credentials.asCookieVal(), credentials.xcsrf());
+            if (accountRespose.getErrorCode() != 1) {
+                throw new IllegalStateException(accountRespose.getMessage());
+            }
+
+            characterIds = new ArrayList<>();
+
+            for (com.bungie.netplatform.destiny.representation.Character bungieCharacter : accountRespose.getResponse().getData().getCharacters()) {
                 characterIds.add(bungieCharacter.getCharacterBase().getCharacterId());
             }
         }
@@ -56,12 +65,20 @@ public class ACLInventoryService implements DestinyInventoryService {
         List<ItemDefinition> definitions;
 
         for (String characterId : characterIds) {
-            CharacterInventory bungieInventory = destinyApi
+
+            BungieResponse<DataResponse<CharacterInventory>> inventoryResponse = destinyApi
                     .getCharacterInventory((anAccountId.withMembershipType()),
                             anAccountId.withMembershipId(),
                             characterId,
                             credentials.asCookieVal(),
                             credentials.xcsrf());
+
+            if (inventoryResponse.getErrorCode() != 1) {
+                throw new IllegalStateException(inventoryResponse.getMessage());
+            }
+
+
+            CharacterInventory bungieInventory = inventoryResponse.getResponse().getData();
 
             for (Equippable equippableList : bungieInventory.getBuckets().getEquippable()) {
                 instances.addAll(equippableList.getItems());
@@ -79,12 +96,16 @@ public class ACLInventoryService implements DestinyInventoryService {
             definitions.clear();
         }
 
-        com.bungie.netplatform.destiny.representation.Vault bungieVault = destinyApi
+        BungieResponse<DataResponse<com.bungie.netplatform.destiny.representation.Vault>> inventoryResponse = destinyApi
                 .getVault(anAccountId.withMembershipType(),
                         credentials.asCookieVal(),
                         credentials.xcsrf());
 
-        for (com.bungie.netplatform.destiny.representation.Item bungieItems : bungieVault.getBuckets()) {
+        if (inventoryResponse.getErrorCode() != 1) {
+            throw new IllegalStateException(inventoryResponse.getMessage());
+        }
+
+        for (com.bungie.netplatform.destiny.representation.Item bungieItems : inventoryResponse.getResponse().getData().getBuckets()) {
             instances.addAll(bungieItems.getItems());
         }
 
@@ -119,7 +140,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             unequip(anItemId, (Character) fromBag, anAccount);
         }
         if (toBag instanceof Vault) {
-            destinyApi.transferItem(
+            BungieResponse<Integer> transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
                             item.getItemInstanceId(),
@@ -128,9 +149,14 @@ public class ACLInventoryService implements DestinyInventoryService {
                             true),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
+
+            if (transferResponse.getErrorCode() != 1) {
+                throw new IllegalStateException(transferResponse.getMessage());
+            }
             inventory.transferItem(anItemId, fromBag.withId(), toBagId);
+
         } else if (fromBag instanceof Vault) {
-            destinyApi.transferItem(
+            BungieResponse<Integer> transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
                             item.getItemInstanceId(),
@@ -139,11 +165,16 @@ public class ACLInventoryService implements DestinyInventoryService {
                             false),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
+
+            if (transferResponse.getErrorCode() != 1) {
+                throw new IllegalStateException(transferResponse.getMessage());
+            }
             inventory.transferItem(anItemId, fromBag.withId(), toBagId);
+
         } else {
             Vault vault = inventory.vault();
 
-            destinyApi.transferItem(
+            BungieResponse<Integer> transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
                             item.getItemInstanceId(),
@@ -152,10 +183,14 @@ public class ACLInventoryService implements DestinyInventoryService {
                             true),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
+
+            if (transferResponse.getErrorCode() != 1) {
+                throw new IllegalStateException(transferResponse.getMessage());
+            }
             inventory.transferItem(anItemId, fromBag.withId(), vault.withId());
 
 
-            destinyApi.transferItem(
+            transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getItemHash()),
                             item.getItemInstanceId(),
@@ -164,6 +199,10 @@ public class ACLInventoryService implements DestinyInventoryService {
                             false),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
+
+            if (transferResponse.getErrorCode() != 1) {
+                throw new IllegalStateException(transferResponse.getMessage());
+            }
             inventory.transferItem(anItemId, vault.withId(), toBag.withId());
         }
     }
@@ -173,14 +212,19 @@ public class ACLInventoryService implements DestinyInventoryService {
         Item item = onCharacter.itemOfId(anItemId);
         for (Item instance : onCharacter.items()) {
             if (instance.isEquipped() && (instance.getBucketTypeHash() == item.getBucketTypeHash())) {
-                destinyApi.equipItem(
+                BungieResponse<Integer> equipResponse = destinyApi.equipItem(
                         new EquipCommand(anAccount.withId().withMembershipType(),
                                 item.getItemInstanceId(),
                                 onCharacter.characterId()),
                         anAccount.withCredentials().asCookieVal(),
                         anAccount.withCredentials().xcsrf());
+
+                if (equipResponse.getErrorCode() != 1) {
+                    throw new IllegalStateException(equipResponse.getMessage());
+                }
+
                 onCharacter.equip(anItemId, instance.getItemId());
-                break;
+                return true;
             }
         }
         return true;
@@ -191,16 +235,20 @@ public class ACLInventoryService implements DestinyInventoryService {
         Item item = onCharacter.itemOfId(anItemId);
         for (Item instance : onCharacter.items()) {
             if (instance != item && (instance.getBucketTypeHash() == item.getBucketTypeHash()) && instance.getTierType() < 6) {
-                destinyApi.equipItem(
+                BungieResponse<Integer> equipResponse = destinyApi.equipItem(
                         new EquipCommand(anAccount.withId().withMembershipType(),
                                 instance.getItemInstanceId(),
                                 onCharacter.characterId()),
                         anAccount.withCredentials().asCookieVal(),
                         anAccount.withCredentials().xcsrf());
+
+                if (equipResponse.getErrorCode() != 1) {
+                    throw new IllegalStateException(equipResponse.getMessage());
+                }
                 onCharacter.equip(instance.getItemId(), anItemId);
-                break;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }

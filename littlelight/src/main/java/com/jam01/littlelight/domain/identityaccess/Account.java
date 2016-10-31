@@ -8,7 +8,7 @@ import com.jam01.littlelight.domain.DomainEventPublisher;
  */
 public class Account {
     private final AccountId accountId;
-    private final AccountCredentials accountCredentials;
+    private AccountCredentials accountCredentials;
     private String displayName;
     private String profilePath;
 
@@ -42,5 +42,9 @@ public class Account {
             this.profilePath = profilePath;
             DomainEventPublisher.instanceOf().publish(new AccountUpdated(this));
         }
+    }
+
+    public void updateCredentials(AccountCredentials newCredentials) {
+        accountCredentials = newCredentials;
     }
 }

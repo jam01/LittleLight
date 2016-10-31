@@ -1,10 +1,15 @@
 package com.jam01.littlelight.adapter.common.service.identityaccess;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
+import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.Endpoints;
+import com.bungie.netplatform.destiny.representation.UserResponse;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
+import com.jam01.littlelight.domain.identityaccess.AccountCredentialsExpired;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
@@ -26,14 +31,25 @@ public class ACLAccountService implements DestinyAccountService {
         String membershipId = null;
         String displayName;
 
-        for (Map.Entry<String, JsonElement> entry : destinyApi.membershipIds(credentials.asCookieVal(), credentials.xcsrf()).entrySet()) {
+        BungieResponse<JsonObject> membershipIdsResponse = destinyApi.membershipIds(credentials.asCookieVal(), credentials.xcsrf());
+        if (membershipIdsResponse.getErrorCode() != 1) {
+            throw new IllegalStateException(membershipIdsResponse.getMessage());
+        }
+
+        for (Map.Entry<String, JsonElement> entry : membershipIdsResponse.getResponse().entrySet()) {
             if (Integer.valueOf(entry.getValue().toString()) == membershipType) {
                 membershipId = entry.getKey();
                 break;
             }
         }
+
+        BungieResponse<UserResponse> userResponse = destinyApi.getUser(credentials.asCookieVal(), credentials.xcsrf());
+        if (userResponse.getErrorCode() != 1) {
+            throw new IllegalStateException(userResponse.getMessage());
+        }
+
         AccountId accountId = new AccountId(membershipType, membershipId);
-        com.bungie.netplatform.destiny.representation.User user = destinyApi.getUser(credentials.asCookieVal(), credentials.xcsrf());
+        com.bungie.netplatform.destiny.representation.User user = userResponse.getResponse().getUser();
         displayName = user.getDisplayName();
 
         return new Account(accountId, credentials, displayName, Endpoints.BASE_URL + user.getProfilePicturePath());
@@ -42,7 +58,15 @@ public class ACLAccountService implements DestinyAccountService {
     @Override
     public void synchronizeAccountsFor(User user) {
         for (Account instance : user.allRegisteredAccounts()) {
-            com.bungie.netplatform.destiny.representation.User bungieUser = destinyApi.getUser(instance.withCredentials().asCookieVal(), instance.withCredentials().xcsrf());
+            BungieResponse<UserResponse> userResponse = destinyApi.getUser(instance.withCredentials().asCookieVal(), instance.withCredentials().xcsrf());
+            if (userResponse.getErrorCode() != 1) {
+                if (userResponse.getErrorCode() == 99) {
+                    DomainEventPublisher.instanceOf().publish(new AccountCredentialsExpired(instance));
+                }
+                throw new IllegalStateException(userResponse.getMessage());
+            }
+
+            com.bungie.netplatform.destiny.representation.User bungieUser = userResponse.getResponse().getUser();
             user.updateAccount(instance.withId(), bungieUser.getDisplayName(), Endpoints.BASE_URL + bungieUser.getProfilePicturePath());
         }
     }

@@ -17,4 +17,6 @@ public interface User {
     AccountCredentials credentialsOf(AccountId anAccountId);
 
     void updateAccount(AccountId accountId, String displayName, String profilePath);
+
+    void updateAccountCredentials(AccountId accountId, AccountCredentials newCredentials);
 }
