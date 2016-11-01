@@ -1,11 +1,14 @@
 package com.jam01.littlelight.adapter.android.di.module;
 
 import com.jam01.littlelight.application.InventoryService;
+import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.application.UserService;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
 import com.jam01.littlelight.domain.inventory.InventoryRepository;
+import com.jam01.littlelight.domain.legend.DestinyLegendService;
+import com.jam01.littlelight.domain.legend.LegendRepository;
 
 import javax.inject.Singleton;
 
@@ -28,5 +31,11 @@ public class ApplicationModule {
     @Singleton
     InventoryService providesInventoryService(DestinyInventoryService destinyService, InventoryRepository inventoryRepo, User user) {
         return new InventoryService(destinyService, inventoryRepo, user);
+    }
+
+    @Provides
+    @Singleton
+    LegendService providesLegendService(DestinyLegendService destinyService, LegendRepository inventoryRepo, User user) {
+        return new LegendService(destinyService, inventoryRepo, user);
     }
 }

@@ -7,6 +7,7 @@ import com.jam01.littlelight.adapter.android.di.module.AndroidModule;
 import com.jam01.littlelight.adapter.android.di.module.ApplicationModule;
 import com.jam01.littlelight.adapter.android.di.module.DomainModule;
 import com.jam01.littlelight.adapter.android.presentation.inventory.InventoryPresenter;
+import com.jam01.littlelight.adapter.android.presentation.legend.LegendPresenter;
 import com.jam01.littlelight.adapter.android.presentation.user.UserPresenter;
 
 import javax.inject.Singleton;
@@ -37,5 +38,7 @@ public class LittleLight extends Application {
         UserPresenter provideMainPresenter();
 
         InventoryPresenter provideInventoryPresenter();
+
+        LegendPresenter provideLegendPresenter();
     }
 }

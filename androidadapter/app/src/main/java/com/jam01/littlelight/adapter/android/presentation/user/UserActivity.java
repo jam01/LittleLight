@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,6 +25,7 @@ import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.inventory.InventoryFragment;
+import com.jam01.littlelight.adapter.android.presentation.legend.LegendFragment;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.identityaccess.User;
@@ -168,14 +170,18 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
-                    .commit();
+        switch (item.getItemId()) {
+            case R.id.nav_inventory:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
+                        .commit();
+                break;
+            case R.id.nav_legend:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.account_frame, LegendFragment.newInstance(accountSelectedId))
+                        .commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -271,6 +277,11 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                 displayAccount(registeredAccounts.get(registeredAccounts.size() - 1));
             }
         }
+    }
+
+    @Override
+    public void showError(String localizedMessage) {
+        Snackbar.make(findViewById(R.id.account_frame), localizedMessage, Snackbar.LENGTH_LONG).show();
     }
 
     @Override

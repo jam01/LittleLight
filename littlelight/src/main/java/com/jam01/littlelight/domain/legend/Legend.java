@@ -11,13 +11,11 @@ import java.util.Map;
  */
 public class Legend {
     private final AccountId id;
-    private final String platform;
     private Map<String, Character> characterMap;
     private int grimoireScore;
 
-    public Legend(AccountId id, String platform, Collection<Character> characters, int grimoireScore) {
+    public Legend(AccountId id, Collection<Character> characters, int grimoireScore) {
         this.id = id;
-        this.platform = platform;
         this.grimoireScore = grimoireScore;
 
         characterMap = new HashMap<>(characters.size());
@@ -32,10 +30,6 @@ public class Legend {
 
     public AccountId withId() {
         return id;
-    }
-
-    public String onPlatform() {
-        return platform;
     }
 
     public int withGrimoire() {

@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -29,6 +30,8 @@ public class InventoryPresenter {
     private InventoryService service;
     private InventoryView view;
     private CompositeSubscription subscriptions = new CompositeSubscription();
+    private OnCompletedAction completedAction = new OnCompletedAction();
+    private OnErrorAction errorAction = new OnErrorAction();
 
     @Inject
     public InventoryPresenter(InventoryService inventoryService) {
@@ -45,17 +48,6 @@ public class InventoryPresenter {
         if (subscriptions.isUnsubscribed()) {
             subscriptions = new CompositeSubscription();
         }
-
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Inventory>() {
-            @Override
-            public void call(Subscriber<? super Inventory> subscriber) {
-                subscriber.onNext(service.ofAccount(anAccountId));
-                subscriber.onCompleted();
-            }
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new OnInventoryAction(), new OnErrorAction()));
 
         subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
                 .subscribeOn(Schedulers.io())
@@ -78,10 +70,25 @@ public class InventoryPresenter {
                                        view.replaceItems(itemBagUpdated.getItemBagUpdated());
                                    }
                                }
-                           }
-
-                        , new OnErrorAction()
+                           }, errorAction
                 ));
+
+        subscriptions.add(Observable.create(new Observable.OnSubscribe<Inventory>() {
+            @Override
+            public void call(Subscriber<? super Inventory> subscriber) {
+                subscriber.onNext(service.ofAccount(anAccountId));
+                subscriber.onCompleted();
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new OnInventoryAction(), errorAction, new Action0() {
+                    @Override
+                    public void call() {
+                        view.showLoading(false);
+                    }
+                }));
+
     }
 
     public void unbindView() {
@@ -107,7 +114,7 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CompletedAction(), new OnErrorAction()));
+                .subscribe(completedAction, errorAction));
     }
 
     public void equipItem(final Item item, final String characterId) {
@@ -119,13 +126,7 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CompletedAction(), new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        throwable.printStackTrace();
-                        view.showError(throwable.getLocalizedMessage());
-                    }
-                }));
+                .subscribe(completedAction, errorAction));
     }
 
     public void refresh(final AccountId anAccountId) {
@@ -139,7 +140,7 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CompletedAction(), new OnErrorAction()));
+                .subscribe(completedAction, errorAction));
     }
 
     public interface InventoryView {
@@ -160,7 +161,7 @@ public class InventoryPresenter {
         void replaceItems(ItemBag itemBagUpdated);
     }
 
-    private class CompletedAction implements Action1<Void> {
+    private class OnCompletedAction implements Action1<Void> {
         @Override
         public void call(Void aVoid) {
             view.showLoading(false);
@@ -180,7 +181,6 @@ public class InventoryPresenter {
         @Override
         public void call(Inventory inventory) {
             view.renderInventory(inventory);
-            view.showLoading(false);
         }
     }
 }
