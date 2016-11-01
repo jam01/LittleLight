@@ -53,6 +53,9 @@ public class UserService {
         destinyService.synchronizeAccountsFor(user);
     }
 
+    public void synchronizeAccount(AccountId anAccountId) {
+        destinyService.synchronizeAccount(user.ofId(anAccountId), user);
+    }
 
     public Observable<DomainEvent> subscribeToUserEvents() {
         return DomainEventPublisher.instanceOf().getEvents()

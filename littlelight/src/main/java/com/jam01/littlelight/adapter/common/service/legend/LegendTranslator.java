@@ -21,7 +21,6 @@ public class LegendTranslator {
         }
 
         return new Legend(newId,
-                newId.withMembershipType() == 1 ? "Xbox Live" : "PlayStation Network",
                 characters,
                 bungieAccount.getGrimoireScore().intValue());
     }
@@ -31,9 +30,10 @@ public class LegendTranslator {
 
         builder.emblemPath(bungieCharacter.getEmblemPath());
         builder.emblemBackgroundPath((bungieCharacter.getBackgroundPath()));
-        builder.level(bungieCharacter.getCharacterLevel().intValue());
-        builder.light(bungieCharacter.getCharacterBase().getPowerLevel().intValue());
+        builder.light(bungieCharacter.getCharacterLevel().intValue());
+        builder.level(bungieCharacter.getCharacterBase().getPowerLevel().intValue());
         builder.defense(bungieCharacter.getCharacterBase().getStats().getSTAT_DEFENSE().getValue().intValue());
+        builder.intellect(bungieCharacter.getCharacterBase().getStats().getSTAT_INTELLECT().getValue().intValue());
         builder.discipline(bungieCharacter.getCharacterBase().getStats().getSTAT_DISCIPLINE().getValue().intValue());
         builder.strength(bungieCharacter.getCharacterBase().getStats().getSTAT_STRENGTH().getValue().intValue());
         builder.armor(bungieCharacter.getCharacterBase().getStats().getSTAT_ARMOR().getValue().intValue());
@@ -43,21 +43,22 @@ public class LegendTranslator {
         switch (bungieCharacter.getCharacterBase().getClassType().intValue()) {
             case 0:
                 builder.className("Titan");
-
+                break;
             case 1:
                 builder.className("Hunter");
-
+                break;
             case 2:
                 builder.className("Warlock");
-
+                break;
         }
 
         switch (bungieCharacter.getCharacterBase().getGenderType().intValue()) {
             case 0:
-                builder.className("Male");
-
+                builder.gender("Male");
+                break;
             case 1:
-                builder.className("Female");
+                builder.gender("Female");
+                break;
         }
 
         return builder.build();

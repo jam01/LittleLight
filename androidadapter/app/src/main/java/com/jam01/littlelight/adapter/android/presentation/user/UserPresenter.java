@@ -1,7 +1,5 @@
 package com.jam01.littlelight.adapter.android.presentation.user;
 
-import android.util.Log;
-
 import com.jam01.littlelight.application.UserService;
 import com.jam01.littlelight.domain.DomainEvent;
 import com.jam01.littlelight.domain.identityaccess.Account;
@@ -26,8 +24,8 @@ public class UserPresenter {
     private final String TAG = this.getClass().getSimpleName();
     private MainView view;
     private UserService service;
-    //    private boolean registeringAccount = false;
     private CompositeSubscription subscriptions = new CompositeSubscription();
+    private OnErrorAction errorAction = new OnErrorAction();
 
     @Inject
     public UserPresenter(final UserService service) {
@@ -63,7 +61,7 @@ public class UserPresenter {
                                    }
                                }
                            }
-                        , new OnErrorAction()
+                        , errorAction
                 ));
 
         subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
@@ -79,12 +77,10 @@ public class UserPresenter {
                     @Override
                     public void call(Void aVoid) {
                     }
-                }, new OnErrorAction()));
+                }, errorAction));
 
         view.setUser(service.getUser());
-        if (service.userAccounts().isEmpty()
-//                && !registeringAccount
-                ) {
+        if (service.userAccounts().isEmpty()) {
             view.showWebSignIn();
         }
     }
@@ -99,13 +95,6 @@ public class UserPresenter {
     }
 
     public void onWebSignInCompleted(final int membershipType, final String[] cookies) {
-        Log.d(TAG, "onWebSignInCompleted: called");
-//        registeringAccount = true;
-
-//        if (subscriptions.isUnsubscribed()) {
-//            subscriptions = new CompositeSubscription();
-//        }
-
         subscriptions.add(Observable.create(new Observable.OnSubscribe<Account>() {
             @Override
             public void call(Subscriber<? super Account> subscriber) {
@@ -122,16 +111,12 @@ public class UserPresenter {
                         view.displayAccount(aVoid);
                         view.showLoading(false);
                     }
-                }, new OnErrorAction()));
+                }, errorAction));
 
         view.showLoading(true);
     }
 
     public void onWebCredentialsUpdated(final AccountId accountId, final String[] cookies) {
-//        if (subscriptions.isUnsubscribed()) {
-//            subscriptions = new CompositeSubscription();
-//        }
-
         subscriptions.add(Observable.create(new Observable.OnSubscribe<Account>() {
             @Override
             public void call(Subscriber<? super Account> subscriber) {
@@ -146,7 +131,7 @@ public class UserPresenter {
                         view.displayAccount(aVoid);
                         view.showLoading(false);
                     }
-                }, new OnErrorAction()));
+                }, errorAction));
         view.showLoading(true);
     }
 
@@ -156,6 +141,8 @@ public class UserPresenter {
         void showWebSignIn();
 
         void setUser(User user);
+
+        void showError(String localizedMessage);
 
         void updateAccount(Account accountUpdated);
 
@@ -172,6 +159,8 @@ public class UserPresenter {
         @Override
         public void call(Throwable throwable) {
             throwable.printStackTrace();
+            view.showError(throwable.getLocalizedMessage());
+            view.showLoading(false);
         }
     }
 }

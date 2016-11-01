@@ -1,5 +1,6 @@
 package com.jam01.littlelight.domain.legend;
 
+import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.Collection;
@@ -11,13 +12,11 @@ import java.util.Map;
  */
 public class Legend {
     private final AccountId id;
-    private final String platform;
     private Map<String, Character> characterMap;
     private int grimoireScore;
 
-    public Legend(AccountId id, String platform, Collection<Character> characters, int grimoireScore) {
+    public Legend(AccountId id, Collection<Character> characters, int grimoireScore) {
         this.id = id;
-        this.platform = platform;
         this.grimoireScore = grimoireScore;
 
         characterMap = new HashMap<>(characters.size());
@@ -34,10 +33,6 @@ public class Legend {
         return id;
     }
 
-    public String onPlatform() {
-        return platform;
-    }
-
     public int withGrimoire() {
         return grimoireScore;
     }
@@ -50,5 +45,7 @@ public class Legend {
         for (Character instance : newState.withCharacters()) {
             characterMap.put(instance.characterId(), instance);
         }
+
+        DomainEventPublisher.instanceOf().publish(new LegendUpdated(this));
     }
 }

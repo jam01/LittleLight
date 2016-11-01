@@ -8,15 +8,21 @@ import com.jam01.littlelight.domain.DomainEventPublisher;
  */
 public class Account {
     private final AccountId accountId;
+    private final String platform;
     private AccountCredentials accountCredentials;
     private String displayName;
     private String profilePath;
 
-    public Account(AccountId accountId, AccountCredentials accountCredentials, String displayName, String profilePath) {
+    public Account(AccountId accountId, AccountCredentials accountCredentials, String displayName, String profilePath, String platform) {
         this.accountId = accountId;
         this.accountCredentials = accountCredentials;
         this.displayName = displayName;
         this.profilePath = profilePath;
+        this.platform = platform;
+    }
+
+    public String onPlatform() {
+        return platform;
     }
 
     public String profilePath() {

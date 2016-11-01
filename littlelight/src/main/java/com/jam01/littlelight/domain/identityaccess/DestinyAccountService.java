@@ -8,4 +8,5 @@ public interface DestinyAccountService {
 
     void synchronizeAccountsFor(User user);
 
+    void synchronizeAccount(Account anAccountId, User user);
 }

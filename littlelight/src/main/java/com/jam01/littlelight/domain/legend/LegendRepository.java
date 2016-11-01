@@ -8,17 +8,14 @@ import java.util.Collection;
  * Created by jam01 on 7/25/16.
  */
 public interface LegendRepository {
-    boolean isEmpty();
 
     Legend ofId(AccountId anAccountId);
 
     boolean hasOfAccount(AccountId anAccountId);
 
-    void save(Legend anLegend);
-
     void addAll(Collection<Legend> legends);
 
-    void remove(Legend anLegend);
+    void remove(AccountId anLegend);
 
     void removeAll();
 

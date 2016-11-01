@@ -268,9 +268,9 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
                               @Override
                               public CharSequence getPageTitle(int position) {
-                                  if (inventory.allItemBags().toArray()[position] instanceof Character) {
+                                  if (bags.get(position) instanceof Character) {
                                       return "Character" + position;
-                                  } else if (inventory.allItemBags().toArray()[position] instanceof Vault) {
+                                  } else if (bags.get(position)  instanceof Vault) {
                                       return "Vault";
                                   } else
                                       return super.getPageTitle(position);

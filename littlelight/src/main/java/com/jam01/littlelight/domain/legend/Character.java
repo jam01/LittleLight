@@ -68,7 +68,10 @@ public class Character {
 
 
     public String name() {
-        return name;
+        if (name == null)
+            return (gender + className);
+        else
+            return name;
     }
 
     public String gender() {

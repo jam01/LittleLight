@@ -52,22 +52,26 @@ public class ACLAccountService implements DestinyAccountService {
         com.bungie.netplatform.destiny.representation.User user = userResponse.getResponse().getUser();
         displayName = user.getDisplayName();
 
-        return new Account(accountId, credentials, displayName, Endpoints.BASE_URL + user.getProfilePicturePath());
+        return new Account(accountId, credentials, displayName, Endpoints.BASE_URL + user.getProfilePicturePath(), membershipType == 2 ? "PlayStation" : "XBOX");
     }
 
     @Override
     public void synchronizeAccountsFor(User user) {
         for (Account instance : user.allRegisteredAccounts()) {
-            BungieResponse<UserResponse> userResponse = destinyApi.getUser(instance.withCredentials().asCookieVal(), instance.withCredentials().xcsrf());
-            if (userResponse.getErrorCode() != 1) {
-                if (userResponse.getErrorCode() == 99) {
-                    DomainEventPublisher.instanceOf().publish(new AccountCredentialsExpired(instance));
-                }
-                throw new IllegalStateException(userResponse.getMessage());
-            }
-
-            com.bungie.netplatform.destiny.representation.User bungieUser = userResponse.getResponse().getUser();
-            user.updateAccount(instance.withId(), bungieUser.getDisplayName(), Endpoints.BASE_URL + bungieUser.getProfilePicturePath());
+            synchronizeAccount(instance, user);
         }
+    }
+
+    @Override
+    public void synchronizeAccount(Account anAccount, User user) {
+        BungieResponse<UserResponse> userResponse = destinyApi.getUser(anAccount.withCredentials().asCookieVal(), anAccount.withCredentials().xcsrf());
+        if (userResponse.getErrorCode() != 1) {
+            if (userResponse.getErrorCode() == 99) {
+                DomainEventPublisher.instanceOf().publish(new AccountCredentialsExpired(anAccount));
+            }
+            throw new IllegalStateException(userResponse.getMessage());
+        }
+        com.bungie.netplatform.destiny.representation.User bungieUser = userResponse.getResponse().getUser();
+        user.updateAccount(anAccount.withId(), bungieUser.getDisplayName(), Endpoints.BASE_URL + bungieUser.getProfilePicturePath());
     }
 }
