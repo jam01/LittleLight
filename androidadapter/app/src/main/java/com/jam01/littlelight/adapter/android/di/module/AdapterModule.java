@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.jam01.littlelight.adapter.android.service.common.RetrofitDestinyApiFacade;
+import com.jam01.littlelight.adapter.android.service.inventory.AndroidLocalDefitionsDbService;
+import com.jam01.littlelight.adapter.common.service.inventory.LocalDefinitionsDbService;
 
 import javax.inject.Singleton;
 
@@ -20,5 +22,11 @@ public class AdapterModule {
     @Singleton
     DestinyApi providesDestinyApi(Context context) {
         return new RetrofitDestinyApiFacade(context);
+    }
+
+    @Provides
+    @Singleton
+    LocalDefinitionsDbService providesLocalDefinitionsDbService(Context context, DestinyApi destinyApi) {
+        return new AndroidLocalDefitionsDbService(context, destinyApi);
     }
 }

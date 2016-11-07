@@ -8,6 +8,7 @@ import com.jam01.littlelight.adapter.common.persistence.inventory.InMemoryInvent
 import com.jam01.littlelight.adapter.common.persistence.legend.InMemoryLegendRepository;
 import com.jam01.littlelight.adapter.common.service.identityaccess.ACLAccountService;
 import com.jam01.littlelight.adapter.common.service.inventory.ACLInventoryService;
+import com.jam01.littlelight.adapter.common.service.inventory.LocalDefinitionsDbService;
 import com.jam01.littlelight.adapter.common.service.legend.ACLLegendService;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
@@ -35,8 +36,8 @@ public class DomainModule {
 
     @Provides
     @Singleton
-    DestinyInventoryService providesDestinyInventoryService(DestinyApi destinyApi) {
-        return new ACLInventoryService(destinyApi);
+    DestinyInventoryService providesDestinyInventoryService(DestinyApi destinyApi, LocalDefinitionsDbService localDefinitionsDbService) {
+        return new ACLInventoryService(destinyApi, localDefinitionsDbService);
     }
 
     @Provides

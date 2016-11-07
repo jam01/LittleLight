@@ -4,13 +4,11 @@ import com.bungie.netplatform.destiny.representation.Account;
 import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.CharacterInventory;
 import com.bungie.netplatform.destiny.representation.DataResponse;
-import com.bungie.netplatform.destiny.representation.ItemDefinition;
-import com.bungie.netplatform.destiny.representation.ItemInstance;
 import com.bungie.netplatform.destiny.representation.UserResponse;
 import com.bungie.netplatform.destiny.representation.Vault;
 import com.google.gson.JsonObject;
 
-import java.util.List;
+import java.io.InputStream;
 
 /**
  * Created by jam01 on 8/10/16.
@@ -32,7 +30,7 @@ public interface DestinyApi {
 
     BungieResponse<JsonObject> latestManifestUrl();
 
-//    ResponseBody manifestDb(String manifestUrl);
+    InputStream zippedManifest(String manifestUrl);
 
-    List<ItemDefinition> getDefinitionsFor(List<ItemInstance> instanceList);
+//    List<ItemDefinition> getDefinitionsFor(List<ItemInstance> instanceList);
 }

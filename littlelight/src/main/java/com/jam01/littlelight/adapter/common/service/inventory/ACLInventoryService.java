@@ -28,9 +28,11 @@ import java.util.List;
  */
 public class ACLInventoryService implements DestinyInventoryService {
     private final DestinyApi destinyApi;
+    private final LocalDefinitionsDbService definitionsService;
 
-    public ACLInventoryService(DestinyApi destinyApi1) {
+    public ACLInventoryService(DestinyApi destinyApi1, LocalDefinitionsDbService localDefinitionsDbService) {
         this.destinyApi = destinyApi1;
+        this.definitionsService = localDefinitionsDbService;
     }
 
     @Override
@@ -88,7 +90,7 @@ public class ACLInventoryService implements DestinyInventoryService {
                 instances.addAll(itemList.getItems());
             }
 
-            definitions = destinyApi.getDefinitionsFor(instances);
+            definitions = definitionsService.getDefinitionsFor(instances);
 
             characters.add(translator.characterFrom(characterId, definitions, instances, anAccountId));
 
@@ -109,7 +111,7 @@ public class ACLInventoryService implements DestinyInventoryService {
             instances.addAll(bungieItems.getItems());
         }
 
-        definitions = destinyApi.getDefinitionsFor(instances);
+        definitions = definitionsService.getDefinitionsFor(instances);
 
         vault = translator.vaultFrom(definitions, instances, anAccountId);
 
