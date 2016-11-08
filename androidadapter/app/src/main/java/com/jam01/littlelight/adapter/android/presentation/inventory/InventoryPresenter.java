@@ -121,7 +121,7 @@ public class InventoryPresenter {
         subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
             @Override
             public void call(Subscriber<? super Void> subscriber) {
-                service.equipItem(item.getItemInstanceId(), characterId);
+                service.equipItem(item.getBungieItemInstanceId(), characterId);
             }
         })
                 .subscribeOn(Schedulers.io())

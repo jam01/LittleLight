@@ -80,4 +80,16 @@ public class Inventory {
     public Vault vault() {
         return vault;
     }
+
+    public List<Item> getExotics() {
+        List<Item> exoticsList = new ArrayList<>();
+        for (ItemBag bag : allItemBags()) {
+            for (Item item : bag.items()) {
+                if (item.getTierType().equals("Exotic")) {
+                    exoticsList.add(item);
+                }
+            }
+        }
+        return exoticsList;
+    }
 }

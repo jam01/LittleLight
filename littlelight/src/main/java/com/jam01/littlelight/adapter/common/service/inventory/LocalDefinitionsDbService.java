@@ -10,4 +10,6 @@ import java.util.List;
  */
 public interface LocalDefinitionsDbService {
     public List<ItemDefinition> getDefinitionsFor(List<ItemInstance> instanceList);
+
+    List<ItemDefinition> getExoticDefinitions();
 }

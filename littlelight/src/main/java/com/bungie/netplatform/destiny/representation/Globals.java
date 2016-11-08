@@ -9,6 +9,7 @@ import java.util.Map;
 public class Globals {
     public static final HashMap<Long, String> buckets = new HashMap<>(16);
     public static final HashMap<Integer, String> damageTypes = new HashMap<>(5);
+    public static final HashMap<Long, String> classTypes = new HashMap<>(3);
 
     static {
         buckets.put(0L, "All");
@@ -39,6 +40,12 @@ public class Globals {
         damageTypes.put(3, "Solar");
         damageTypes.put(4, "Void");
         damageTypes.put(9, "All");
+    }
+
+    static {
+        classTypes.put(1L, "Hunter");
+        classTypes.put(0L, "Titan");
+        classTypes.put(2L, "Warlock");
     }
 
     public static Object getKeyFromValue(Map hm, Object value) {

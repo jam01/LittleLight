@@ -144,8 +144,8 @@ public class ACLInventoryService implements DestinyInventoryService {
         if (toBag instanceof Vault) {
             BungieResponse<Integer> transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
-                            String.valueOf(item.getItemHash()),
-                            item.getItemInstanceId(),
+                            String.valueOf(item.getBungieItemHash()),
+                            item.getBungieItemInstanceId(),
                             item.getStackSize(),
                             ((Character) fromBag).characterId(),
                             true),
@@ -160,8 +160,8 @@ public class ACLInventoryService implements DestinyInventoryService {
         } else if (fromBag instanceof Vault) {
             BungieResponse<Integer> transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
-                            String.valueOf(item.getItemHash()),
-                            item.getItemInstanceId(),
+                            String.valueOf(item.getBungieItemHash()),
+                            item.getBungieItemInstanceId(),
                             item.getStackSize(),
                             ((Character) toBag).characterId(),
                             false),
@@ -178,8 +178,8 @@ public class ACLInventoryService implements DestinyInventoryService {
 
             BungieResponse<Integer> transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
-                            String.valueOf(item.getItemHash()),
-                            item.getItemInstanceId(),
+                            String.valueOf(item.getBungieItemHash()),
+                            item.getBungieItemInstanceId(),
                             item.getStackSize(),
                             ((Character) fromBag).characterId(),
                             true),
@@ -194,8 +194,8 @@ public class ACLInventoryService implements DestinyInventoryService {
 
             transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
-                            String.valueOf(item.getItemHash()),
-                            item.getItemInstanceId(),
+                            String.valueOf(item.getBungieItemHash()),
+                            item.getBungieItemInstanceId(),
                             item.getStackSize(),
                             ((Character) toBag).characterId(),
                             false),
@@ -213,10 +213,10 @@ public class ACLInventoryService implements DestinyInventoryService {
     public boolean equip(String anItemId, Character onCharacter, Account anAccount) {
         Item item = onCharacter.itemOfId(anItemId);
         for (Item instance : onCharacter.items()) {
-            if (instance.isEquipped() && (instance.getBucketTypeHash() == item.getBucketTypeHash())) {
+            if (instance.isEquipped() && (instance.getBungieBucketTypeHash() == item.getBungieBucketTypeHash())) {
                 BungieResponse<Integer> equipResponse = destinyApi.equipItem(
                         new EquipCommand(anAccount.withId().withMembershipType(),
-                                item.getItemInstanceId(),
+                                item.getBungieItemInstanceId(),
                                 onCharacter.characterId()),
                         anAccount.withCredentials().asCookieVal(),
                         anAccount.withCredentials().xcsrf());
@@ -236,10 +236,10 @@ public class ACLInventoryService implements DestinyInventoryService {
     public boolean unequip(String anItemId, Character onCharacter, Account anAccount) {
         Item item = onCharacter.itemOfId(anItemId);
         for (Item instance : onCharacter.items()) {
-            if (instance != item && (instance.getBucketTypeHash() == item.getBucketTypeHash()) && instance.getTierType() < 6) {
+            if (instance != item && (instance.getBungieBucketTypeHash() == item.getBungieBucketTypeHash()) && !instance.getTierType().equals("Exotic")) {
                 BungieResponse<Integer> equipResponse = destinyApi.equipItem(
                         new EquipCommand(anAccount.withId().withMembershipType(),
-                                instance.getItemInstanceId(),
+                                instance.getBungieItemInstanceId(),
                                 onCharacter.characterId()),
                         anAccount.withCredentials().asCookieVal(),
                         anAccount.withCredentials().xcsrf());

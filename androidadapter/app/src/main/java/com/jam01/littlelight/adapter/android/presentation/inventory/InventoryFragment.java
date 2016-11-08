@@ -222,11 +222,11 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                                           title.setText(selectedItem.getItemName());
 
                                                           switch (selectedItem.getItemType()) {
-                                                              case 2:
+                                                              case "Armor":
                                                                   second.setText("Defense: " + selectedItem.getDamage());
                                                                   second.setVisibility(View.VISIBLE);
                                                                   break;
-                                                              case 3:
+                                                              case "Weapon":
                                                                   second.setText("Attack: " + selectedItem.getDamage());
                                                                   second.setVisibility(View.VISIBLE);
                                                                   third.setText("Damage Type: ");
@@ -236,10 +236,10 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                                           }
 
                                                           switch (selectedItem.getTierType()) {
-                                                              case 5:
+                                                              case "Legendary":
                                                                   title.setBackgroundColor(0xff5a1bff);
                                                                   break;
-                                                              case 6:
+                                                              case "Exotic":
                                                                   title.setBackgroundColor(0xffffb200);
                                                                   break;
                                                           }

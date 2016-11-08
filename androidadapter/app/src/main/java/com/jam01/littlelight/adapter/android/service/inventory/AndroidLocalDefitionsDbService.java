@@ -82,6 +82,31 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
         return definitions;
     }
 
+    @Override
+    public List<ItemDefinition> getExoticDefinitions() {
+        List<ItemDefinition> definitions = new ArrayList<>();
+        try {
+            SQLiteDatabase definitionsDb = database.get();
+            Cursor resultSet = definitionsDb.rawQuery("SELECT json FROM DestinyInventoryItemDefinition",
+                    null);
+            while (resultSet.moveToNext()) {
+                ItemDefinition tmp = gson.fromJson(resultSet.getString(0), ItemDefinition.class);
+                if (tmp.getTierType() == 6 && (tmp.getItemType() == 2 || tmp.getItemType() == 3) && !tmp.getItemName().equals("Exotic Engram") && !tmp.getItemName().contains("###")) {
+                    definitions.add(tmp);
+                }
+            }
+            resultSet.close();
+//            definitionsDb.close();
+        } catch (SQLiteException exception) {
+            throw new IllegalStateException(exception.getMessage(), exception);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return definitions;
+    }
+
     private boolean hasDb(String databaseName) {
         //See http://stackoverflow.com/questions/3386667/query-if-android-database-exists
         SQLiteDatabase checkDB;

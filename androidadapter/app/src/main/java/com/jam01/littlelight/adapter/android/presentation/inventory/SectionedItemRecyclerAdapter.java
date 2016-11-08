@@ -38,7 +38,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         Collections.sort(items, new Comparator<Item>() {
             @Override
             public int compare(Item inventoryItem, Item inventoryItem2) {
-                return ((Long) inventoryItem.getBucketTypeHash()).compareTo(inventoryItem2.getBucketTypeHash());
+                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
             }
         });
         mContext = context;
@@ -47,7 +47,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         if (!items.isEmpty()) {
             headerPositions.add(0);
             for (int i = 1; i < mItems.size(); i++) {
-                if (mItems.get(i).getBucketTypeHash() != mItems.get(i - 1).getBucketTypeHash()) {
+                if (mItems.get(i).getBungieBucketTypeHash() != mItems.get(i - 1).getBungieBucketTypeHash()) {
                     headerPositions.add(i + headerPositions.size());
                 }
             }
@@ -76,7 +76,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         if (isPositionHeader(position)) {
-            ((HeaderViewHolder) viewHolder).mTextView.setText(Globals.buckets.get(mItems.get(positionToItemPosition(position)).getBucketTypeHash()));
+            ((HeaderViewHolder) viewHolder).mTextView.setText(Globals.buckets.get(mItems.get(positionToItemPosition(position)).getBungieBucketTypeHash()));
         } else {
             ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
             ImageView icon = itemViewHolder.imageView;
@@ -85,7 +85,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
 
             Item item = mItems.get(positionToItemPosition(position));
             Picasso.with(mContext)
-                    .load(item.getIcon())
+                    .load(item.getIconUrl())
                     .resize(90, 90)
                     .placeholder(R.mipmap.ic_launcher)
                     .centerCrop()
@@ -130,7 +130,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         int position = itemPosition;
         for (int headerPosition : headerPositions) {
             position++;
-            if (mItems.get(positionToItemPosition(headerPosition + 1)).getBucketTypeHash() == mItems.get(itemPosition).getBucketTypeHash()) {
+            if (mItems.get(positionToItemPosition(headerPosition + 1)).getBungieBucketTypeHash() == mItems.get(itemPosition).getBungieBucketTypeHash()) {
                 break;
             }
         }
@@ -188,7 +188,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         //Find where to add the item
         for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
             int headerPosition = headerPositions.get(i1);
-            if (getItem(headerPosition + 1).getBucketTypeHash() == itemToAdd.getBucketTypeHash()) {
+            if (getItem(headerPosition + 1).getBungieBucketTypeHash() == itemToAdd.getBungieBucketTypeHash()) {
                 itemToAddPos = headerPosition + 1;
             }
         }
@@ -244,14 +244,14 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         Collections.sort(newItems, new Comparator<Item>() {
             @Override
             public int compare(Item inventoryItem, Item inventoryItem2) {
-                return ((Long) inventoryItem.getBucketTypeHash()).compareTo(inventoryItem2.getBucketTypeHash());
+                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
             }
         });
         mItems = newItems;
         if (!newItems.isEmpty()) {
             headerPositions.add(0);
             for (int i = 1; i < mItems.size(); i++) {
-                if (mItems.get(i).getBucketTypeHash() != mItems.get(i - 1).getBucketTypeHash()) {
+                if (mItems.get(i).getBungieBucketTypeHash() != mItems.get(i - 1).getBungieBucketTypeHash()) {
                     headerPositions.add(i + headerPositions.size());
                 }
             }

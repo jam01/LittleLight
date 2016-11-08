@@ -31,6 +31,4 @@ public interface DestinyApi {
     BungieResponse<JsonObject> latestManifestUrl();
 
     InputStream zippedManifest(String manifestUrl);
-
-//    List<ItemDefinition> getDefinitionsFor(List<ItemInstance> instanceList);
 }
