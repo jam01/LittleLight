@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
+import com.jam01.littlelight.adapter.android.presentation.inventory.ExoticsFragment;
 import com.jam01.littlelight.adapter.android.presentation.inventory.InventoryFragment;
 import com.jam01.littlelight.adapter.android.presentation.legend.LegendFragment;
 import com.jam01.littlelight.domain.identityaccess.Account;
@@ -181,6 +182,11 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.account_frame, LegendFragment.newInstance(accountSelectedId))
+                        .commit();
+            case R.id.nav_exotics:
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.account_frame, ExoticsFragment.newInstance(accountSelectedId))
                         .commit();
         }
 

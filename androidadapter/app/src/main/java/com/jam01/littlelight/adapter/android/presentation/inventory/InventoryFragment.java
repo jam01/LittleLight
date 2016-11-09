@@ -172,7 +172,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
                               @Override
                               public Object instantiateItem(ViewGroup container, int position) {
-
                                   RecyclerView recyclerView = new RecyclerView(getContext());
                                   final SectionedItemRecyclerAdapter testAdapter =
                                           new SectionedItemRecyclerAdapter(new ArrayList<>(bags.get(position).items()), getContext());
@@ -183,7 +182,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                       float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
                                       noOfColumns = (int) (dpWidth / 90);
                                   }
-
 
                                   GridLayoutManager gridManager = new GridLayoutManager(getContext(), noOfColumns);
                                   gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {

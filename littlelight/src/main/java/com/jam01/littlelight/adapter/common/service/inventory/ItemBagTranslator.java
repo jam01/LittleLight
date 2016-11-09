@@ -35,15 +35,12 @@ public class ItemBagTranslator {
         //We build our item if both params are != null and they represent the same item
         //TODO: consider using illegalArgumentExceptions
         if (instance != null && definition != null && (instance.getItemHash().equals(definition.getItemHash()))) {
-            ItemType itemType = new ItemType(definition.getItemHash(), definition.getItemName(), definition.getBucketTypeHash(),
-                    definition.getMaxStackSize().intValue(), "https://www.bungie.net" + definition.getIcon(), definition.getTierTypeName(),
-                    Globals.classTypes.get(definition.getClassType()), definition.getEquippable(), Globals.buckets.get(definition.getBucketTypeHash()),
-                    definition.getItemTypeName());
+
 
             Item.Builder builder = new Item.Builder(
                     instance.getItemInstanceId() + "-" + instance.getItemHash(),
                     instance.getItemInstanceId(),
-                    itemType)
+                    transform(definition))
                     .stackSize(instance.getStackSize().intValue())
                     .isEquipped(instance.getIsEquipped())
                     .isGridComplete(instance.getIsGridComplete())
@@ -55,52 +52,14 @@ public class ItemBagTranslator {
                         .maxDamage(instance.getPrimaryStat().getMaximumValue().intValue());
             }
 
-            // Setting Materials as itemType 10
-            // See http://pastebin.com/Hy5ghZv1 line 552
-//            if (definition.getBucketTypeHash().equals(3865314626L)) {
-//                builder.itemType(10);
-//            } else {
-//                builder.itemType(definition.getItemType().intValue());
-//            }
-
             item = builder.build();
         } else {
             System.out.println("Something went wrong!");
         }
 
-        System.out.println(item.getItemName() + "|" + definition.getItemType());
-
         return item;
     }
 
-//    private Item transform(ItemDefinition definition) {
-//        Item item;
-//        Item.Builder builder = new Item.Builder(
-//                "-" + definition.getBungieItemHash(),
-//                "",
-//                definition.getBungieItemHash(),
-//                definition.getItemName(),
-//                definition.getBucketTypeHash())
-//                .stackSize(definition.getMaxStackSize().intValue())
-//                .maxStackSize(definition.getMaxStackSize().intValue())
-//                .icon("https://www.bungie.net" + definition.getIcon())
-//                .isEquipped(false)
-//                .tierType(definition.getTierType().intValue())
-//                .isGridComplete(true)
-//                .classType(definition.getClassType().intValue());
-//
-//        // Setting Materials as itemType 10
-//        // See http://pastebin.com/Hy5ghZv1 line 552
-//        if (definition.getBucketTypeHash().equals(3865314626L)) {
-//            builder.itemType(10);
-//        } else {
-//            builder.itemType(definition.getItemType().intValue());
-//        }
-//
-//        item = builder.build();
-//
-//        return item;
-//    }
 
     private Collection<Item> transform(List<ItemDefinition> definitions, List<ItemInstance> instances) {
         if (definitions.size() != instances.size()) {
@@ -108,11 +67,25 @@ public class ItemBagTranslator {
         }
         Collection<Item> items = new ArrayList<>(definitions.size());
         for (int i = 0; i < instances.size(); i++) {
-//            if (instances.get(i).getBungieItemHash().equals(2254123540L))
-//                System.out.println("Debugging");
             items.add(transform(definitions.get(i), instances.get(i)));
         }
         return items;
+    }
+
+    public ItemType transform(ItemDefinition definition) {
+        return new ItemType(definition.getItemHash(), definition.getItemName(), definition.getBucketTypeHash(),
+                definition.getMaxStackSize().intValue(), "https://www.bungie.net" + definition.getIcon(), definition.getTierTypeName(),
+                Globals.classTypes.get(definition.getClassType()), definition.getEquippable(), Globals.buckets.get(definition.getBucketTypeHash()),
+                definition.getItemTypeName());
+    }
+
+    public Collection<ItemType> transform(List<ItemDefinition> definitions) {
+        List<ItemType> list = new ArrayList<>(definitions.size());
+        for (ItemDefinition instance :
+                definitions) {
+            list.add(transform(instance));
+        }
+        return list;
     }
 
 }

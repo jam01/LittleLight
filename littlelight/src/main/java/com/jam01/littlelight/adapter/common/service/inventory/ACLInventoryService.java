@@ -18,9 +18,11 @@ import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.InventoryRepository;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
+import com.jam01.littlelight.domain.inventory.ItemType;
 import com.jam01.littlelight.domain.inventory.Vault;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -252,5 +254,11 @@ public class ACLInventoryService implements DestinyInventoryService {
             }
         }
         return false;
+    }
+
+    @Override
+    public Collection<ItemType> getExoticTypes() {
+        ItemBagTranslator translator = new ItemBagTranslator();
+        return translator.transform(definitionsService.getExoticDefinitions());
     }
 }

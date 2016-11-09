@@ -42,7 +42,6 @@ public class InventoryPresenter {
         this.view = inventoryView;
     }
 
-
     public void onStart(final AccountId anAccountId) {
         view.showLoading(true);
         if (subscriptions.isUnsubscribed()) {

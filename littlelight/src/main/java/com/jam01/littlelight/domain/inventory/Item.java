@@ -105,7 +105,7 @@ public class Item {
     }
 
     public long getBungieBucketTypeHash() {
-        return itemType.getBucketTypeHash();
+        return itemType.getBungieBucketTypeHash();
     }
 
     public String getTierType() {

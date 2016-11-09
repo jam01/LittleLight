@@ -35,6 +35,7 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
     private final DestinyApi bungieApi;
     private final String TAG = this.getClass().getSimpleName();
     private Future<SQLiteDatabase> database;
+    private List<ItemDefinition> exotics;
     private Gson gson = new Gson();
 
     public AndroidLocalDefitionsDbService(Context context, DestinyApi destinyApi) {
@@ -84,27 +85,29 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
 
     @Override
     public List<ItemDefinition> getExoticDefinitions() {
-        List<ItemDefinition> definitions = new ArrayList<>();
-        try {
-            SQLiteDatabase definitionsDb = database.get();
-            Cursor resultSet = definitionsDb.rawQuery("SELECT json FROM DestinyInventoryItemDefinition",
-                    null);
-            while (resultSet.moveToNext()) {
-                ItemDefinition tmp = gson.fromJson(resultSet.getString(0), ItemDefinition.class);
-                if (tmp.getTierType() == 6 && (tmp.getItemType() == 2 || tmp.getItemType() == 3) && !tmp.getItemName().equals("Exotic Engram") && !tmp.getItemName().contains("###")) {
-                    definitions.add(tmp);
+        if (exotics == null) {
+            exotics = new ArrayList<>();
+            try {
+                SQLiteDatabase definitionsDb = database.get();
+                Cursor resultSet = definitionsDb.rawQuery("SELECT json FROM DestinyInventoryItemDefinition",
+                        null);
+                while (resultSet.moveToNext()) {
+                    ItemDefinition tmp = gson.fromJson(resultSet.getString(0), ItemDefinition.class);
+                    if (tmp.getTierType() == 6 && (tmp.getItemType() == 2 || tmp.getItemType() == 3) && !tmp.getItemName().equals("Exotic Engram") && !tmp.getItemName().contains("###")) {
+                        exotics.add(tmp);
+                    }
                 }
-            }
-            resultSet.close();
+                resultSet.close();
 //            definitionsDb.close();
-        } catch (SQLiteException exception) {
-            throw new IllegalStateException(exception.getMessage(), exception);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+            } catch (SQLiteException exception) {
+                throw new IllegalStateException(exception.getMessage(), exception);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
-        return definitions;
+        return exotics;
     }
 
     private boolean hasDb(String databaseName) {

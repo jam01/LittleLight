@@ -6,7 +6,7 @@ package com.jam01.littlelight.domain.inventory;
 public class ItemType {
     private final long bungieItemHash;
     private final String itemName;
-    private final long bucketTypeHash;
+    private final long bungieBucketTypeHash;
     private final int maxStackSize;
     private final String iconPath;
     private final String tierType;
@@ -15,10 +15,10 @@ public class ItemType {
     private final String itemType;
     private final String itemSubType;
 
-    public ItemType(long bungieItemHash, String itemName, long bucketTypeHash, int maxStackSize, String iconPath, String tierType, String classType, boolean isEquippable, String itemType, String itemSubType) {
+    public ItemType(long bungieItemHash, String itemName, long bungieBucketTypeHash, int maxStackSize, String iconPath, String tierType, String classType, boolean isEquippable, String itemType, String itemSubType) {
         this.bungieItemHash = bungieItemHash;
         this.itemName = itemName;
-        this.bucketTypeHash = bucketTypeHash;
+        this.bungieBucketTypeHash = bungieBucketTypeHash;
         this.maxStackSize = maxStackSize;
         this.iconPath = iconPath;
         this.tierType = tierType;
@@ -36,8 +36,8 @@ public class ItemType {
         return itemName;
     }
 
-    public long getBucketTypeHash() {
-        return bucketTypeHash;
+    public long getBungieBucketTypeHash() {
+        return bungieBucketTypeHash;
     }
 
     public int getMaxStackSize() {
