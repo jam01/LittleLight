@@ -17,8 +17,9 @@ import com.jam01.littlelight.domain.inventory.ItemType;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
-import rx.functions.Func1;
+import io.reactivex.Observable;
+import io.reactivex.functions.Predicate;
+
 
 /**
  * Created by jam01 on 7/25/16.
@@ -71,9 +72,9 @@ public class InventoryService {
 
     public Observable<DomainEvent> subscribeToInventoryEvents(final AccountId subscriberAccountId) {
         return DomainEventPublisher.instanceOf().getEvents()
-                .filter(new Func1<DomainEvent, Boolean>() {
+                .filter(new Predicate<DomainEvent>() {
                     @Override
-                    public Boolean call(DomainEvent domainEvent) {
+                    public boolean test(DomainEvent domainEvent) throws Exception {
                         if (domainEvent instanceof ItemTransferred)
                             return (((ItemTransferred) domainEvent).onAccountId().equals(subscriberAccountId)
                                     || ((ItemTransferred) domainEvent).onAccountId().equals(subscriberAccountId));

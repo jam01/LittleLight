@@ -6,13 +6,11 @@ import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by jam01 on 11/8/16.
@@ -21,9 +19,9 @@ public class ExoticsPresenter {
     private final String TAG = getClass().getSimpleName();
     private InventoryService service;
     private ExoticsView view;
-    private CompositeSubscription subscriptions = new CompositeSubscription();
-    private OnCompletedAction completedAction = new OnCompletedAction();
+    private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
+    private OnExoticsAction exoticsAction = new OnExoticsAction();
 
     @Inject
     public ExoticsPresenter(InventoryService inventoryService) {
@@ -38,37 +36,29 @@ public class ExoticsPresenter {
     public void unbindView() {
         view.showLoading(false);
         view = null;
-        if (!subscriptions.isUnsubscribed()) {
-            subscriptions.unsubscribe();
+        if (!subscriptions.isDisposed()) {
+            subscriptions.dispose();
         }
     }
 
     public void onStart(final AccountId accountId) {
         view.showLoading(true);
-        if (subscriptions.isUnsubscribed()) {
-            subscriptions = new CompositeSubscription();
+        if (subscriptions.isDisposed()) {
+            subscriptions = new CompositeDisposable();
         }
 
         // TODO: 11/8/16 Make this a zip rx
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<ExoticsDPO>() {
-            @Override
-            public void call(Subscriber<? super ExoticsDPO> subscriber) {
-                subscriber.onNext(new ExoticsDPO(service.exoticsOf(accountId), service.exotics()));
-                subscriber.onCompleted();
-            }
-        })
+        subscriptions.add(Single.defer(() -> Single.just(new ExoticsDPO(service.exoticsOf(accountId), service.exotics())))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new OnExoticsAction(), errorAction, new Action0() {
-                    @Override
-                    public void call() {
-                        view.showLoading(false);
-                    }
-                }));
+                .subscribe(exoticsAction, errorAction));
     }
 
     public void refresh(AccountId accountId) {
-
+        subscriptions.add(Single.defer(() -> Single.just(new ExoticsDPO(service.exoticsOf(accountId), service.exotics())))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(exoticsAction, errorAction));
     }
 
     public interface ExoticsView {
@@ -80,26 +70,20 @@ public class ExoticsPresenter {
         void showError(String message);
     }
 
-    private class OnCompletedAction implements Action1<Void> {
+    private class OnExoticsAction implements Consumer<ExoticsDPO> {
         @Override
-        public void call(Void aVoid) {
+        public void accept(ExoticsDPO account) {
+            view.renderExotics(account);
             view.showLoading(false);
         }
     }
 
-    private class OnErrorAction implements Action1<Throwable> {
+    private class OnErrorAction implements Consumer<Throwable> {
         @Override
-        public void call(Throwable throwable) {
+        public void accept(Throwable throwable) throws Exception {
             throwable.printStackTrace();
             view.showError(throwable.getLocalizedMessage());
             view.showLoading(false);
-        }
-    }
-
-    private class OnExoticsAction implements Action1<ExoticsDPO> {
-        @Override
-        public void call(ExoticsDPO items) {
-            view.renderExotics(items);
         }
     }
 }

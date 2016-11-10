@@ -1,20 +1,18 @@
 package com.jam01.littlelight.adapter.android.presentation.legend;
 
 import com.jam01.littlelight.application.LegendService;
-import com.jam01.littlelight.domain.DomainEvent;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.legend.Legend;
 import com.jam01.littlelight.domain.legend.LegendUpdated;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by jam01 on 9/5/16.
@@ -23,9 +21,9 @@ public class LegendPresenter {
     private final String TAG = getClass().getSimpleName();
     private LegendService service;
     private LegendView view;
-    private CompositeSubscription subscriptions = new CompositeSubscription();
-    private OnCompletedAction completedAction = new OnCompletedAction();
+    private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
+    private OnLegendAction legendAction = new OnLegendAction();
 
     @Inject
     public LegendPresenter(LegendService legendService) {
@@ -38,61 +36,40 @@ public class LegendPresenter {
 
     public void onStart(final AccountId anAccountId) {
         view.showLoading(true);
-        if (subscriptions.isUnsubscribed()) {
-            subscriptions = new CompositeSubscription();
+        if (subscriptions.isDisposed()) {
+            subscriptions = new CompositeDisposable();
         }
 
         subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<DomainEvent>() {
-                               @Override
-                               public void call(DomainEvent domainEvent) {
-                                   if (domainEvent instanceof LegendUpdated) {
-                                       view.renderLegend(((LegendUpdated) domainEvent).getLegendUpdated());
-                                   }
-                               }
-                           }, errorAction
-                ));
+                .subscribe(domainEvent -> {
+                    if (domainEvent instanceof LegendUpdated) {
+                        view.renderLegend(((LegendUpdated) domainEvent).getLegendUpdated());
+                    }
+                }, errorAction));
 
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Legend>() {
-            @Override
-            public void call(Subscriber<? super Legend> subscriber) {
-                subscriber.onNext(service.ofAccount(anAccountId));
-                subscriber.onCompleted();
-            }
-        })
+
+        subscriptions.add(Single.defer(() -> Single.just(service.ofAccount(anAccountId)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new OnLegendAction(), errorAction, new Action0() {
-                    @Override
-                    public void call() {
-                        view.showLoading(false);
-                    }
-                }));
-
+                .subscribe(legendAction, errorAction));
     }
 
     public void unbindView() {
         view.showLoading(false);
         view = null;
-        if (!subscriptions.isUnsubscribed()) {
-            subscriptions.unsubscribe();
+        if (!subscriptions.isDisposed()) {
+            subscriptions.dispose();
         }
     }
 
     public void refresh(final AccountId anAccountId) {
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                service.synchronizeLegendOf(anAccountId);
-                subscriber.onNext(null);
-                subscriber.onCompleted();
-            }
-        })
+        subscriptions.add(Completable.fromAction(() -> service.synchronizeLegendOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(completedAction, errorAction));
+                .subscribe(() -> view.showLoading(false), errorAction));
+
     }
 
     public interface LegendView {
@@ -103,26 +80,20 @@ public class LegendPresenter {
         void showError(String localizedMessage);
     }
 
-    private class OnCompletedAction implements Action1<Void> {
+    private class OnLegendAction implements Consumer<Legend> {
         @Override
-        public void call(Void aVoid) {
+        public void accept(Legend account) {
+            view.renderLegend(account);
             view.showLoading(false);
         }
     }
 
-    private class OnErrorAction implements Action1<Throwable> {
+    private class OnErrorAction implements Consumer<Throwable> {
         @Override
-        public void call(Throwable throwable) {
+        public void accept(Throwable throwable) throws Exception {
             throwable.printStackTrace();
             view.showError(throwable.getLocalizedMessage());
             view.showLoading(false);
-        }
-    }
-
-    private class OnLegendAction implements Action1<Legend> {
-        @Override
-        public void call(Legend legend) {
-            view.renderLegend(legend);
         }
     }
 }

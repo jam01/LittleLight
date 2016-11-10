@@ -1,7 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.user;
 
 import com.jam01.littlelight.application.UserService;
-import com.jam01.littlelight.domain.DomainEvent;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentialsExpired;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -10,12 +9,12 @@ import com.jam01.littlelight.domain.identityaccess.User;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by jam01 on 9/23/16.
@@ -24,7 +23,7 @@ public class UserPresenter {
     private final String TAG = this.getClass().getSimpleName();
     private MainView view;
     private UserService service;
-    private CompositeSubscription subscriptions = new CompositeSubscription();
+    private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
 
     @Inject
@@ -37,46 +36,33 @@ public class UserPresenter {
     }
 
     public void unbindView() {
+        view.showLoading(false);
         view = null;
-        if (!subscriptions.isUnsubscribed()) {
-            subscriptions.unsubscribe();
+        if (!subscriptions.isDisposed()) {
+            subscriptions.dispose();
         }
     }
 
     public void onStart() {
-        if (subscriptions.isUnsubscribed()) {
-            subscriptions = new CompositeSubscription();
+        if (subscriptions.isDisposed()) {
+            subscriptions = new CompositeDisposable();
         }
 
         subscriptions.add(service.subscribeToUserEvents()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<DomainEvent>() {
-                               @Override
-                               public void call(DomainEvent domainEvent) {
-                                   if (domainEvent instanceof AccountUpdated) {
-                                       view.updateAccount(((AccountUpdated) domainEvent).getAccountUpdated());
-                                   } else if (domainEvent instanceof AccountCredentialsExpired) {
-                                       view.showWebSignInForUpdatingCredentials(((AccountCredentialsExpired) domainEvent).getExpiredAccount().withId());
-                                   }
-                               }
-                           }
-                        , errorAction
-                ));
+                .subscribe(domainEvent -> {
+                    if (domainEvent instanceof AccountUpdated) {
+                        view.updateAccount(((AccountUpdated) domainEvent).getAccountUpdated());
+                    } else if (domainEvent instanceof AccountCredentialsExpired) {
+                        view.showWebSignInForUpdatingCredentials(((AccountCredentialsExpired) domainEvent).getExpiredAccount().withId());
+                    }
+                }, errorAction));
 
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                service.synchronizeUserAccounts();
-                subscriber.onCompleted();
-            }
-        })
+        subscriptions.add(Completable.fromAction(() -> service.synchronizeUserAccounts())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                    }
+                .subscribe(() -> {
                 }, errorAction));
 
         view.setUser(service.getUser());
@@ -95,42 +81,23 @@ public class UserPresenter {
     }
 
     public void onWebSignInCompleted(final int membershipType, final String[] cookies) {
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Account>() {
-            @Override
-            public void call(Subscriber<? super Account> subscriber) {
-                subscriber.onNext(service.registerFromCredentials(membershipType, cookies));
-                subscriber.onCompleted();
-            }
-        })
+        subscriptions.add(Single.defer(() -> Single.just(service.registerFromCredentials(membershipType, cookies)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Account>() {
-                    @Override
-                    public void call(Account aVoid) {
-                        view.addAccount(aVoid);
-                        view.displayAccount(aVoid);
-                        view.showLoading(false);
-                    }
+                .subscribe(account -> {
+                    view.addAccount(account);
+                    view.displayAccount(account);
+                    view.showLoading(false);
                 }, errorAction));
-
         view.showLoading(true);
     }
 
     public void onWebCredentialsUpdated(final AccountId accountId, final String[] cookies) {
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Account>() {
-            @Override
-            public void call(Subscriber<? super Account> subscriber) {
-                service.updateCredentials(accountId, cookies);
-            }
-        })
+        subscriptions.add(Completable.fromAction(() -> service.updateCredentials(accountId, cookies))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Account>() {
-                    @Override
-                    public void call(Account aVoid) {
-                        view.displayAccount(aVoid);
-                        view.showLoading(false);
-                    }
+                .subscribe(() -> {
+                    view.showLoading(false);
                 }, errorAction));
         view.showLoading(true);
     }
@@ -155,9 +122,9 @@ public class UserPresenter {
         void showLoading(boolean bool);
     }
 
-    private class OnErrorAction implements Action1<Throwable> {
+    private class OnErrorAction implements Consumer<Throwable> {
         @Override
-        public void call(Throwable throwable) {
+        public void accept(Throwable throwable) throws Exception {
             throwable.printStackTrace();
             view.showError(throwable.getLocalizedMessage());
             view.showLoading(false);

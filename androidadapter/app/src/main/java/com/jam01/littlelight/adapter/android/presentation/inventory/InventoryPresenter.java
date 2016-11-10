@@ -1,7 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.inventory;
 
 import com.jam01.littlelight.application.InventoryService;
-import com.jam01.littlelight.domain.DomainEvent;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.Item;
@@ -14,13 +13,13 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by jam01 on 9/5/16.
@@ -29,9 +28,10 @@ public class InventoryPresenter {
     private final String TAG = getClass().getSimpleName();
     private InventoryService service;
     private InventoryView view;
-    private CompositeSubscription subscriptions = new CompositeSubscription();
-    private OnCompletedAction completedAction = new OnCompletedAction();
+    private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
+    private OnInventoryAction inventoryAction = new OnInventoryAction();
+    private OnCompletedAction completedAction = new OnCompletedAction();
 
     @Inject
     public InventoryPresenter(InventoryService inventoryService) {
@@ -44,72 +44,51 @@ public class InventoryPresenter {
 
     public void onStart(final AccountId anAccountId) {
         view.showLoading(true);
-        if (subscriptions.isUnsubscribed()) {
-            subscriptions = new CompositeSubscription();
+        if (subscriptions.isDisposed()) {
+            subscriptions = new CompositeDisposable();
         }
 
         subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<DomainEvent>() {
-                               @Override
-                               public void call(DomainEvent domainEvent) {
-                                   if (domainEvent instanceof ItemTransferred) {
-                                       ItemTransferred itemTransferred = (ItemTransferred) domainEvent;
-                                       view.removeItem(itemTransferred.getItemTransferred(), itemTransferred.getFromItemBagId());
-                                       view.addItem(itemTransferred.getItemTransferred(), itemTransferred.getToItemBagId());
-                                   }
-                                   if (domainEvent instanceof ItemEquipped) {
-                                       ItemEquipped itemEquipped = (ItemEquipped) domainEvent;
-                                       view.updateItem(itemEquipped.getItemEquipped(), itemEquipped.getOnBagId());
-                                       view.updateItem(itemEquipped.getItemUnequipped(), itemEquipped.getOnBagId());
-                                   }
-                                   if (domainEvent instanceof ItemBagUpdated) {
-                                       ItemBagUpdated itemBagUpdated = (ItemBagUpdated) domainEvent;
-                                       view.replaceItems(itemBagUpdated.getItemBagUpdated());
-                                   }
-                               }
-                           }, errorAction
-                ));
+                .subscribe(domainEvent -> {
+                    if (domainEvent instanceof ItemTransferred) {
+                        ItemTransferred itemTransferred = (ItemTransferred) domainEvent;
+                        view.removeItem(itemTransferred.getItemTransferred(), itemTransferred.getFromItemBagId());
+                        view.addItem(itemTransferred.getItemTransferred(), itemTransferred.getToItemBagId());
+                    }
+                    if (domainEvent instanceof ItemEquipped) {
+                        ItemEquipped itemEquipped = (ItemEquipped) domainEvent;
+                        view.updateItem(itemEquipped.getItemEquipped(), itemEquipped.getOnBagId());
+                        view.updateItem(itemEquipped.getItemUnequipped(), itemEquipped.getOnBagId());
+                    }
+                    if (domainEvent instanceof ItemBagUpdated) {
+                        ItemBagUpdated itemBagUpdated = (ItemBagUpdated) domainEvent;
+                        view.replaceItems(itemBagUpdated.getItemBagUpdated());
+                    }
+                }, errorAction));
 
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Inventory>() {
-            @Override
-            public void call(Subscriber<? super Inventory> subscriber) {
-                subscriber.onNext(service.ofAccount(anAccountId));
-                subscriber.onCompleted();
-            }
-        })
+
+        subscriptions.add(Single.defer(() -> Single.just(service.ofAccount(anAccountId)))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new OnInventoryAction(), errorAction, new Action0() {
-                    @Override
-                    public void call() {
-                        view.showLoading(false);
-                    }
-                }));
-
+                .subscribe(inventoryAction, errorAction));
     }
 
     public void unbindView() {
         view.showLoading(false);
         view = null;
-        if (!subscriptions.isUnsubscribed()) {
-            subscriptions.unsubscribe();
+        if (!subscriptions.isDisposed()) {
+            subscriptions.dispose();
         }
     }
 
     public void sendItems(final List<Item> toTransfer, final String toItemBagId) {
         view.showLoading(true);
-
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                for (Item instance : toTransfer) {
-                    service.transferItem(instance.getItemId(), toItemBagId);
-                }
-                subscriber.onNext(null);
-                subscriber.onCompleted();
-            }
+        // TODO: 11/10/16 Use streams to map items to their Ids whenever streams is available
+        subscriptions.add(Completable.fromAction(() -> {
+            for (Item instance : toTransfer)
+                service.transferItem(instance.getItemId(), toItemBagId);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -117,26 +96,15 @@ public class InventoryPresenter {
     }
 
     public void equipItem(final Item item, final String characterId) {
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                service.equipItem(item.getBungieItemInstanceId(), characterId);
-            }
-        })
+        view.showLoading(true);
+        subscriptions.add(Completable.fromAction(() -> service.equipItem(item.getBungieItemInstanceId(), characterId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(completedAction, errorAction));
     }
 
     public void refresh(final AccountId anAccountId) {
-        subscriptions.add(Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(Subscriber<? super Void> subscriber) {
-                service.synchronizeInventoryOf(anAccountId);
-                subscriber.onNext(null);
-                subscriber.onCompleted();
-            }
-        })
+        subscriptions.add(Completable.fromAction(() -> service.synchronizeInventoryOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(completedAction, errorAction));
@@ -160,26 +128,27 @@ public class InventoryPresenter {
         void replaceItems(ItemBag itemBagUpdated);
     }
 
-    private class OnCompletedAction implements Action1<Void> {
+    private class OnCompletedAction implements Action {
         @Override
-        public void call(Void aVoid) {
+        public void run() throws Exception {
             view.showLoading(false);
         }
     }
 
-    private class OnErrorAction implements Action1<Throwable> {
+    private class OnInventoryAction implements Consumer<Inventory> {
         @Override
-        public void call(Throwable throwable) {
+        public void accept(Inventory account) {
+            view.renderInventory(account);
+            view.showLoading(false);
+        }
+    }
+
+    private class OnErrorAction implements Consumer<Throwable> {
+        @Override
+        public void accept(Throwable throwable) throws Exception {
             throwable.printStackTrace();
             view.showError(throwable.getLocalizedMessage());
             view.showLoading(false);
-        }
-    }
-
-    private class OnInventoryAction implements Action1<Inventory> {
-        @Override
-        public void call(Inventory inventory) {
-            view.renderInventory(inventory);
         }
     }
 }

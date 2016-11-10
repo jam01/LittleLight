@@ -16,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -184,16 +183,19 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                         .beginTransaction()
                         .replace(R.id.account_frame, LegendFragment.newInstance(accountSelectedId))
                         .commit();
+                break;
             case R.id.nav_exotics:
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.account_frame, ExoticsFragment.newInstance(accountSelectedId))
                         .commit();
+                break;
             case R.id.nav_activities:
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.account_frame, ActivityFragment.newInstance(accountSelectedId))
                         .commit();
+                break;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -336,11 +338,10 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void showLoading(boolean bool) {
-        FrameLayout accountFrame = (FrameLayout) findViewById(R.id.account_frame);
         if (bool) {
-            accountFrame.findViewById(R.id.pbMain).setVisibility(View.VISIBLE);
+            findViewById(R.id.pbMain).setVisibility(View.VISIBLE);
         } else {
-            accountFrame.findViewById(R.id.pbMain).setVisibility(View.GONE);
+            findViewById(R.id.pbMain).setVisibility(View.GONE);
         }
     }
 }

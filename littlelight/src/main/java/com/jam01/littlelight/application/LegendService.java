@@ -9,8 +9,9 @@ import com.jam01.littlelight.domain.legend.Legend;
 import com.jam01.littlelight.domain.legend.LegendRepository;
 import com.jam01.littlelight.domain.legend.LegendUpdated;
 
-import rx.Observable;
-import rx.functions.Func1;
+import io.reactivex.Observable;
+import io.reactivex.functions.Predicate;
+
 
 /**
  * Created by jam01 on 11/1/16.
@@ -39,9 +40,9 @@ public class LegendService {
 
     public Observable<DomainEvent> subscribeToInventoryEvents(final AccountId subscriberAccountId) {
         return DomainEventPublisher.instanceOf().getEvents()
-                .filter(new Func1<DomainEvent, Boolean>() {
+                .filter(new Predicate<DomainEvent>() {
                     @Override
-                    public Boolean call(DomainEvent domainEvent) {
+                    public boolean test(DomainEvent domainEvent) throws Exception {
                         if (domainEvent instanceof LegendUpdated)
                             return ((LegendUpdated) domainEvent).getLegendUpdated().withId().equals(subscriberAccountId);
                         return false;

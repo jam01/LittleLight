@@ -12,8 +12,8 @@ import com.jam01.littlelight.domain.identityaccess.User;
 
 import java.util.Collection;
 
-import rx.Observable;
-import rx.functions.Func1;
+import io.reactivex.Observable;
+import io.reactivex.functions.Predicate;
 
 /**
  * Created by jam01 on 8/6/16.
@@ -59,9 +59,9 @@ public class UserService {
 
     public Observable<DomainEvent> subscribeToUserEvents() {
         return DomainEventPublisher.instanceOf().getEvents()
-                .filter(new Func1<DomainEvent, Boolean>() {
+                .filter(new Predicate<DomainEvent>() {
                     @Override
-                    public Boolean call(DomainEvent domainEvent) {
+                    public boolean test(DomainEvent domainEvent) throws Exception {
                         return (domainEvent instanceof AccountUpdated || domainEvent instanceof AccountCredentialsExpired);
                     }
                 });
