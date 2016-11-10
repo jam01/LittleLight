@@ -4,6 +4,7 @@ import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.representation.Advisors;
 import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.DataResponse;
+import com.jam01.littlelight.adapter.common.service.BungieResponseValidator;
 import com.jam01.littlelight.domain.activity.Account;
 import com.jam01.littlelight.domain.activity.Character;
 import com.jam01.littlelight.domain.activity.DestinyActivityService;
@@ -34,9 +35,7 @@ public class ACLActivityService implements DestinyActivityService {
         if (characterIdsCached.get(anAccountId) == null) {
             BungieResponse<DataResponse<com.bungie.netplatform.destiny.representation.Account>> accountRespose = destinyApi.getAccount(anAccountId.withMembershipType(), anAccountId.withMembershipId(),
                     credentials.asCookieVal(), credentials.xcsrf());
-            if (accountRespose.getErrorCode() != 1) {
-                throw new IllegalStateException(accountRespose.getMessage());
-            }
+            BungieResponseValidator.validate(accountRespose, anAccount);
             List<String> characterIds = new ArrayList<>(accountRespose.getResponse().getData().getCharacters().size());
             for (com.bungie.netplatform.destiny.representation.Character bungieCharacter : accountRespose.getResponse().getData().getCharacters()) {
                 characterIds.add(bungieCharacter.getCharacterBase().getCharacterId());
@@ -48,9 +47,7 @@ public class ACLActivityService implements DestinyActivityService {
         ActivityTranslator translator = new ActivityTranslator();
         for (String id : characterIdsCached.get(anAccountId)) {
             BungieResponse<DataResponse<Advisors>> advisorsResponse = destinyApi.getAdvisorsForCharacter(anAccountId.withMembershipType(), anAccountId.withMembershipId(), id, credentials.asCookieVal(), credentials.xcsrf());
-            if (advisorsResponse.getErrorCode() != 1) {
-                throw new IllegalStateException(advisorsResponse.getMessage());
-            }
+            BungieResponseValidator.validate(advisorsResponse, anAccount);
             characters.add(new Character(id, translator.transform(advisorsResponse.getResponse().getData())));
         }
 

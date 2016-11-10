@@ -3,6 +3,7 @@ package com.jam01.littlelight.adapter.common.service.legend;
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.DataResponse;
+import com.jam01.littlelight.adapter.common.service.BungieResponseValidator;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -32,10 +33,7 @@ public class ACLLegendService implements DestinyLegendService {
                         credentials.asCookieVal(),
                         credentials.xcsrf());
 
-        if (accountResponse.getErrorCode() != 1) {
-            throw new IllegalStateException(accountResponse.getMessage());
-        }
-
+        BungieResponseValidator.validate(accountResponse, anAccount);
         com.bungie.netplatform.destiny.representation.Account bungieAccount = accountResponse.getResponse().getData();
         Legend newState = new LegendTranslator().from(bungieAccount);
 

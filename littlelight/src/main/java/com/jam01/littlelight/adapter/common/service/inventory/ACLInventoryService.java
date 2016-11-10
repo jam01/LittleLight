@@ -9,6 +9,7 @@ import com.bungie.netplatform.destiny.representation.DataResponse;
 import com.bungie.netplatform.destiny.representation.Equippable;
 import com.bungie.netplatform.destiny.representation.ItemDefinition;
 import com.bungie.netplatform.destiny.representation.ItemInstance;
+import com.jam01.littlelight.adapter.common.service.BungieResponseValidator;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -42,7 +43,7 @@ public class ACLInventoryService implements DestinyInventoryService {
         AccountId anAccountId = anAccount.withId();
         AccountCredentials credentials = anAccount.withCredentials();
         Inventory toUpdate = null;
-        List<String> characterIds;// = new ArrayList<>();
+        List<String> characterIds;
         if (repository.hasOfAccount(anAccountId)) {
             toUpdate = repository.ofAccount(anAccountId);
             characterIds = new ArrayList<>(toUpdate.characters().size() + 1);
@@ -51,12 +52,8 @@ public class ACLInventoryService implements DestinyInventoryService {
         } else {
             BungieResponse<DataResponse<com.bungie.netplatform.destiny.representation.Account>> accountRespose = destinyApi.getAccount(anAccountId.withMembershipType(), anAccountId.withMembershipId(),
                     credentials.asCookieVal(), credentials.xcsrf());
-            if (accountRespose.getErrorCode() != 1) {
-                throw new IllegalStateException(accountRespose.getMessage());
-            }
-
+            BungieResponseValidator.validate(accountRespose, anAccount);
             characterIds = new ArrayList<>();
-
             for (com.bungie.netplatform.destiny.representation.Character bungieCharacter : accountRespose.getResponse().getData().getCharacters()) {
                 characterIds.add(bungieCharacter.getCharacterBase().getCharacterId());
             }
@@ -69,7 +66,6 @@ public class ACLInventoryService implements DestinyInventoryService {
         List<ItemDefinition> definitions;
 
         for (String characterId : characterIds) {
-
             BungieResponse<DataResponse<CharacterInventory>> inventoryResponse = destinyApi
                     .getCharacterInventory((anAccountId.withMembershipType()),
                             anAccountId.withMembershipId(),
@@ -77,11 +73,7 @@ public class ACLInventoryService implements DestinyInventoryService {
                             credentials.asCookieVal(),
                             credentials.xcsrf());
 
-            if (inventoryResponse.getErrorCode() != 1) {
-                throw new IllegalStateException(inventoryResponse.getMessage());
-            }
-
-
+            BungieResponseValidator.validate(inventoryResponse, anAccount);
             CharacterInventory bungieInventory = inventoryResponse.getResponse().getData();
 
             for (Equippable equippableList : bungieInventory.getBuckets().getEquippable()) {
@@ -95,7 +87,6 @@ public class ACLInventoryService implements DestinyInventoryService {
             definitions = definitionsService.getDefinitionsFor(instances);
 
             characters.add(translator.characterFrom(characterId, definitions, instances, anAccountId));
-
             instances.clear();
             definitions.clear();
         }
@@ -104,19 +95,13 @@ public class ACLInventoryService implements DestinyInventoryService {
                 .getVault(anAccountId.withMembershipType(),
                         credentials.asCookieVal(),
                         credentials.xcsrf());
-
-        if (inventoryResponse.getErrorCode() != 1) {
-            throw new IllegalStateException(inventoryResponse.getMessage());
-        }
-
+        BungieResponseValidator.validate(inventoryResponse, anAccount);
         for (com.bungie.netplatform.destiny.representation.Item bungieItems : inventoryResponse.getResponse().getData().getBuckets()) {
             instances.addAll(bungieItems.getItems());
         }
 
         definitions = definitionsService.getDefinitionsFor(instances);
-
         vault = translator.vaultFrom(definitions, instances, anAccountId);
-
         instances.clear();
         definitions.clear();
 
@@ -153,10 +138,7 @@ public class ACLInventoryService implements DestinyInventoryService {
                             true),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
-
-            if (transferResponse.getErrorCode() != 1) {
-                throw new IllegalStateException(transferResponse.getMessage());
-            }
+            BungieResponseValidator.validate(transferResponse, anAccount);
             inventory.transferItem(anItemId, fromBag.withId(), toBagId);
 
         } else if (fromBag instanceof Vault) {
@@ -169,15 +151,11 @@ public class ACLInventoryService implements DestinyInventoryService {
                             false),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
-
-            if (transferResponse.getErrorCode() != 1) {
-                throw new IllegalStateException(transferResponse.getMessage());
-            }
+            BungieResponseValidator.validate(transferResponse, anAccount);
             inventory.transferItem(anItemId, fromBag.withId(), toBagId);
 
         } else {
             Vault vault = inventory.vault();
-
             BungieResponse<Integer> transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getBungieItemHash()),
@@ -187,13 +165,8 @@ public class ACLInventoryService implements DestinyInventoryService {
                             true),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
-
-            if (transferResponse.getErrorCode() != 1) {
-                throw new IllegalStateException(transferResponse.getMessage());
-            }
+            BungieResponseValidator.validate(transferResponse, anAccount);
             inventory.transferItem(anItemId, fromBag.withId(), vault.withId());
-
-
             transferResponse = destinyApi.transferItem(
                     new TransferCommand(anAccountId.withMembershipType(),
                             String.valueOf(item.getBungieItemHash()),
@@ -203,10 +176,7 @@ public class ACLInventoryService implements DestinyInventoryService {
                             false),
                     credentials.asCookieVal(),
                     credentials.xcsrf());
-
-            if (transferResponse.getErrorCode() != 1) {
-                throw new IllegalStateException(transferResponse.getMessage());
-            }
+            BungieResponseValidator.validate(transferResponse, anAccount);
             inventory.transferItem(anItemId, vault.withId(), toBag.withId());
         }
     }
@@ -222,11 +192,7 @@ public class ACLInventoryService implements DestinyInventoryService {
                                 onCharacter.characterId()),
                         anAccount.withCredentials().asCookieVal(),
                         anAccount.withCredentials().xcsrf());
-
-                if (equipResponse.getErrorCode() != 1) {
-                    throw new IllegalStateException(equipResponse.getMessage());
-                }
-
+                BungieResponseValidator.validate(equipResponse, anAccount);
                 onCharacter.equip(anItemId, instance.getItemId());
                 return true;
             }
@@ -245,10 +211,7 @@ public class ACLInventoryService implements DestinyInventoryService {
                                 onCharacter.characterId()),
                         anAccount.withCredentials().asCookieVal(),
                         anAccount.withCredentials().xcsrf());
-
-                if (equipResponse.getErrorCode() != 1) {
-                    throw new IllegalStateException(equipResponse.getMessage());
-                }
+                BungieResponseValidator.validate(equipResponse, anAccount);
                 onCharacter.equip(instance.getItemId(), anItemId);
                 return true;
             }

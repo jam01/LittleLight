@@ -6,10 +6,9 @@ import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.bungie.netplatform.destiny.representation.UserResponse;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.jam01.littlelight.domain.DomainEventPublisher;
+import com.jam01.littlelight.adapter.common.service.BungieResponseValidator;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
-import com.jam01.littlelight.domain.identityaccess.AccountCredentialsExpired;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
@@ -65,12 +64,7 @@ public class ACLAccountService implements DestinyAccountService {
     @Override
     public void synchronizeAccount(Account anAccount, User user) {
         BungieResponse<UserResponse> userResponse = destinyApi.getUser(anAccount.withCredentials().asCookieVal(), anAccount.withCredentials().xcsrf());
-        if (userResponse.getErrorCode() != 1) {
-            if (userResponse.getErrorCode() == 99) {
-                DomainEventPublisher.instanceOf().publish(new AccountCredentialsExpired(anAccount));
-            }
-            throw new IllegalStateException(userResponse.getMessage());
-        }
+        BungieResponseValidator.validate(userResponse, anAccount);
         com.bungie.netplatform.destiny.representation.User bungieUser = userResponse.getResponse().getUser();
         user.updateAccount(anAccount.withId(), bungieUser.getDisplayName(), Endpoints.BASE_URL + bungieUser.getProfilePicturePath());
     }
