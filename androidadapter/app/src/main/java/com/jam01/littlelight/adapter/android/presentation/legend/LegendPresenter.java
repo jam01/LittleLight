@@ -36,7 +36,6 @@ public class LegendPresenter {
         this.view = inventoryView;
     }
 
-
     public void onStart(final AccountId anAccountId) {
         view.showLoading(true);
         if (subscriptions.isUnsubscribed()) {

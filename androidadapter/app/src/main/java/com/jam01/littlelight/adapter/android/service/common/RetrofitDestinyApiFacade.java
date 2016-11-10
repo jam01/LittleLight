@@ -1,12 +1,10 @@
 package com.jam01.littlelight.adapter.android.service.common;
 
-import android.content.Context;
-import android.util.Log;
-
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.api.EquipCommand;
 import com.bungie.netplatform.destiny.api.TransferCommand;
 import com.bungie.netplatform.destiny.representation.Account;
+import com.bungie.netplatform.destiny.representation.Advisors;
 import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.CharacterInventory;
 import com.bungie.netplatform.destiny.representation.DataResponse;
@@ -41,12 +39,9 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     private final Retrofit retrofit;
     private final RetrofitDestinyApi bungieApi;
     private final String TAG = this.getClass().getSimpleName();
-    private final Context context;
     private Gson gson;
 
-    public RetrofitDestinyApiFacade(Context mContext) {
-        Log.d(TAG, "RetrofitDestinyApiFacade: instantiated!");
-        this.context = mContext;
+    public RetrofitDestinyApiFacade() {
         gson = new Gson();
 
         HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
@@ -141,6 +136,17 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     }
 
     @Override
+    public BungieResponse<DataResponse<Advisors>> getAdvisorsForCharacter(int membershipType, String membershipId, String characterId, String cookies, String xcsrf) {
+        try {
+            return bungieApi.requestCharacterAdvisors(membershipType, membershipId, characterId, cookies, xcsrf)
+                    .execute()
+                    .body();
+        } catch (IOException e) {
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public InputStream zippedManifest(String manifestUrl) {
         try {
             return bungieApi.downloadManifestWithDynamicUrl(manifestUrl).execute().body().byteStream();
@@ -159,6 +165,14 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
                                                                                          @Path("characterId") String characterId,
                                                                                          @Header("Cookie") String cookie,
                                                                                          @Header("X-CSRF") String xcsrf);
+
+        @Headers("X-API-KEY: " + apiKey)
+        @GET("/Platform/Destiny/{membershipType}/Account/{membershipId}/Character/{characterId}/Advisors")
+        Call<BungieResponse<DataResponse<Advisors>>> requestCharacterAdvisors(@Path("membershipType") int membershipType,
+                                                                              @Path("membershipId") String membershipId,
+                                                                              @Path("characterId") String characterId,
+                                                                              @Header("Cookie") String cookie,
+                                                                              @Header("X-CSRF") String xcsrf);
 
         @Headers("X-API-KEY: " + apiKey)
         @GET("/Platform/Destiny/{membershipType}/MyAccount/Vault")
@@ -202,5 +216,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         @GET
         @Streaming
         Call<ResponseBody> downloadManifestWithDynamicUrl(@Url String manifestUrl);
+
+
     }
 }

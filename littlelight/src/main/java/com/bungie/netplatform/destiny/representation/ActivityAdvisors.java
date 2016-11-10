@@ -1,150 +1,48 @@
-package com.bungie.netplatform.destiny.representation;
-
-/**
- * Created by jam01 on 5/27/15.
- */
-
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
-import javax.annotation.Generated;
-
-
-@Generated("org.jsonschema2pojo")
-public class ActivityAdvisors {
-    @SerializedName("nightfall")
-    @Expose
-    private Nightfall nightfall;
-    @SerializedName("activityBundleHash")
-    @Expose
-    private Long activityBundleHash;
-
-
-    @SerializedName("dailyCrucible")
-    @Expose
-    private DailyCrucible dailyCrucible;
-
-
-    @SerializedName("materialUpgrades")
-    @Expose
-    private com.bungie.netplatform.destiny.representation.MaterialUpgrades materialUpgrades;
-
-
-    @SerializedName("dailyChapterActivities")
-    @Expose
-    private DailyChapterActivities dailyChapterActivities;
-
-
-    @SerializedName("raidActivities")
-    @Expose
-    private com.bungie.netplatform.destiny.representation.RaidActivities raidActivities;
-
-    @SerializedName("heroicStrike")
-    @Expose
-    private com.bungie.netplatform.destiny.representation.HeroicStrike heroicStrike;
-
-
-    /**
-     * @return The nightfall
-     */
-    public Nightfall getNightfall() {
-        return nightfall;
-    }
-
-    /**
-     * @param nightfall The nightfall
-     */
-    public void setNightfall(Nightfall nightfall) {
-        this.nightfall = nightfall;
-    }
-
-    /**
-     * @return The activityBundleHash
-     */
-    public Long getActivityBundleHash() {
-        return activityBundleHash;
-    }
-
-    /**
-     * @param activityBundleHash The activityBundleHash
-     */
-    public void setActivityBundleHash(Long activityBundleHash) {
-        this.activityBundleHash = activityBundleHash;
-    }
-
-
-    /**
-     * @return The dailyCrucible
-     */
-    public DailyCrucible getDailyCrucible() {
-        return dailyCrucible;
-    }
-
-    /**
-     * @param dailyCrucible The dailyCrucible
-     */
-    public void setDailyCrucible(DailyCrucible dailyCrucible) {
-        this.dailyCrucible = dailyCrucible;
-    }
-
-
-    /**
-     * @return The materialUpgrades
-     */
-    public com.bungie.netplatform.destiny.representation.MaterialUpgrades getMaterialUpgrades() {
-        return materialUpgrades;
-    }
-
-    /**
-     * @param materialUpgrades The materialUpgrades
-     */
-    public void setMaterialUpgrades(com.bungie.netplatform.destiny.representation.MaterialUpgrades materialUpgrades) {
-        this.materialUpgrades = materialUpgrades;
-    }
-
-
-    /**
-     * @return The dailyChapterActivities
-     */
-    public DailyChapterActivities getDailyChapterActivities() {
-        return dailyChapterActivities;
-    }
-
-    /**
-     * @param dailyChapterActivities The dailyChapterActivities
-     */
-    public void setDailyChapterActivities(DailyChapterActivities dailyChapterActivities) {
-        this.dailyChapterActivities = dailyChapterActivities;
-    }
-
-
-    /**
-     * @return The raidActivities
-     */
-    public com.bungie.netplatform.destiny.representation.RaidActivities getRaidActivities() {
-        return raidActivities;
-    }
-
-    /**
-     * @param raidActivities The raidActivities
-     */
-    public void setRaidActivities(com.bungie.netplatform.destiny.representation.RaidActivities raidActivities) {
-        this.raidActivities = raidActivities;
-    }
-
-
-    /**
-     * @return The heroicStrike
-     */
-    public com.bungie.netplatform.destiny.representation.HeroicStrike getHeroicStrike() {
-        return heroicStrike;
-    }
-
-    /**
-     * @param heroicStrike The heroicStrike
-     */
-    public void setHeroicStrike(com.bungie.netplatform.destiny.representation.HeroicStrike heroicStrike) {
-        this.heroicStrike = heroicStrike;
-    }
-
-}
+//
+//package com.bungie.netplatform.destiny.representation.temp;
+//
+//import javax.annotation.Generated;
+//import com.google.gson.annotations.Expose;
+//import com.google.gson.annotations.SerializedName;
+//
+//@Generated("org.jsonschema2pojo")
+//public class ActivityAdvisors {
+//
+//    @SerializedName("149381097")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._149381097 _149381097;
+//    @SerializedName("260765522")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._260765522 _260765522;
+//    @SerializedName("428290721")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._428290721 _428290721;
+//    @SerializedName("614791010")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._614791010 _614791010;
+//    @SerializedName("854130400")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._854130400 _854130400;
+//    @SerializedName("870614351")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._870614351 _870614351;
+//    @SerializedName("1293005540")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._1293005540 _1293005540;
+//    @SerializedName("1733556769")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._1733556769 _1733556769;
+//    @SerializedName("1836893116")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._1836893116 _1836893116;
+//    @SerializedName("2474598319")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._2474598319 _2474598319;
+//    @SerializedName("2659248071")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._2659248071 _2659248071;
+//    @SerializedName("3645919501")
+//    @Expose
+//    public com.bungie.netplatform.destiny.representation._3645919501 _3645919501;
+//
+//}

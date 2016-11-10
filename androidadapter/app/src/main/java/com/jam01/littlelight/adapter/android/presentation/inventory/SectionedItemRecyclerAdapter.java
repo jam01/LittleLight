@@ -32,6 +32,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     private boolean mValid = true;
     private LayoutInflater mLayoutInflater;
     private List<Item> mItems;
+    // TODO: 11/8/16 Change this to a hashmap<item.type, header location> to help locate sections
     private List<Integer> headerPositions = new ArrayList<>();
 
     public SectionedItemRecyclerAdapter(List<Item> items, Context context) {

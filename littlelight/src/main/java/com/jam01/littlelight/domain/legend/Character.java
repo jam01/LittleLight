@@ -10,7 +10,6 @@ public class Character {
     private final String characterId;
     private final String className;
     private final String race;
-    private final AccountId accountId;
     private String name;
     private String emblemPath;
     private String emblemBackgroundPath;
@@ -26,7 +25,7 @@ public class Character {
 
     public Character(String race, String name, String gender, String emblemPath, String emblemBackgroundPath, String characterId,
                      String className, int level, int light, int defense, int intellect, int discipline, int strength,
-                     int armor, int recovery, int agility, AccountId accountId) {
+                     int armor, int recovery, int agility) {
         this.race = race;
         this.name = name;
         this.gender = gender;
@@ -43,7 +42,6 @@ public class Character {
         this.armor = armor;
         this.recovery = recovery;
         this.agility = agility;
-        this.accountId = accountId;
     }
 
     private Character(Builder builder) {
@@ -63,7 +61,6 @@ public class Character {
         this.armor = builder.armor;
         this.recovery = builder.recovery;
         this.agility = builder.agility;
-        this.accountId = builder.accountId;
     }
 
 

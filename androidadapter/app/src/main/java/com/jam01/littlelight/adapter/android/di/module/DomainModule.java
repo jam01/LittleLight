@@ -6,10 +6,12 @@ import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.jam01.littlelight.adapter.android.persistence.identityaccess.DiskUser;
 import com.jam01.littlelight.adapter.common.persistence.inventory.InMemoryInventoryRepository;
 import com.jam01.littlelight.adapter.common.persistence.legend.InMemoryLegendRepository;
+import com.jam01.littlelight.adapter.common.service.activity.ACLActivityService;
 import com.jam01.littlelight.adapter.common.service.identityaccess.ACLAccountService;
 import com.jam01.littlelight.adapter.common.service.inventory.ACLInventoryService;
 import com.jam01.littlelight.adapter.common.service.inventory.LocalDefinitionsDbService;
 import com.jam01.littlelight.adapter.common.service.legend.ACLLegendService;
+import com.jam01.littlelight.domain.activity.DestinyActivityService;
 import com.jam01.littlelight.domain.identityaccess.DestinyAccountService;
 import com.jam01.littlelight.domain.identityaccess.User;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
@@ -44,6 +46,12 @@ public class DomainModule {
     @Singleton
     DestinyLegendService providesDestinyLegendService(DestinyApi destinyApi) {
         return new ACLLegendService(destinyApi);
+    }
+
+    @Provides
+    @Singleton
+    DestinyActivityService providesDestinyActivityService(DestinyApi destinyApi) {
+        return new ACLActivityService(destinyApi);
     }
 
     @Provides

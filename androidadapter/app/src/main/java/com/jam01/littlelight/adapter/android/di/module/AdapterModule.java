@@ -20,8 +20,8 @@ import dagger.Provides;
 public class AdapterModule {
     @Provides
     @Singleton
-    DestinyApi providesDestinyApi(Context context) {
-        return new RetrofitDestinyApiFacade(context);
+    DestinyApi providesDestinyApi() {
+        return new RetrofitDestinyApiFacade();
     }
 
     @Provides

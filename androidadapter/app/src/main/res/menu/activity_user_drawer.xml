@@ -14,6 +14,10 @@
             android:id="@+id/nav_exotics"
             android:icon="@drawable/ic_menu_gallery"
             android:title="Exotics" />
+        <item
+            android:id="@+id/nav_activities"
+            android:icon="@drawable/ic_menu_gallery"
+            android:title="Activities" />
         <!--<item-->
         <!--android:id="@+id/nav_slideshow"-->
         <!--android:icon="@drawable/ic_menu_slideshow"-->

@@ -1,6 +1,7 @@
 package com.bungie.netplatform.destiny.api;
 
 import com.bungie.netplatform.destiny.representation.Account;
+import com.bungie.netplatform.destiny.representation.Advisors;
 import com.bungie.netplatform.destiny.representation.BungieResponse;
 import com.bungie.netplatform.destiny.representation.CharacterInventory;
 import com.bungie.netplatform.destiny.representation.DataResponse;
@@ -29,6 +30,8 @@ public interface DestinyApi {
     BungieResponse<JsonObject> membershipIds(String cookies, String xcsrf);
 
     BungieResponse<JsonObject> latestManifestUrl();
+
+    BungieResponse<DataResponse<Advisors>> getAdvisorsForCharacter(int membershipType, String membershipId, String characterId, String cookies, String xcsrf);
 
     InputStream zippedManifest(String manifestUrl);
 }

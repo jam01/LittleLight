@@ -6,6 +6,7 @@ import com.jam01.littlelight.adapter.android.di.module.AdapterModule;
 import com.jam01.littlelight.adapter.android.di.module.AndroidModule;
 import com.jam01.littlelight.adapter.android.di.module.ApplicationModule;
 import com.jam01.littlelight.adapter.android.di.module.DomainModule;
+import com.jam01.littlelight.adapter.android.presentation.activity.ActivityPresenter;
 import com.jam01.littlelight.adapter.android.presentation.inventory.ExoticsPresenter;
 import com.jam01.littlelight.adapter.android.presentation.inventory.InventoryPresenter;
 import com.jam01.littlelight.adapter.android.presentation.legend.LegendPresenter;
@@ -43,5 +44,7 @@ public class LittleLight extends Application {
         LegendPresenter provideLegendPresenter();
 
         ExoticsPresenter provideExoticsPresenter();
+
+        ActivityPresenter provideActivityPresenter();
     }
 }
