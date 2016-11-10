@@ -8,7 +8,7 @@ import java.util.Collection;
  * Created by jam01 on 7/25/16.
  */
 public interface DestinyInventoryService {
-    void synchronizeIventoryFor(Account anAccount, InventoryRepository repository);
+    void synchronizeInventoryFor(Account anAccount, InventoryRepository repository);
 
     void transferItem(String anItemId, String toBagId, Inventory inventory, Account anAccount);
 

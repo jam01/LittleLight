@@ -39,7 +39,7 @@ public class ACLInventoryService implements DestinyInventoryService {
     }
 
     @Override
-    public void synchronizeIventoryFor(Account anAccount, InventoryRepository repository) {
+    public void synchronizeInventoryFor(Account anAccount, InventoryRepository repository) {
         AccountId anAccountId = anAccount.withId();
         AccountCredentials credentials = anAccount.withCredentials();
         Inventory toUpdate = null;

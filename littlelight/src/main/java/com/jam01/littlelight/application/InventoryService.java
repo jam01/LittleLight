@@ -42,7 +42,7 @@ public class InventoryService {
     }
 
     public void synchronizeInventoryOf(AccountId anAccountId) {
-        destinyService.synchronizeIventoryFor(user.ofId(anAccountId), inventoryRepo);
+        destinyService.synchronizeInventoryFor(user.ofId(anAccountId), inventoryRepo);
     }
 
     public void transferItem(String anItemId, String toItemBagId) {
