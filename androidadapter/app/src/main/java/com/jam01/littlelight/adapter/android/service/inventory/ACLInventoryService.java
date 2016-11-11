@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.common.service.inventory;
+package com.jam01.littlelight.adapter.android.service.inventory;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.api.EquipCommand;
@@ -10,6 +10,8 @@ import com.bungie.netplatform.destiny.representation.Equippable;
 import com.bungie.netplatform.destiny.representation.ItemDefinition;
 import com.bungie.netplatform.destiny.representation.ItemInstance;
 import com.jam01.littlelight.adapter.common.service.BungieResponseValidator;
+import com.jam01.littlelight.adapter.common.service.inventory.ItemBagTranslator;
+import com.jam01.littlelight.adapter.common.service.inventory.LocalDefinitionsDbService;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -25,6 +27,10 @@ import com.jam01.littlelight.domain.inventory.Vault;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by jam01 on 7/25/16.
@@ -59,56 +65,58 @@ public class ACLInventoryService implements DestinyInventoryService {
             }
         }
 
-        List<Character> characters = new ArrayList<>(characterIds.size());
-        Vault vault;
         ItemBagTranslator translator = new ItemBagTranslator();
-        List<ItemInstance> instances = new ArrayList<>();
-        List<ItemDefinition> definitions;
 
-        for (String characterId : characterIds) {
-            BungieResponse<DataResponse<CharacterInventory>> inventoryResponse = destinyApi
-                    .getCharacterInventory((anAccountId.withMembershipType()),
-                            anAccountId.withMembershipId(),
-                            characterId,
-                            credentials.asCookieVal(),
-                            credentials.xcsrf());
+        Inventory toReturn = Single.zip(
+                Observable.fromIterable(characterIds)
+                        .flatMap(charId -> Observable.defer(() -> Observable.just(destinyApi.getCharacterInventory((anAccountId.withMembershipType()),
+                                anAccountId.withMembershipId(),
+                                charId,
+                                credentials.asCookieVal(),
+                                credentials.xcsrf()))
+                                .retry(3)
+                                .map(inventoryResponse -> {
+                                    BungieResponseValidator.validate(inventoryResponse, anAccount);
+                                    CharacterInventory bungieInventory = inventoryResponse.getResponse().getData();
 
-            BungieResponseValidator.validate(inventoryResponse, anAccount);
-            CharacterInventory bungieInventory = inventoryResponse.getResponse().getData();
-
-            for (Equippable equippableList : bungieInventory.getBuckets().getEquippable()) {
-                instances.addAll(equippableList.getItems());
-            }
-
-            for (com.bungie.netplatform.destiny.representation.Item itemList : bungieInventory.getBuckets().getItem()) {
-                instances.addAll(itemList.getItems());
-            }
-
-            definitions = definitionsService.getDefinitionsFor(instances);
-
-            characters.add(translator.characterFrom(characterId, definitions, instances, anAccountId));
-            instances.clear();
-            definitions.clear();
-        }
-
-        BungieResponse<DataResponse<com.bungie.netplatform.destiny.representation.Vault>> inventoryResponse = destinyApi
-                .getVault(anAccountId.withMembershipType(),
+                                    List<ItemInstance> instances = new ArrayList<>();
+                                    List<ItemDefinition> definitions;
+                                    for (Equippable equippableList : bungieInventory.getBuckets().getEquippable()) {
+                                        instances.addAll(equippableList.getItems());
+                                    }
+                                    for (com.bungie.netplatform.destiny.representation.Item itemList : bungieInventory.getBuckets().getItem()) {
+                                        instances.addAll(itemList.getItems());
+                                    }
+                                    definitions = definitionsService.getDefinitionsFor(instances);
+                                    return translator.characterFrom(charId, definitions, instances, anAccountId);
+                                }))
+                                .subscribeOn(Schedulers.io())
+                        )
+                        .toList(),
+                Single.defer(() -> Single.just(destinyApi.getVault(anAccountId.withMembershipType(),
                         credentials.asCookieVal(),
-                        credentials.xcsrf());
-        BungieResponseValidator.validate(inventoryResponse, anAccount);
-        for (com.bungie.netplatform.destiny.representation.Item bungieItems : inventoryResponse.getResponse().getData().getBuckets()) {
-            instances.addAll(bungieItems.getItems());
-        }
+                        credentials.xcsrf()))
+                        .retry(3)
+                        .map(inventoryResponse -> {
+                            BungieResponseValidator.validate(inventoryResponse, anAccount);
+                            List<ItemInstance> instances = new ArrayList<>();
+                            List<ItemDefinition> definitions;
+                            for (com.bungie.netplatform.destiny.representation.Item bungieItems : inventoryResponse.getResponse().getData().getBuckets()) {
+                                instances.addAll(bungieItems.getItems());
+                            }
 
-        definitions = definitionsService.getDefinitionsFor(instances);
-        vault = translator.vaultFrom(definitions, instances, anAccountId);
-        instances.clear();
-        definitions.clear();
+                            definitions = definitionsService.getDefinitionsFor(instances);
+                            translator.vaultFrom(definitions, instances, anAccountId);
+                            return translator.vaultFrom(definitions, instances, anAccountId);
+                        }))
+                        .subscribeOn(Schedulers.io()),
+                (characters, vault) -> new Inventory(anAccountId, characters, vault))
+                .blockingGet();
 
         if (toUpdate != null) {
-            toUpdate.updateFrom(new Inventory(anAccountId, characters, vault));
+            toUpdate.updateFrom(toReturn);
         } else {
-            repository.add(new Inventory(anAccountId, characters, vault));
+            repository.add(toReturn);
         }
     }
 
