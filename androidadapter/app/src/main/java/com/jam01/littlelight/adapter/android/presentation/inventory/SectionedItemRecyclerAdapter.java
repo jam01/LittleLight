@@ -16,8 +16,6 @@ import com.jam01.littlelight.domain.inventory.Item;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -36,12 +34,12 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     private List<Integer> headerPositions = new ArrayList<>();
 
     public SectionedItemRecyclerAdapter(List<Item> items, Context context) {
-        Collections.sort(items, new Comparator<Item>() {
-            @Override
-            public int compare(Item inventoryItem, Item inventoryItem2) {
-                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
-            }
-        });
+//        Collections.sort(items, new Comparator<Item>() {
+//            @Override
+//            public int compare(Item inventoryItem, Item inventoryItem2) {
+//                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
+//            }
+//        });
         mContext = context;
         mLayoutInflater = LayoutInflater.from(context);
         mItems = items;
@@ -242,13 +240,13 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     public void replaceAll(List<Item> newItems) {
         mItems.clear();
         headerPositions.clear();
-        Collections.sort(newItems, new Comparator<Item>() {
-            @Override
-            public int compare(Item inventoryItem, Item inventoryItem2) {
-                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
-            }
-        });
-        mItems = newItems;
+//        Collections.sort(newItems, new Comparator<Item>() {
+//            @Override
+//            public int compare(Item inventoryItem, Item inventoryItem2) {
+//                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
+//            }
+//        });
+//        mItems = newItems;
         if (!newItems.isEmpty()) {
             headerPositions.add(0);
             for (int i = 1; i < mItems.size(); i++) {

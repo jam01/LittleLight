@@ -174,7 +174,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                               public Object instantiateItem(ViewGroup container, int position) {
                                   RecyclerView recyclerView = new RecyclerView(getContext());
                                   final SectionedItemRecyclerAdapter testAdapter =
-                                          new SectionedItemRecyclerAdapter(new ArrayList<>(bags.get(position).items()), getContext());
+                                          new SectionedItemRecyclerAdapter(new ArrayList<>(bags.get(position).orderedItems()), getContext());
 
                                   final int noOfColumns;
                                   {
@@ -319,7 +319,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void replaceItems(ItemBag itemBagUpdated) {
-        itemAdapterMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.items()));
+        itemAdapterMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.orderedItems()));
     }
 
     /**

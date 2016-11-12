@@ -31,6 +31,9 @@ public class Globals {
         buckets.put(4274335291L, "Emblems");
         buckets.put(2197472680L, "Quests");
         buckets.put(375726501L, "Mission Items");
+        buckets.put(3054419239L, "Emotes");
+        buckets.put(3796357825L, "Sparrow Horns");
+        buckets.put(434908299L, "Artifacts");
     }
 
     static {
