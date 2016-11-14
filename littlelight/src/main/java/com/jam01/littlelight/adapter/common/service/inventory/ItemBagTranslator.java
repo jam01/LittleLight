@@ -35,8 +35,6 @@ public class ItemBagTranslator {
         //We build our item if both params are != null and they represent the same item
         //TODO: consider using illegalArgumentExceptions
         if (instance != null && definition != null && (instance.getItemHash().equals(definition.getItemHash()))) {
-
-
             Item.Builder builder = new Item.Builder(
                     instance.getItemInstanceId() + "-" + instance.getItemHash(),
                     instance.getItemInstanceId(),
@@ -60,7 +58,6 @@ public class ItemBagTranslator {
         return item;
     }
 
-
     private Collection<Item> transform(List<ItemDefinition> definitions, List<ItemInstance> instances) {
         if (definitions.size() != instances.size()) {
             throw new IllegalArgumentException("Definition and Instance collections are not the same size");
@@ -73,16 +70,37 @@ public class ItemBagTranslator {
     }
 
     public ItemType transform(ItemDefinition definition) {
+        String itemSuperType;
+        // TODO: 11/13/16 Pretty this up
+        long i = definition.getBucketTypeHash();
+        if (i == 1498876634L || i == 2465295065L || i == 953998645L) {
+            itemSuperType = "Weapons";
+        } else if (i == 3448274439L || i == 3551918588L || i == 14239492L || i == 20886954L || i == 1585787867L || i == 4023194814L || i == 434908299L) {
+            itemSuperType = "Armor";
+        } else if (i == 2197472680L || i == 375726501L) {
+            itemSuperType = "Progress";
+        } else {
+            itemSuperType = "General";
+//            case 3865314626L://Materials");
+//            case 1469714392L://Consumables");
+//            case 3284755031L://Subclass");
+//            case 2025709351L://Vehicles");
+//            case 284967655L://Ships");
+//            case 2973005342L://Shaders");
+//            case 4274335291L://Emblems");
+//            case 3054419239L://Emotes");
+//            case 3796357825L://Sparrow Horns");
+
+        }
         return new ItemType(definition.getItemHash(), definition.getItemName(), definition.getBucketTypeHash(),
                 definition.getMaxStackSize().intValue(), "https://www.bungie.net" + definition.getIcon(), definition.getTierTypeName(),
                 Globals.classTypes.get(definition.getClassType()), definition.getEquippable(), Globals.buckets.get(definition.getBucketTypeHash()),
-                definition.getItemTypeName());
+                definition.getItemTypeName(), itemSuperType);
     }
 
     public Collection<ItemType> transform(List<ItemDefinition> definitions) {
         List<ItemType> list = new ArrayList<>(definitions.size());
-        for (ItemDefinition instance :
-                definitions) {
+        for (ItemDefinition instance : definitions) {
             list.add(transform(instance));
         }
         return list;

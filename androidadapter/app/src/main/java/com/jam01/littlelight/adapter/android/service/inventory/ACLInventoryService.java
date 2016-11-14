@@ -67,6 +67,7 @@ public class ACLInventoryService implements DestinyInventoryService {
 
         ItemBagTranslator translator = new ItemBagTranslator();
 
+        // TODO: 11/11/16 Figure out if this can be rewritten with CompletableFutures and/or Streams to lessen Rx reliance
         Inventory toReturn = Single.zip(
                 Observable.fromIterable(characterIds)
                         .flatMap(charId -> Observable.defer(() -> Observable.just(destinyApi.getCharacterInventory((anAccountId.withMembershipType()),
@@ -212,7 +213,7 @@ public class ACLInventoryService implements DestinyInventoryService {
     public boolean unequip(String anItemId, Character onCharacter, Account anAccount) {
         Item item = onCharacter.itemOfId(anItemId);
         for (Item instance : onCharacter.items()) {
-            if (instance != item && (instance.getBungieBucketTypeHash() == item.getBungieBucketTypeHash()) && !instance.getTierType().equals("Exotic")) {
+            if (instance != item && (instance.getBungieBucketTypeHash() == item.getBungieBucketTypeHash()) && !instance.getTierTypeName().equals("Exotic")) {
                 BungieResponse<Integer> equipResponse = destinyApi.equipItem(
                         new EquipCommand(anAccount.withId().withMembershipType(),
                                 instance.getBungieItemInstanceId(),

@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ public abstract class ItemBag {
         ITEM_ORDER.add(1469714392L);//"Consumables");
         ITEM_ORDER.add(2197472680L);//"Quests");
         ITEM_ORDER.add(375726501L);//"Mission Items");
+        ITEM_ORDER.add(434908299L);//, "Artifacts");
         ITEM_ORDER.add(0L);//"All");
     }
 
@@ -55,6 +57,55 @@ public abstract class ItemBag {
         this.id = id;
     }
 
+    public static List<Item> filterByItemType(List<Item> items, String itemType) {
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().getItemType().equals(itemType)) {
+                iterator.remove();
+            }
+        }
+        return items;
+    }
+
+    public static List<Item> filterByItemSuperType(List<Item> items, String itemSuperType) {
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().getItemSuperType().equals(itemSuperType)) {
+                iterator.remove();
+            }
+        }
+        return items;
+    }
+
+    public static List<Item> filterByItemSubType(List<Item> items, String itemSubType) {
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().getItemSubType().equals(itemSubType)) {
+                iterator.remove();
+            }
+        }
+        return items;
+    }
+
+    public static List<Item> filterByMaxxedOnly(List<Item> items) {
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().isGridComplete()) {
+                iterator.remove();
+            }
+        }
+        return items;
+    }
+
+    public static List<Item> filterByDamageType(List<Item> items, String damageType) {
+        Iterator<Item> iterator = items.iterator();
+        while (iterator.hasNext()) {
+            if (!iterator.next().getDamageType().equals(damageType)) {
+                iterator.remove();
+            }
+        }
+        return items;
+    }
 
     public String withId() {
         return id;
@@ -92,7 +143,8 @@ public abstract class ItemBag {
     }
 
     public Collection<Item> items() {
-        return itemMap.values();
+        return Collections.unmodifiableCollection(itemMap.values());
+//        return itemMap.values();
     }
 
     public List<Item> orderedItems() {
@@ -103,6 +155,8 @@ public abstract class ItemBag {
                 return ITEM_ORDER.indexOf(o1.getBungieBucketTypeHash()) - ITEM_ORDER.indexOf(o2.getBungieBucketTypeHash());
             }
         });
+
+//        return filterByItemType(filterByItemSubType(filterByMaxxedOnly(toReturn), "Shotgun"), "Secondary Weapons");
         return toReturn;
     }
 }

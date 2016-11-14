@@ -105,15 +105,23 @@ public class Item {
     }
 
     public long getBungieBucketTypeHash() {
-        return itemType.getBungieBucketTypeHash();
+        return itemType.getTypeHash();
     }
 
-    public String getTierType() {
-        return itemType.getTierType();
+    public String getTierTypeName() {
+        return itemType.getTierTypeName();
     }
 
     public String getItemType() {
         return itemType.getItemType();
+    }
+
+    public String getItemSubType() {
+        return itemType.getItemSubType();
+    }
+
+    public String getItemSuperType() {
+        return itemType.getItemSuperType();
     }
 
     public static class Builder {

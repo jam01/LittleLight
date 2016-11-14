@@ -5,6 +5,7 @@ import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -53,7 +54,7 @@ public class Inventory {
     }
 
     public Collection<ItemBag> allItemBags() {
-        return itemBags();
+        return Collections.unmodifiableCollection(itemBags());
     }
 
     public void transferItem(String anItemId, String fromBagId, String toBagId) {
@@ -85,7 +86,8 @@ public class Inventory {
         List<Item> exoticsList = new ArrayList<>();
         for (ItemBag bag : allItemBags()) {
             for (Item item : bag.items()) {
-                if (item.getTierType().equals("Exotic")) {
+                // TODO: 11/13/16 introduce an int tier type to optimize these comparisons
+                if (item.getTierTypeName().equals("Exotic")) {
                     exoticsList.add(item);
                 }
             }

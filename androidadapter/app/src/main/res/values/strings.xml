@@ -9,4 +9,56 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="equip">Equip Item</string>
+
+    <string-array name="itemSuperTypes">
+        <item>All</item>
+        <item>Weapons</item>
+        <item>Armor</item>
+        <item>General</item>
+        <item>Progress</item>
+    </string-array>
+
+    <string-array name="weaponsSubtypes">
+        <item>All</item>
+        <item>Primary Weapons</item>
+        <item>Secondary Weapons</item>
+        <item>Heavy Weapons</item>
+    </string-array>
+
+    <string-array name="armorSubtypes">
+        <item>All</item>
+        <item>Helmets</item>
+        <item>Arms</item>
+        <item>Chests</item>
+        <item>Legs</item>
+    </string-array>
+
+    <string-array name="generalSubtypes">
+        <item>All</item>
+        <item>Materials</item>
+        <item>Consumables</item>
+        <item>Subclass</item>
+        <item>Vehicles</item>
+        <item>Ships</item>
+        <item>Shaders</item>
+        <item>Emblems</item>
+        <item>Emotes</item>
+        <item>Sparrow Horns</item>
+        <item>Artifacts</item>
+    </string-array>
+
+    <string-array name="damageTypes">
+        <item>All</item>
+        <item>None</item>
+        <item>Kinetic</item>
+        <item>Arc</item>
+        <item>Solar</item>
+        <item>Void</item>
+    </string-array>
+
+    <string-array name="loadoutsOptions">
+        <item>Options</item>
+        <item>Change loadout name</item>
+        <item>Delete loadout</item>
+    </string-array>
 </resources>

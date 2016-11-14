@@ -20,9 +20,14 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.jam01.littlelight.R;
@@ -56,7 +61,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private SwipeRefreshLayout swipeContainer;
     private AccountId accountId;
     private ActionMode actionMode = null;
-    private Map<String, SectionedItemRecyclerAdapter> itemAdapterMap;
+    private Map<String, ItemBagView> itemAdapterMap;
 
 
     public InventoryFragment() {
@@ -82,6 +87,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (getArguments() != null) {
             accountId = new AccountId(getArguments().getInt(MEMBERSHIP_TYPE), getArguments().getString(MEMBERSHIP_ID));
         }
@@ -173,8 +179,8 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                               @Override
                               public Object instantiateItem(ViewGroup container, int position) {
                                   RecyclerView recyclerView = new RecyclerView(getContext());
-                                  final SectionedItemRecyclerAdapter testAdapter =
-                                          new SectionedItemRecyclerAdapter(new ArrayList<>(bags.get(position).orderedItems()), getContext());
+                                  final ItemBagView itemAdapter =
+                                          new ItemBagView(bags.get(position), getContext());
 
                                   final int noOfColumns;
                                   {
@@ -187,10 +193,10 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                   gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                                       @Override
                                       public int getSpanSize(int position) {
-                                          switch (testAdapter.getItemViewType(position)) {
-                                              case SectionedItemRecyclerAdapter.SECTION_TYPE:
+                                          switch (itemAdapter.getItemViewType(position)) {
+                                              case ItemBagView.SECTION_TYPE:
                                                   return noOfColumns;
-                                              case SectionedItemRecyclerAdapter.ITEM_TYPE:
+                                              case ItemBagView.ITEM_TYPE:
                                                   return 1;
                                               default:
                                                   return -1;
@@ -198,67 +204,14 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                       }
                                   });
 
-                                  itemAdapterMap.put(bags.get(position).withId(), testAdapter);
+                                  itemAdapterMap.put(bags.get(position).withId(), itemAdapter);
                                   recyclerView.setHasFixedSize(true);
                                   recyclerView.setLayoutManager(gridManager);
-                                  recyclerView.setAdapter(testAdapter);
+                                  recyclerView.setAdapter(itemAdapter);
 
                                   ItemClickSupport.addTo(recyclerView)
-                                          .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                                              @Override
-                                              public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                                                  final Item selectedItem = ((SectionedItemRecyclerAdapter) recyclerView.getAdapter()).getItem(position);
-                                                  if (selectedItem != null) {
-                                                      if (actionMode != null) {
-                                                          toggleSelection((SelectableAdapter) recyclerView.getAdapter(), position);
-                                                      } else {
-                                                          View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
-                                                          TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
-                                                          TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
-                                                          TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
-
-                                                          title.setText(selectedItem.getItemName());
-
-                                                          switch (selectedItem.getItemType()) {
-                                                              case "Armor":
-                                                                  second.setText("Defense: " + selectedItem.getDamage());
-                                                                  second.setVisibility(View.VISIBLE);
-                                                                  break;
-                                                              case "Weapon":
-                                                                  second.setText("Attack: " + selectedItem.getDamage());
-                                                                  second.setVisibility(View.VISIBLE);
-                                                                  third.setText("Damage Type: ");
-                                                                  third.append(selectedItem.getDamageType());
-                                                                  third.setVisibility(View.VISIBLE);
-                                                                  break;
-                                                          }
-
-                                                          switch (selectedItem.getTierType()) {
-                                                              case "Legendary":
-                                                                  title.setBackgroundColor(0xff5a1bff);
-                                                                  break;
-                                                              case "Exotic":
-                                                                  title.setBackgroundColor(0xffffb200);
-                                                                  break;
-                                                          }
-                                                          new AlertDialog.Builder(getContext())
-                                                                  .setView(dialogView)
-                                                                  .create()
-                                                                  .show();
-                                                      }
-                                                  }
-                                              }
-                                          })
-                                          .setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
-                                              @Override
-                                              public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-                                                  if (actionMode == null) {
-                                                      actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new SendModeCallback());
-                                                  }
-                                                  toggleSelection((SelectableAdapter) recyclerView.getAdapter(), position);
-                                                  return true;
-                                              }
-                                          });
+                                          .setOnItemClickListener(new ItemClickListener())
+                                          .setOnItemLongClickListener(new ItemLongClickListener());
 
                                   container.addView(recyclerView);
                                   return recyclerView;
@@ -268,7 +221,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                               public CharSequence getPageTitle(int position) {
                                   if (bags.get(position) instanceof Character) {
                                       return "Character" + position;
-                                  } else if (bags.get(position)  instanceof Vault) {
+                                  } else if (bags.get(position) instanceof Vault) {
                                       return "Vault";
                                   } else
                                       return super.getPageTitle(position);
@@ -324,7 +277,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     /**
      * Toggle the selection state of an item.
-     * <p/>
+     * <p>
      * If the item was the last one in the selection and is unselected, the selection is stopped.
      * Note that the selection must already be started (actionMode must not be null).
      *
@@ -344,8 +297,90 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_filter, null);
+        builder.setView(dialogView);
+        final Spinner superTypes = (Spinner) dialogView.findViewById(R.id.filter_sTypes);
+        final Spinner types = (Spinner) dialogView.findViewById(R.id.filter_sSubtypes);
+        final Spinner damageTypes = (Spinner) dialogView.findViewById(R.id.filter_sDmgTypes);
+        final CheckBox maxedOnly = (CheckBox) dialogView.findViewById(R.id.filter_cbMaxed);
+
+        superTypes.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        types.setAdapter(null);
+                        damageTypes.setAdapter(null);
+                        break;
+                    case 1:
+                        types.setAdapter(ArrayAdapter.createFromResource(getContext(), R.array.weaponsSubtypes, android.R.layout.simple_spinner_dropdown_item));
+                        damageTypes.setAdapter(ArrayAdapter.createFromResource(getContext(), R.array.damageTypes, android.R.layout.simple_spinner_dropdown_item));
+                        break;
+                    case 2:
+                        types.setAdapter(ArrayAdapter.createFromResource(getContext(), R.array.armorSubtypes, android.R.layout.simple_spinner_dropdown_item));
+                        damageTypes.setAdapter(null);
+                        break;
+                    case 3:
+                        types.setAdapter(ArrayAdapter.createFromResource(getContext(), R.array.generalSubtypes, android.R.layout.simple_spinner_dropdown_item));
+                        damageTypes.setAdapter(null);
+                        break;
+                    default:
+                        types.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item));
+                        damageTypes.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ItemBagView.FilterCommand command = new ItemBagView.FilterCommand();
+                        if (superTypes.getSelectedItemPosition() != 0) {
+                            command.superType = (String) superTypes.getSelectedItem();
+                        }
+                        if (types.getSelectedItemPosition() != AdapterView.INVALID_POSITION && types.getSelectedItemPosition() != 0) {
+                            command.type = (String) types.getSelectedItem();
+                        }
+                        if (damageTypes.getSelectedItemPosition() != AdapterView.INVALID_POSITION && damageTypes.getSelectedItemPosition() != 0) {
+                            command.damageType = (String) damageTypes.getSelectedItem();
+                        }
+                        command.maxedOnly = maxedOnly.isChecked();
+
+                        for (ItemBagView adapter : itemAdapterMap.values()) {
+                            adapter.filter(command);
+                        }
+                    }
+                }
+
+        );
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                }
+
+        );
+        builder.create().show();
+        return true;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_inventory, menu);
+    }
 
     private class SendModeCallback implements ActionMode.Callback {
+
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.menu_inventory_overlay, menu);
@@ -368,7 +403,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                         destinationArray[i] = (String) itemAdapterMap.keySet().toArray()[i];
                     }
                     final List<Item> toTransfer = new ArrayList<>();
-                    for (SectionedItemRecyclerAdapter instance : itemAdapterMap.values()) {
+                    for (ItemBagView instance : itemAdapterMap.values()) {
                         for (Integer itemPosition : instance.getSelectedItems()) {
                             toTransfer.add(instance.getItem(itemPosition));
                         }
@@ -394,6 +429,64 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                 instance.clearSelection();
             }
             actionMode = null;
+        }
+
+    }
+
+    private class ItemClickListener implements ItemClickSupport.OnItemClickListener {
+        @Override
+        public void onItemClicked(RecyclerView recyclerView1, int position1, View v) {
+            final Item selectedItem = ((ItemBagView) recyclerView1.getAdapter()).getItem(position1);
+            if (selectedItem != null) {
+                if (actionMode != null) {
+                    toggleSelection((SelectableAdapter) recyclerView1.getAdapter(), position1);
+                } else {
+                    View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
+                    TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
+                    TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
+                    TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
+
+                    title.setText(selectedItem.getItemName());
+
+                    switch (selectedItem.getItemType()) {
+                        case "Armor":
+                            second.setText("Defense: " + selectedItem.getDamage());
+                            second.setVisibility(View.VISIBLE);
+                            break;
+                        case "Weapon":
+                            second.setText("Attack: " + selectedItem.getDamage());
+                            second.setVisibility(View.VISIBLE);
+                            third.setText("Damage Type: ");
+                            third.append(selectedItem.getDamageType());
+                            third.setVisibility(View.VISIBLE);
+                            break;
+                    }
+
+                    switch (selectedItem.getTierTypeName()) {
+                        case "Legendary":
+                            title.setBackgroundColor(0xff5a1bff);
+                            break;
+                        case "Exotic":
+                            title.setBackgroundColor(0xffffb200);
+                            break;
+                    }
+                    new AlertDialog.Builder(getContext())
+                            .setView(dialogView)
+                            .create()
+                            .show();
+                }
+            }
+        }
+    }
+
+    private class ItemLongClickListener implements ItemClickSupport.OnItemLongClickListener {
+        @Override
+        public boolean onItemLongClicked(RecyclerView recyclerView1, int position1, View v) {
+            if (actionMode == null) {
+                actionMode = ((AppCompatActivity) getActivity()).startSupportActionMode(new SendModeCallback());
+            }
+            toggleSelection((SelectableAdapter) recyclerView1.getAdapter(), position1);
+            return true;
         }
     }
 }

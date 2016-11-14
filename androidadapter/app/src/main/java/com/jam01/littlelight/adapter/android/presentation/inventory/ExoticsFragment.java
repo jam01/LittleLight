@@ -178,9 +178,9 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
                     @Override
                     public int getSpanSize(int position) {
                         switch (testAdapter.getItemViewType(position)) {
-                            case SectionedItemRecyclerAdapter.SECTION_TYPE:
+                            case ItemBagView.SECTION_TYPE:
                                 return noOfColumns;
-                            case SectionedItemRecyclerAdapter.ITEM_TYPE:
+                            case ItemBagView.ITEM_TYPE:
                                 return 1;
                             default:
                                 return -1;
@@ -202,7 +202,7 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
 
                                 title.setText(selectedItem.getItemName());
 
-                                switch (selectedItem.getTierType()) {
+                                switch (selectedItem.getTierTypeName()) {
                                     case "Legendary":
                                         title.setBackgroundColor(0xff5a1bff);
                                         break;

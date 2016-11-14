@@ -38,7 +38,7 @@ public class SectionedItemTypeRecyclerAdapter extends SelectableAdapter<Recycler
         Collections.sort(types, new Comparator<ItemType>() {
             @Override
             public int compare(ItemType inventoryItem, ItemType inventoryItem2) {
-                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
+                return ((Long) inventoryItem.getTypeHash()).compareTo(inventoryItem2.getTypeHash());
             }
         });
         this.items = items;
@@ -48,7 +48,7 @@ public class SectionedItemTypeRecyclerAdapter extends SelectableAdapter<Recycler
         if (!itemTypes.isEmpty()) {
             headerPositions.add(0);
             for (int i = 1; i < itemTypes.size(); i++) {
-                if (itemTypes.get(i).getBungieBucketTypeHash() != itemTypes.get(i - 1).getBungieBucketTypeHash()) {
+                if (itemTypes.get(i).getTypeHash() != itemTypes.get(i - 1).getTypeHash()) {
                     headerPositions.add(i + headerPositions.size());
                 }
             }
@@ -77,7 +77,7 @@ public class SectionedItemTypeRecyclerAdapter extends SelectableAdapter<Recycler
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         if (isPositionHeader(position)) {
-            ((HeaderViewHolder) viewHolder).mTextView.setText(Globals.buckets.get(itemTypes.get(positionToItemPosition(position)).getBungieBucketTypeHash()));
+            ((HeaderViewHolder) viewHolder).mTextView.setText(Globals.buckets.get(itemTypes.get(positionToItemPosition(position)).getTypeHash()));
         } else {
             ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
             ImageView icon = itemViewHolder.imageView;
@@ -128,14 +128,14 @@ public class SectionedItemTypeRecyclerAdapter extends SelectableAdapter<Recycler
         Collections.sort(newItems, new Comparator<ItemType>() {
             @Override
             public int compare(ItemType inventoryItem, ItemType inventoryItem2) {
-                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
+                return ((Long) inventoryItem.getTypeHash()).compareTo(inventoryItem2.getTypeHash());
             }
         });
         itemTypes = newItems;
         if (!newItems.isEmpty()) {
             headerPositions.add(0);
             for (int i = 1; i < itemTypes.size(); i++) {
-                if (itemTypes.get(i).getBungieBucketTypeHash() != itemTypes.get(i - 1).getBungieBucketTypeHash()) {
+                if (itemTypes.get(i).getTypeHash() != itemTypes.get(i - 1).getTypeHash()) {
                     headerPositions.add(i + headerPositions.size());
                 }
             }

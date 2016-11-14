@@ -10,9 +10,9 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bungie.netplatform.destiny.representation.Globals;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.domain.inventory.Item;
+import com.jam01.littlelight.domain.inventory.ItemBag;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -21,29 +21,24 @@ import java.util.List;
 /**
  * Created by jam01 on 10/2/16.
  */
-public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView.ViewHolder> {
-
+public class ItemBagView extends SelectableAdapter<RecyclerView.ViewHolder> {
     static final int SECTION_TYPE = 0;
     static final int ITEM_TYPE = 1;
     private final Context mContext;
     private final String TAG = this.getClass().getSimpleName();
     private boolean mValid = true;
     private LayoutInflater mLayoutInflater;
+    private ItemBag itemBag;
     private List<Item> mItems;
     // TODO: 11/8/16 Change this to a hashmap<item.type, header location> to help locate sections
     private List<Integer> headerPositions = new ArrayList<>();
 
-    public SectionedItemRecyclerAdapter(List<Item> items, Context context) {
-//        Collections.sort(items, new Comparator<Item>() {
-//            @Override
-//            public int compare(Item inventoryItem, Item inventoryItem2) {
-//                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
-//            }
-//        });
+    public ItemBagView(ItemBag bag, Context context) {
         mContext = context;
         mLayoutInflater = LayoutInflater.from(context);
-        mItems = items;
-        if (!items.isEmpty()) {
+        itemBag = bag;
+        mItems = bag.orderedItems();
+        if (!mItems.isEmpty()) {
             headerPositions.add(0);
             for (int i = 1; i < mItems.size(); i++) {
                 if (mItems.get(i).getBungieBucketTypeHash() != mItems.get(i - 1).getBungieBucketTypeHash()) {
@@ -75,7 +70,8 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         if (isPositionHeader(position)) {
-            ((HeaderViewHolder) viewHolder).mTextView.setText(Globals.buckets.get(mItems.get(positionToItemPosition(position)).getBungieBucketTypeHash()));
+            ((HeaderViewHolder) viewHolder).mTextView.setText(mItems.get(positionToItemPosition(position)).getItemType());
+//                    Globals.buckets.get(mItems.get(positionToItemPosition(position)).getTypeHash()));
         } else {
             ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
             ImageView icon = itemViewHolder.imageView;
@@ -216,7 +212,6 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
         }
     }
 
-
     private void shiftHeadersDownBy(int headerOffset, int itemPosition) {
         //Move subsequent headers positions down
         for (int i1 = 0, headerPositionsSize = headerPositions.size(); i1 < headerPositionsSize; i1++) {
@@ -240,13 +235,7 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
     public void replaceAll(List<Item> newItems) {
         mItems.clear();
         headerPositions.clear();
-//        Collections.sort(newItems, new Comparator<Item>() {
-//            @Override
-//            public int compare(Item inventoryItem, Item inventoryItem2) {
-//                return ((Long) inventoryItem.getBungieBucketTypeHash()).compareTo(inventoryItem2.getBungieBucketTypeHash());
-//            }
-//        });
-//        mItems = newItems;
+        mItems = newItems;
         if (!newItems.isEmpty()) {
             headerPositions.add(0);
             for (int i = 1; i < mItems.size(); i++) {
@@ -256,6 +245,50 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
             }
         }
         notifyDataSetChanged();
+    }
+
+    //    public void filterByItemType(String itemType) {
+//        mItems = new ArrayList<>();
+//        for (Item instance : originalItems) {
+//            if (instance.getItemType().equals(itemType))
+//                mItems.add(instance);
+//        }
+//        notifyDataSetChanged();
+//    }
+//
+//    public void filterByItemSubType(String itemSubType) {
+//        mItems = new ArrayList<>();
+//        for (Item instance : originalItems) {
+//            if (instance.getItemSubType().equals(itemSubType))
+//                mItems.add(instance);
+//        }
+//        notifyDataSetChanged();
+//    }
+//
+//    public void filterByMaxxedOnly() {
+//        mItems = new ArrayList<>();
+//        for (Item instance : originalItems) {
+//            if (instance.isGridComplete())
+//                mItems.add(instance);
+//        }
+//        notifyDataSetChanged();
+//    }
+//
+    public void filter(FilterCommand command) {
+        List<Item> filteredItems = new ArrayList<>(itemBag.orderedItems());
+        if (command.superType != null)
+            filteredItems = ItemBag.filterByItemSuperType(filteredItems, command.superType);
+        if (command.type != null)
+            filteredItems = ItemBag.filterByItemType(filteredItems, command.type);
+        if (command.maxedOnly)
+            filteredItems = ItemBag.filterByMaxxedOnly(filteredItems);
+        if (command.damageType != null)
+            filteredItems = ItemBag.filterByDamageType(filteredItems, command.damageType);
+        replaceAll(filteredItems);
+    }
+
+    public void resetFilters() {
+        replaceAll(itemBag.orderedItems());
     }
 
     static class HeaderViewHolder extends RecyclerView.ViewHolder {
@@ -277,6 +310,16 @@ public class SectionedItemRecyclerAdapter extends SelectableAdapter<RecyclerView
             imageView = (ImageView) itemView.findViewById(R.id.ivIcon);
             textView = (TextView) itemView.findViewById(R.id.tvAmount);
             checkBox = (CheckBox) itemView.findViewById(R.id.cbCheck);
+        }
+    }
+
+    public static class FilterCommand {
+        public String superType;
+        public String type;
+        public boolean maxedOnly;
+        public String damageType;
+
+        public FilterCommand() {
         }
     }
 }
