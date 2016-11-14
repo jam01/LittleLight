@@ -93,7 +93,10 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
                         null);
                 while (resultSet.moveToNext()) {
                     ItemDefinition tmp = gson.fromJson(resultSet.getString(0), ItemDefinition.class);
-                    if (tmp.getTierType() == 6 && (tmp.getItemType() == 2 || tmp.getItemType() == 3) && !tmp.getItemName().equals("Exotic Engram") && !tmp.getItemName().contains("###")) {
+                    if (tmp.getTierType() == 6
+                            && (tmp.getItemType() == 2 || tmp.getItemType() == 3)
+                            && !tmp.getItemName().equals("Exotic Engram")
+                            && !(tmp.getItemName().contains("###") || tmp.getItemName().isEmpty())) {
                         exotics.add(tmp);
                     }
                 }

@@ -14,9 +14,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -178,43 +176,15 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
                               @Override
                               public Object instantiateItem(ViewGroup container, int position) {
-                                  RecyclerView recyclerView = new RecyclerView(getContext());
-                                  final ItemBagView itemAdapter =
-                                          new ItemBagView(bags.get(position), getContext());
+                                  ItemBagView itemBagView = new ItemBagView(bags.get(position), getContext());
 
-                                  final int noOfColumns;
-                                  {
-                                      DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-                                      float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-                                      noOfColumns = (int) (dpWidth / 90);
-                                  }
-
-                                  GridLayoutManager gridManager = new GridLayoutManager(getContext(), noOfColumns);
-                                  gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                                      @Override
-                                      public int getSpanSize(int position) {
-                                          switch (itemAdapter.getItemViewType(position)) {
-                                              case ItemBagView.SECTION_TYPE:
-                                                  return noOfColumns;
-                                              case ItemBagView.ITEM_TYPE:
-                                                  return 1;
-                                              default:
-                                                  return -1;
-                                          }
-                                      }
-                                  });
-
-                                  itemAdapterMap.put(bags.get(position).withId(), itemAdapter);
-                                  recyclerView.setHasFixedSize(true);
-                                  recyclerView.setLayoutManager(gridManager);
-                                  recyclerView.setAdapter(itemAdapter);
-
-                                  ItemClickSupport.addTo(recyclerView)
+                                  ItemClickSupport.addTo(itemBagView)
                                           .setOnItemClickListener(new ItemClickListener())
                                           .setOnItemLongClickListener(new ItemLongClickListener());
 
-                                  container.addView(recyclerView);
-                                  return recyclerView;
+                                  itemAdapterMap.put(bags.get(position).withId(), itemBagView);
+                                  container.addView(itemBagView);
+                                  return itemBagView;
                               }
 
                               @Override
@@ -286,7 +256,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private void toggleSelection(SelectableAdapter adapter, int position) {
         adapter.toggleSelection(position);
         int count = 0;
-        for (SelectableAdapter instance : itemAdapterMap.values()) {
+        for (ItemBagView instance : itemAdapterMap.values()) {
             count += instance.getSelectedItemCount();
         }
         if (count == 0) {
@@ -425,7 +395,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            for (SelectableAdapter instance : itemAdapterMap.values()) {
+            for (ItemBagView instance : itemAdapterMap.values()) {
                 instance.clearSelection();
             }
             actionMode = null;
@@ -436,7 +406,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private class ItemClickListener implements ItemClickSupport.OnItemClickListener {
         @Override
         public void onItemClicked(RecyclerView recyclerView1, int position1, View v) {
-            final Item selectedItem = ((ItemBagView) recyclerView1.getAdapter()).getItem(position1);
+            final Item selectedItem = ((ItemAdapter) recyclerView1.getAdapter()).getItem(position1);
             if (selectedItem != null) {
                 if (actionMode != null) {
                     toggleSelection((SelectableAdapter) recyclerView1.getAdapter(), position1);

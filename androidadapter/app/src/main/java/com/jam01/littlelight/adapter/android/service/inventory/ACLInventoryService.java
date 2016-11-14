@@ -194,7 +194,7 @@ public class ACLInventoryService implements DestinyInventoryService {
     public boolean equip(String anItemId, Character onCharacter, Account anAccount) {
         Item item = onCharacter.itemOfId(anItemId);
         for (Item instance : onCharacter.items()) {
-            if (instance.isEquipped() && (instance.getBungieBucketTypeHash() == item.getBungieBucketTypeHash())) {
+            if (instance.isEquipped() && (instance.getItemTypeHash() == item.getItemTypeHash())) {
                 BungieResponse<Integer> equipResponse = destinyApi.equipItem(
                         new EquipCommand(anAccount.withId().withMembershipType(),
                                 item.getBungieItemInstanceId(),
@@ -213,7 +213,7 @@ public class ACLInventoryService implements DestinyInventoryService {
     public boolean unequip(String anItemId, Character onCharacter, Account anAccount) {
         Item item = onCharacter.itemOfId(anItemId);
         for (Item instance : onCharacter.items()) {
-            if (instance != item && (instance.getBungieBucketTypeHash() == item.getBungieBucketTypeHash()) && !instance.getTierTypeName().equals("Exotic")) {
+            if (instance != item && (instance.getItemTypeHash() == item.getItemTypeHash()) && !instance.getTierTypeName().equals("Exotic")) {
                 BungieResponse<Integer> equipResponse = destinyApi.equipItem(
                         new EquipCommand(anAccount.withId().withMembershipType(),
                                 instance.getBungieItemInstanceId(),

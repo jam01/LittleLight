@@ -15,7 +15,7 @@ import java.util.Map;
  * Created by jam01 on 6/9/16.
  */
 public abstract class ItemBag {
-    private static final List<Long> ITEM_ORDER;
+    public static final List<Long> ITEM_ORDER;
 
     static {
         ITEM_ORDER = new ArrayList<>();
@@ -152,7 +152,7 @@ public abstract class ItemBag {
         Collections.sort(toReturn, new Comparator<Item>() {
             @Override
             public int compare(Item o1, Item o2) {
-                return ITEM_ORDER.indexOf(o1.getBungieBucketTypeHash()) - ITEM_ORDER.indexOf(o2.getBungieBucketTypeHash());
+                return ITEM_ORDER.indexOf(o1.getItemTypeHash()) - ITEM_ORDER.indexOf(o2.getItemTypeHash());
             }
         });
 

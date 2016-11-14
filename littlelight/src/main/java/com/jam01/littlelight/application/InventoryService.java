@@ -9,12 +9,15 @@ import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.InventoryRepository;
 import com.jam01.littlelight.domain.inventory.Item;
+import com.jam01.littlelight.domain.inventory.ItemBag;
 import com.jam01.littlelight.domain.inventory.ItemBagUpdated;
 import com.jam01.littlelight.domain.inventory.ItemEquipped;
 import com.jam01.littlelight.domain.inventory.ItemTransferred;
 import com.jam01.littlelight.domain.inventory.ItemType;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -63,7 +66,14 @@ public class InventoryService {
     }
 
     public List<ItemType> exotics() {
-        return new ArrayList<>(destinyService.getExoticTypes());
+        List<ItemType> toReturn = new ArrayList<>(destinyService.getExoticTypes());
+        Collections.sort(toReturn, new Comparator<ItemType>() {
+            @Override
+            public int compare(ItemType o1, ItemType o2) {
+                return ItemBag.ITEM_ORDER.indexOf(o1.getTypeHash()) - ItemBag.ITEM_ORDER.indexOf(o2.getTypeHash());
+            }
+        });
+        return toReturn;
     }
 
     public List<Item> exoticsOf(AccountId anAccountId) {

@@ -162,16 +162,12 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
                 RecyclerView recyclerView = new RecyclerView(getContext());
-                final SectionedItemTypeRecyclerAdapter testAdapter =
-                        new SectionedItemTypeRecyclerAdapter(subLists.get(position), exoticsList.getExoticItems(), getContext());
+                final ItemTypeAdapter testAdapter =
+                        new ItemTypeAdapter(subLists.get(position), exoticsList.getExoticItems(), R.layout.header, R.layout.layout_inventory_item_cell, getContext());
 
-                final int noOfColumns;
-                {
-                    DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-                    float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-                    noOfColumns = (int) (dpWidth / 90);
-                }
-
+                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+                int noOfColumns = (int) (dpWidth / 90);
 
                 GridLayoutManager gridManager = new GridLayoutManager(getContext(), noOfColumns);
                 gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -196,7 +192,7 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
                         .setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                             @Override
                             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                                final ItemType selectedItem = ((SectionedItemTypeRecyclerAdapter) recyclerView.getAdapter()).getItem(position);
+                                final ItemType selectedItem = ((ItemTypeAdapter) recyclerView.getAdapter()).getItem(position);
                                 View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
                                 TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
 

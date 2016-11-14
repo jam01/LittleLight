@@ -85,7 +85,7 @@ public class Inventory {
     public List<Item> getExotics() {
         List<Item> exoticsList = new ArrayList<>();
         for (ItemBag bag : allItemBags()) {
-            for (Item item : bag.items()) {
+            for (Item item : bag.orderedItems()) {
                 // TODO: 11/13/16 introduce an int tier type to optimize these comparisons
                 if (item.getTierTypeName().equals("Exotic")) {
                     exoticsList.add(item);

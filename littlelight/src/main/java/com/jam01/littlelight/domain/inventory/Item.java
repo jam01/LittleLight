@@ -104,7 +104,7 @@ public class Item {
         isEquipped = equipped;
     }
 
-    public long getBungieBucketTypeHash() {
+    public long getItemTypeHash() {
         return itemType.getTypeHash();
     }
 
@@ -122,6 +122,11 @@ public class Item {
 
     public String getItemSuperType() {
         return itemType.getItemSuperType();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Item && ((Item) obj).itemId.equals(this.itemId);
     }
 
     public static class Builder {
