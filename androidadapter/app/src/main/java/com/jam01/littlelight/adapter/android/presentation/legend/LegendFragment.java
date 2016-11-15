@@ -1,8 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.legend;
 
 import android.app.ProgressDialog;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -79,10 +77,9 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_inventory, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
 
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        tabs = (TabLayout) rootView.findViewById(R.id.tabs);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Little Light");
         progressDialog.setMessage("Searching for Guardians");
@@ -96,8 +93,8 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
         });
 
         mPager.setOffscreenPageLimit(3);
-        tabs.setSelectedTabIndicatorColor(Color.WHITE);
-        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
+//        tabs.setSelectedTabIndicatorColor(Color.WHITE);
+//        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
         tabs.setupWithViewPager(mPager);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -143,7 +140,7 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
 
                               @Override
                               public Object instantiateItem(ViewGroup container, int position) {
-                                  View rootView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_in_legend, container, false);
+                                  View rootView = LayoutInflater.from(getContext()).inflate(R.layout.view_legend, container, false);
                                   Character characterLegend = characters.get(position);
 
                                   TextView light = (TextView) rootView.findViewById(R.id.inLegend_tvLight);
@@ -194,5 +191,10 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
     @Override
     public void showError(String localizedMessage) {
         Snackbar.make(getView(), localizedMessage, Snackbar.LENGTH_LONG).show();
+    }
+
+    public Fragment setTabs(TabLayout tabs) {
+        this.tabs = tabs;
+        return this;
     }
 }

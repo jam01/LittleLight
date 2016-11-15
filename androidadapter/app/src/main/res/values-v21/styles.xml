@@ -1,9 +1,19 @@
 <resources>
 
-    <style name="AppTheme.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/material_blue_grey_500</item>
+        <item name="colorPrimaryDark">@color/material_blue_grey_700</item>
+        <item name="colorAccent">@color/material_blue_grey_100</item>
+        <item name="android:textColorPrimary">@android:color/primary_text_light</item>
+        <item name="android:colorBackground">@color/background_material_light</item>
+        <item name="windowActionModeOverlay">true</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/material_blue_grey_900</item>
+        <item name="android:statusBarColor">@color/material_blue_grey_900</item>
+        <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
+        <item name="android:textColorSecondaryInverse">@android:color/secondary_text_dark</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
     </style>
 </resources>

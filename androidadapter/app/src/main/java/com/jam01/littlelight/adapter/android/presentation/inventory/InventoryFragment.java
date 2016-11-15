@@ -2,8 +2,6 @@ package com.jam01.littlelight.adapter.android.presentation.inventory;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -98,12 +96,10 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView: ");
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_inventory, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
 
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        tabs = (TabLayout) rootView.findViewById(R.id.tabs);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Little Light");
         progressDialog.setMessage("Searching for Guardians");
@@ -117,8 +113,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         });
 
         mPager.setOffscreenPageLimit(3);
-        tabs.setSelectedTabIndicatorColor(Color.WHITE);
-        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
         tabs.setupWithViewPager(mPager);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -158,7 +152,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void onStop() {
-        Log.d(TAG, "onStop: ");
         presenter.unbindView();
         super.onStop();
     }
@@ -347,6 +340,11 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_inventory, menu);
+    }
+
+    public Fragment setTabs(TabLayout tabs) {
+        this.tabs = tabs;
+        return this;
     }
 
     private class SendModeCallback implements ActionMode.Callback {

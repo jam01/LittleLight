@@ -2,8 +2,6 @@ package com.jam01.littlelight.adapter.android.presentation.inventory;
 
 
 import android.app.ProgressDialog;
-import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -83,10 +81,9 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_inventory, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
 
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        tabs = (TabLayout) rootView.findViewById(R.id.tabs);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Little Light");
         progressDialog.setMessage("Searching for Guardians");
@@ -100,8 +97,8 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
         });
 
         mPager.setOffscreenPageLimit(3);
-        tabs.setSelectedTabIndicatorColor(Color.WHITE);
-        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
+//        tabs.setSelectedTabIndicatorColor(Color.WHITE);
+//        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
         tabs.setupWithViewPager(mPager);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -163,7 +160,7 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
             public Object instantiateItem(ViewGroup container, int position) {
                 RecyclerView recyclerView = new RecyclerView(getContext());
                 final ItemTypeAdapter testAdapter =
-                        new ItemTypeAdapter(subLists.get(position), exoticsList.getExoticItems(), R.layout.header, R.layout.layout_inventory_item_cell, getContext());
+                        new ItemTypeAdapter(subLists.get(position), exoticsList.getExoticItems(), R.layout.view_item_header_row, R.layout.view_item_tile, getContext());
 
                 DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
                 float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
@@ -265,5 +262,10 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
     @Override
     public void showError(String localizedMessage) {
         Snackbar.make(getView(), localizedMessage, Snackbar.LENGTH_LONG).show();
+    }
+
+    public Fragment setTabs(TabLayout tabs) {
+        this.tabs = tabs;
+        return this;
     }
 }

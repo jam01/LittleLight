@@ -41,6 +41,7 @@ public abstract class ItemBag {
         ITEM_ORDER.add(2197472680L);//"Quests");
         ITEM_ORDER.add(375726501L);//"Mission Items");
         ITEM_ORDER.add(434908299L);//, "Artifacts");
+        ITEM_ORDER.add(3313201758L);//9, "Ornaments");
         ITEM_ORDER.add(0L);//"All");
     }
 

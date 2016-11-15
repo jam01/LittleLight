@@ -48,7 +48,7 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Account toDraw = accounts.get(position);
-        final View toReturn = inflater.inflate(R.layout.account_row, parent, false);
+        final View toReturn = inflater.inflate(R.layout.view_account_row, parent, false);
         ((TextView) toReturn.findViewById(R.id.tvAccountName)).setText(toDraw.withName());
         Picasso.with(mContext)
                 .load(toDraw.profilePath())

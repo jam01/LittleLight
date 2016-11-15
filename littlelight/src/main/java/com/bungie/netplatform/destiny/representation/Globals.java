@@ -36,7 +36,6 @@ public class Globals {
         buckets.put(3796357825L, "Sparrow Horns");
         buckets.put(434908299L, "Artifacts");
         buckets.put(3313201758L, "Ornaments");
-        buckets.put(434908299L, "Artifacts");
     }
 
     static {

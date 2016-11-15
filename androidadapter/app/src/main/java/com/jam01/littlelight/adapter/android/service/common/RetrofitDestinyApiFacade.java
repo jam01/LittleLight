@@ -18,7 +18,6 @@ import java.io.InputStream;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -44,12 +43,12 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     public RetrofitDestinyApiFacade() {
         gson = new Gson();
 
-        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+//        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+//        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
         okHttpClient = new OkHttpClient.Builder()
                 .retryOnConnectionFailure(true)
-                .addInterceptor(httpLoggingInterceptor)
+//                .addInterceptor(httpLoggingInterceptor)
                 .build();
 
         retrofit = new Retrofit.Builder()

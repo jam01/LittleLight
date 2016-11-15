@@ -36,7 +36,7 @@ public class ActivityAdapter extends ArrayAdapter<Activity> {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Activity toDraw = activities.get(position);
-        final View toReturn = inflater.inflate(R.layout.layout_activity, parent, false);
+        final View toReturn = inflater.inflate(R.layout.view_activity_tile, parent, false);
         ((TextView) toReturn.findViewById(R.id.tvActivityName)).setText(toDraw.getName());
         LinearLayout checkboxes = (LinearLayout) toReturn.findViewById(R.id.ll_checkboxes);
 

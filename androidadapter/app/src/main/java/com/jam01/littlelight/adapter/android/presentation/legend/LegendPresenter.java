@@ -1,5 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.legend;
 
+import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.legend.Legend;
@@ -91,9 +92,14 @@ public class LegendPresenter {
     private class OnErrorAction implements Consumer<Throwable> {
         @Override
         public void accept(Throwable throwable) throws Exception {
-            throwable.printStackTrace();
-            view.showError(throwable.getLocalizedMessage());
-            view.showLoading(false);
+            if (throwable instanceof BungieResponseException) {
+                throwable.printStackTrace();
+                view.showError(throwable.getLocalizedMessage());
+                view.showLoading(false);
+            } else {
+                throwable.printStackTrace();
+                throw new IllegalStateException("Something went wrong, Little Light will check the cause and address the issue.", throwable);
+            }
         }
     }
 }

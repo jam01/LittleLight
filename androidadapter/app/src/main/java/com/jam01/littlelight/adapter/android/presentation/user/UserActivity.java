@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -45,6 +46,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
     private View headerView;
     private View spinnerArrow;
     private ImageView accountPic;
+    private TabLayout tabs;
     private String TAG = this.getClass().getSimpleName();
 
     @Override
@@ -72,6 +74,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         accountListView = (ListView) headerView.findViewById(R.id.lvAccountList);
         spinnerArrow = headerView.findViewById(R.id.ivSpinnerArrow);
         accountPic = (ImageView) headerView.findViewById(R.id.ivAccountPic);
+        tabs = (TabLayout) findViewById(R.id.tabs);
 
         headerView.findViewById(R.id.bAddAccount).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,12 +161,12 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+//        int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -175,29 +178,28 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_inventory:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
+                        .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId).setTabs(tabs))
                         .commit();
                 break;
             case R.id.nav_legend:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, LegendFragment.newInstance(accountSelectedId))
+                        .replace(R.id.account_frame, LegendFragment.newInstance(accountSelectedId).setTabs(tabs))
                         .commit();
                 break;
             case R.id.nav_exotics:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, ExoticsFragment.newInstance(accountSelectedId))
+                        .replace(R.id.account_frame, ExoticsFragment.newInstance(accountSelectedId).setTabs(tabs))
                         .commit();
                 break;
             case R.id.nav_activities:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, ActivityFragment.newInstance(accountSelectedId))
+                        .replace(R.id.account_frame, ActivityFragment.newInstance(accountSelectedId).setTabs(tabs))
                         .commit();
                 break;
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -263,7 +265,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
     public void setUser(User user) {
         final Context context = this;
         final List<Account> registeredAccounts = new ArrayList<>(user.allRegisteredAccounts());
-        final AccountsAdapter accountsAdapter = new AccountsAdapter(getApplicationContext(), R.layout.account_row, registeredAccounts);
+        final AccountsAdapter accountsAdapter = new AccountsAdapter(getApplicationContext(), R.layout.view_account_row, registeredAccounts);
         accountsAdapter.setOnItemRemoveClickListener(new AccountsAdapter.OnItemRemoveClickListener() {
             @Override
             public void onItemRemoveClick(View view, final int position) {
@@ -325,7 +327,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         accountSelectedId = anAccount.withId();
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
+                .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId).setTabs(tabs))
                 .commit();
 
         ((TextView) headerView.findViewById(R.id.tvAccountNameSelected)).setText(anAccount.withName());

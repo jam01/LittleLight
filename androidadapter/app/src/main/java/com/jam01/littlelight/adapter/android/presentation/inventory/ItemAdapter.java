@@ -27,25 +27,30 @@ public class ItemAdapter extends SelectableSectionedRecyclerViewAdapter<Item> {
     protected void onBindItemViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         ItemViewHolder itemViewHolder = (ItemViewHolder) viewHolder;
         ImageView icon = itemViewHolder.imageView;
-        TextView amount = itemViewHolder.textView;
+        TextView amount = itemViewHolder.tvAmount;
+        TextView itemName = itemViewHolder.tvFirstLine;
+        TextView subType = itemViewHolder.tvSecondLine;
         CheckBox checkBox = itemViewHolder.checkBox;
+        View tile = itemViewHolder.tile;
 
         Item item = mItems.get(viewPositionToItemPosition(position));
         Picasso.with(mContext)
                 .load(item.getIconUrl())
-                .resize(90, 90)
                 .placeholder(R.mipmap.ic_launcher)
-                .centerCrop()
+                .fit()
                 .into(icon);
+
+        itemName.setText(item.getItemName());
+        subType.setText(item.getItemSubType());
 
         if (item.getMaxStackSize() > 1) {
             amount.setText(String.valueOf(item.getStackSize()));
             amount.setTextColor(Color.WHITE);
             amount.setBackgroundColor(0xAA000000);
-        } else if (item.isEquipped()) {
-            amount.setTextColor(Color.WHITE);
-            amount.setText("Equipped");
-            amount.setBackgroundColor(0xAA000000);
+//        } else if (item.isEquipped()) {
+//            amount.setTextColor(Color.WHITE);
+//            amount.setText("Equipped");
+//            amount.setBackgroundColor(0xAA000000);
         } else {
             amount.setText("");
             amount.setBackgroundColor(Color.TRANSPARENT);
@@ -57,6 +62,24 @@ public class ItemAdapter extends SelectableSectionedRecyclerViewAdapter<Item> {
         } else {
             icon.setPadding(0, 0, 0, 0);
             icon.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        switch (item.getTierTypeName()) {
+            case "Common":
+                tile.setBackgroundColor(mContext.getResources().getColor(R.color.colorCommonItem));
+                break;
+            case "Uncommon":
+                tile.setBackgroundColor(mContext.getResources().getColor(R.color.colorUncommonItem));
+                break;
+            case "Rare":
+                tile.setBackgroundColor(mContext.getResources().getColor(R.color.colorRareItem));
+                break;
+            case "Legendary":
+                tile.setBackgroundColor(mContext.getResources().getColor(R.color.colorLegendaryItem));
+                break;
+            case "Exotic":
+                tile.setBackgroundColor(mContext.getResources().getColor(R.color.colorExoticItem));
+                break;
         }
 
         // Highlight the item if it's selected
@@ -99,13 +122,19 @@ public class ItemAdapter extends SelectableSectionedRecyclerViewAdapter<Item> {
 
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
-        TextView textView;
+        TextView tvAmount;
+        TextView tvFirstLine;
+        TextView tvSecondLine;
         CheckBox checkBox;
+        View tile;
 
         public ItemViewHolder(View itemView) {
             super(itemView);
+            tile = itemView;
             imageView = (ImageView) itemView.findViewById(R.id.ivIcon);
-            textView = (TextView) itemView.findViewById(R.id.tvAmount);
+            tvAmount = (TextView) itemView.findViewById(R.id.tvAmount);
+            tvFirstLine = (TextView) itemView.findViewById(R.id.tvItemTileFirstLine);
+            tvSecondLine = (TextView) itemView.findViewById(R.id.tvItemTileSecondLine);
             checkBox = (CheckBox) itemView.findViewById(R.id.cbCheck);
         }
     }

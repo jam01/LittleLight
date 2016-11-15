@@ -130,6 +130,7 @@ public abstract class SelectableSectionedRecyclerViewAdapter<T> extends Selectab
         //Find if we already have this type of item
         if (headers.containsValue(getItemType(itemToAdd))) {
             //Find the entry for its type
+            @SuppressWarnings("unchecked")
             List<Map.Entry<Integer, Long>> entryList = new ArrayList<Map.Entry<Integer, Long>>((Collection) headers.entrySet());
             for (int i = 0; i < headers.size(); i++) {
                 if (entryList.get(i).getValue().equals(getItemType(itemToAdd))) {
@@ -159,7 +160,7 @@ public abstract class SelectableSectionedRecyclerViewAdapter<T> extends Selectab
     private void shiftHeadersBy(int headerOffset, int itemPosition, int direction) {
         //Move subsequent headers positions up
         Map<Integer, Object> newState = new TreeMap<>();
-        for (TreeMap.Entry headerEntry : headers.entrySet()) {
+        for (Map.Entry headerEntry : headers.entrySet()) {
             if ((int) headerEntry.getKey() > itemPosition)
                 newState.put((int) headerEntry.getKey() + (direction * headerOffset), headerEntry.getValue());
             else
