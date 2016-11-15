@@ -1,7 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.inventory;
 
 import android.content.Context;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -30,7 +29,7 @@ public class ItemBagView extends RecyclerView {
 
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-        int noOfColumns = (int) (dpWidth / 120);
+        int noOfColumns = (int) (dpWidth / 108);
 
         GridLayoutManager gridManager = new GridLayoutManager(getContext(), noOfColumns);
         gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -46,9 +45,9 @@ public class ItemBagView extends RecyclerView {
                 }
             }
         });
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this.getContext(),
-                gridManager.getOrientation());
-        this.addItemDecoration(dividerItemDecoration);
+//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this.getContext(),
+//                gridManager.getOrientation());
+//        this.addItemDecoration(dividerItemDecoration);
 
         this.setHasFixedSize(true);
         this.setLayoutManager(gridManager);

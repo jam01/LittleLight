@@ -1,9 +1,10 @@
 package com.jam01.littlelight.adapter.android.presentation.inventory;
 
+import com.jam01.littlelight.adapter.common.presentation.InventoryDPO;
 import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.InventoryService;
+import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
-import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
 import com.jam01.littlelight.domain.inventory.ItemBagUpdated;
@@ -27,7 +28,8 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class InventoryPresenter {
     private final String TAG = getClass().getSimpleName();
-    private InventoryService service;
+    private InventoryService inventoryService;
+    private LegendService legendService;
     private InventoryView view;
     private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
@@ -35,8 +37,9 @@ public class InventoryPresenter {
     private OnCompletedAction completedAction = new OnCompletedAction();
 
     @Inject
-    public InventoryPresenter(InventoryService inventoryService) {
-        this.service = inventoryService;
+    public InventoryPresenter(InventoryService inventoryService, LegendService legendService) {
+        this.inventoryService = inventoryService;
+        this.legendService = legendService;
     }
 
     public void bindView(InventoryView inventoryView) {
@@ -49,7 +52,7 @@ public class InventoryPresenter {
             subscriptions = new CompositeDisposable();
         }
 
-        subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
+        subscriptions.add(inventoryService.subscribeToInventoryEvents(anAccountId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(domainEvent -> {
@@ -70,7 +73,7 @@ public class InventoryPresenter {
                 }, errorAction));
 
 
-        subscriptions.add(Single.defer(() -> Single.just(service.ofAccount(anAccountId)))
+        subscriptions.add(Single.defer(() -> Single.just(new InventoryDPO(inventoryService.ofAccount(anAccountId), legendService.ofAccount(anAccountId))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(inventoryAction, errorAction));
@@ -89,7 +92,7 @@ public class InventoryPresenter {
         // TODO: 11/10/16 Use streams to map items to their Ids whenever streams is available
         subscriptions.add(Completable.fromAction(() -> {
             for (Item instance : toTransfer)
-                service.transferItem(instance.getItemId(), toItemBagId);
+                inventoryService.transferItem(instance.getItemId(), toItemBagId);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -98,21 +101,21 @@ public class InventoryPresenter {
 
     public void equipItem(final Item item, final String characterId) {
         view.showLoading(true);
-        subscriptions.add(Completable.fromAction(() -> service.equipItem(item.getBungieItemInstanceId(), characterId))
+        subscriptions.add(Completable.fromAction(() -> inventoryService.equipItem(item.getBungieItemInstanceId(), characterId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(completedAction, errorAction));
     }
 
     public void refresh(final AccountId anAccountId) {
-        subscriptions.add(Completable.fromAction(() -> service.synchronizeInventoryOf(anAccountId))
+        subscriptions.add(Completable.fromAction(() -> inventoryService.synchronizeInventoryOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(completedAction, errorAction));
     }
 
     public interface InventoryView {
-        void renderInventory(Inventory inventory);
+        void renderInventory(InventoryDPO inventory);
 
         void renderEmblem(String url);
 
@@ -136,9 +139,9 @@ public class InventoryPresenter {
         }
     }
 
-    private class OnInventoryAction implements Consumer<Inventory> {
+    private class OnInventoryAction implements Consumer<InventoryDPO> {
         @Override
-        public void accept(Inventory account) {
+        public void accept(InventoryDPO account) {
             view.renderInventory(account);
             view.showLoading(false);
         }

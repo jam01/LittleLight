@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
+import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
 import com.jam01.littlelight.adapter.common.presentation.ExoticsDPO;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.ItemType;
@@ -82,7 +83,7 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
-
+        tabs = ((UserActivity) getActivity()).getTabs();
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Little Light");
@@ -196,11 +197,20 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
                                 title.setText(selectedItem.getItemName());
 
                                 switch (selectedItem.getTierTypeName()) {
+                                    case "Common":
+                                        title.setBackgroundColor(getResources().getColor(R.color.colorCommonItem));
+                                        break;
+                                    case "Uncommon":
+                                        title.setBackgroundColor(getResources().getColor(R.color.colorUncommonItem));
+                                        break;
+                                    case "Rare":
+                                        title.setBackgroundColor(getResources().getColor(R.color.colorRareItem));
+                                        break;
                                     case "Legendary":
-                                        title.setBackgroundColor(0xff5a1bff);
+                                        title.setBackgroundColor(getResources().getColor(R.color.colorLegendaryItem));
                                         break;
                                     case "Exotic":
-                                        title.setBackgroundColor(0xffffb200);
+                                        title.setBackgroundColor(getResources().getColor(R.color.colorExoticItem));
                                         break;
                                 }
                                 new AlertDialog.Builder(getContext())
@@ -262,10 +272,5 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
     @Override
     public void showError(String localizedMessage) {
         Snackbar.make(getView(), localizedMessage, Snackbar.LENGTH_LONG).show();
-    }
-
-    public Fragment setTabs(TabLayout tabs) {
-        this.tabs = tabs;
-        return this;
     }
 }

@@ -11,6 +11,7 @@ import com.jam01.littlelight.adapter.android.presentation.inventory.ExoticsPrese
 import com.jam01.littlelight.adapter.android.presentation.inventory.InventoryPresenter;
 import com.jam01.littlelight.adapter.android.presentation.legend.LegendPresenter;
 import com.jam01.littlelight.adapter.android.presentation.user.UserPresenter;
+import com.squareup.picasso.Picasso;
 
 import javax.inject.Singleton;
 
@@ -27,7 +28,10 @@ public class LittleLight extends Application {
         super.onCreate();
         component = DaggerLittleLight_LittleLightComponent.builder()
                 .androidModule(new AndroidModule(this))
+                .adapterModule(new AdapterModule("https://www.bungie.net"))
                 .build();
+
+        Picasso.setSingletonInstance(component.providePicasso());
     }
 
     public LittleLightComponent getComponent() {
@@ -46,5 +50,9 @@ public class LittleLight extends Application {
         ExoticsPresenter provideExoticsPresenter();
 
         ActivityPresenter provideActivityPresenter();
+
+        Picasso providePicasso();
     }
+
+
 }

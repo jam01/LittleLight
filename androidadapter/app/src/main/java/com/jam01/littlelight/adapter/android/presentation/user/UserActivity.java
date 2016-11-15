@@ -178,25 +178,25 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_inventory:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId).setTabs(tabs))
+                        .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
                         .commit();
                 break;
             case R.id.nav_legend:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, LegendFragment.newInstance(accountSelectedId).setTabs(tabs))
+                        .replace(R.id.account_frame, LegendFragment.newInstance(accountSelectedId))
                         .commit();
                 break;
             case R.id.nav_exotics:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, ExoticsFragment.newInstance(accountSelectedId).setTabs(tabs))
+                        .replace(R.id.account_frame, ExoticsFragment.newInstance(accountSelectedId))
                         .commit();
                 break;
             case R.id.nav_activities:
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.account_frame, ActivityFragment.newInstance(accountSelectedId).setTabs(tabs))
+                        .replace(R.id.account_frame, ActivityFragment.newInstance(accountSelectedId))
                         .commit();
                 break;
         }
@@ -327,7 +327,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         accountSelectedId = anAccount.withId();
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId).setTabs(tabs))
+                .replace(R.id.account_frame, InventoryFragment.newInstance(accountSelectedId))
                 .commit();
 
         ((TextView) headerView.findViewById(R.id.tvAccountNameSelected)).setText(anAccount.withName());
@@ -345,5 +345,9 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         } else {
             findViewById(R.id.pbMain).setVisibility(View.GONE);
         }
+    }
+
+    public TabLayout getTabs() {
+        return tabs;
     }
 }

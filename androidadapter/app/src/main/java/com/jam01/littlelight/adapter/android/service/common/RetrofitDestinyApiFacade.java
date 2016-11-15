@@ -10,17 +10,14 @@ import com.bungie.netplatform.destiny.representation.CharacterInventory;
 import com.bungie.netplatform.destiny.representation.DataResponse;
 import com.bungie.netplatform.destiny.representation.UserResponse;
 import com.bungie.netplatform.destiny.representation.Vault;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
@@ -34,29 +31,10 @@ import retrofit2.http.Url;
  * Created by jam01 on 7/26/16.
  */
 public class RetrofitDestinyApiFacade implements DestinyApi {
-    private final OkHttpClient okHttpClient;
-    private final Retrofit retrofit;
     private final RetrofitDestinyApi bungieApi;
     private final String TAG = this.getClass().getSimpleName();
-    private Gson gson;
 
-    public RetrofitDestinyApiFacade() {
-        gson = new Gson();
-
-//        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
-//        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-
-        okHttpClient = new OkHttpClient.Builder()
-                .retryOnConnectionFailure(true)
-//                .addInterceptor(httpLoggingInterceptor)
-                .build();
-
-        retrofit = new Retrofit.Builder()
-                .client(okHttpClient)
-                .baseUrl("https://www.bungie.net")
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
+    public RetrofitDestinyApiFacade(Retrofit retrofit) {
         bungieApi = retrofit.create(RetrofitDestinyApi.class);
     }
 

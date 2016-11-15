@@ -15,6 +15,7 @@ import android.widget.GridView;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
+import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
 import com.jam01.littlelight.domain.activity.Account;
 import com.jam01.littlelight.domain.activity.Character;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -77,7 +78,7 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
-
+        tabs = ((UserActivity) getActivity()).getTabs();
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Little Light");
@@ -170,10 +171,5 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
     @Override
     public void showError(String localizedMessage) {
         Snackbar.make(getView(), localizedMessage, Snackbar.LENGTH_LONG).show();
-    }
-
-    public Fragment setTabs(TabLayout tabs) {
-        this.tabs = tabs;
-        return this;
     }
 }

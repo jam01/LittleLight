@@ -23,17 +23,21 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
+import com.jam01.littlelight.adapter.android.presentation.user.CircleTransform;
+import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
+import com.jam01.littlelight.adapter.common.presentation.InventoryDPO;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
-import com.jam01.littlelight.domain.inventory.Character;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
-import com.jam01.littlelight.domain.inventory.Vault;
+import com.jam01.littlelight.domain.legend.Character;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +62,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private AccountId accountId;
     private ActionMode actionMode = null;
     private Map<String, ItemBagView> itemAdapterMap;
+//    private List<>
 
 
     public InventoryFragment() {
@@ -98,7 +103,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
-
+        tabs = ((UserActivity) getActivity()).getTabs();
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setTitle("Little Light");
@@ -121,6 +126,9 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
             @Override
             public void onPageSelected(int position) {
+//                Single.defer(() -> Single.just(Picasso.with(getContext()).load(characters.get(finalI).emblemPath()).get())
+//                        .subscribeOn(Schedulers.io()))
+//                        .doOnSuccess(bitmap -> tabs.getTabAt(finalI).setIcon(new BitmapDrawable(bitmap)));
             }
 
             @Override
@@ -157,7 +165,8 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     }
 
     @Override
-    public void renderInventory(final Inventory inventory) {
+    public void renderInventory(InventoryDPO inventoryDPO) {
+        final Inventory inventory = inventoryDPO.inventory;
         itemAdapterMap = new HashMap<>(inventory.allItemBags().size());
         mPager.setAdapter(new PagerAdapter() {
                               List<ItemBag> bags = new ArrayList<>(inventory.allItemBags());
@@ -180,15 +189,15 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                                   return itemBagView;
                               }
 
-                              @Override
-                              public CharSequence getPageTitle(int position) {
-                                  if (bags.get(position) instanceof Character) {
-                                      return "Character" + position;
-                                  } else if (bags.get(position) instanceof Vault) {
-                                      return "Vault";
-                                  } else
-                                      return super.getPageTitle(position);
-                              }
+//                              @Override
+//                              public CharSequence getPageTitle(int position) {
+//                                  if (bags.get(position) instanceof Character) {
+//                                      return "Character" + position;
+//                                  } else if (bags.get(position) instanceof Vault) {
+//                                      return "Vault";
+//                                  } else
+//                                      return super.getPageTitle(position);
+//                              }
 
                               @Override
                               public boolean isViewFromObject(View view, Object object) {
@@ -201,11 +210,35 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                               }
                           }
         );
+
+        List<Character> characters = new ArrayList<>(inventoryDPO.legend.withCharacters());
+
+//        int pix = (int) ((32 * getContext().getResources().getDisplayMetrics().density) + 0.5);
+
+        for (int i = 0; i < tabs.getTabCount(); i++) {
+            tabs.getTabAt(i).setCustomView(R.layout.tab);
+        }
+
+        for (int i = 0; i < characters.size(); i++) {
+            Picasso.with(getContext())
+                    .load(characters.get(i).emblemPath())
+                    .transform(new CircleTransform())
+                    .fit()
+                    .into((ImageView) tabs.getTabAt(i)
+                            .getCustomView()
+                            .findViewById(R.id.ivTabIcon));
+        }
     }
 
     @Override
     public void renderEmblem(String url) {
-
+//        Bitmap bitmap = imageContainer.getBitmap();
+//        int tabsHeight = (int) (48 * mContext.getResources().getDisplayMetrics().density);
+//        if (bitmap != null) {
+//            bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), mActionBar.getHeight() + tabsHeight, false);
+//            mActionBar.setBackgroundDrawable(new BitmapDrawable(Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight() - tabsHeight)));
+//            tabs.setBackgroundDrawable(new BitmapDrawable(Bitmap.createBitmap(bitmap, 0, bitmap.getHeight() - tabsHeight, bitmap.getWidth(), tabsHeight)));
+//        }
     }
 
     @Override
@@ -342,11 +375,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         inflater.inflate(R.menu.menu_inventory, menu);
     }
 
-    public Fragment setTabs(TabLayout tabs) {
-        this.tabs = tabs;
-        return this;
-    }
-
     private class SendModeCallback implements ActionMode.Callback {
 
         @Override
@@ -429,13 +457,21 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                             third.setVisibility(View.VISIBLE);
                             break;
                     }
-
                     switch (selectedItem.getTierTypeName()) {
+                        case "Common":
+                            title.setBackgroundColor(getResources().getColor(R.color.colorCommonItem));
+                            break;
+                        case "Uncommon":
+                            title.setBackgroundColor(getResources().getColor(R.color.colorUncommonItem));
+                            break;
+                        case "Rare":
+                            title.setBackgroundColor(getResources().getColor(R.color.colorRareItem));
+                            break;
                         case "Legendary":
-                            title.setBackgroundColor(0xff5a1bff);
+                            title.setBackgroundColor(getResources().getColor(R.color.colorLegendaryItem));
                             break;
                         case "Exotic":
-                            title.setBackgroundColor(0xffffb200);
+                            title.setBackgroundColor(getResources().getColor(R.color.colorExoticItem));
                             break;
                     }
                     new AlertDialog.Builder(getContext())

@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.domain.inventory.Item;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class ItemAdapter extends SelectableSectionedRecyclerViewAdapter<Item> {
         Item item = mItems.get(viewPositionToItemPosition(position));
         Picasso.with(mContext)
                 .load(item.getIconUrl())
+                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .placeholder(R.mipmap.ic_launcher)
                 .fit()
                 .into(icon);

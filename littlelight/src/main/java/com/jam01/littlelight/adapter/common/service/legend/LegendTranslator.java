@@ -28,8 +28,8 @@ public class LegendTranslator {
     private Character transform(com.bungie.netplatform.destiny.representation.Character bungieCharacter, AccountId aAccountId) {
         Character.Builder builder = new Character.Builder(bungieCharacter.getCharacterBase().getCharacterId(), aAccountId);
 
-        builder.emblemPath(bungieCharacter.getEmblemPath());
-        builder.emblemBackgroundPath((bungieCharacter.getBackgroundPath()));
+        builder.emblemPath("https://www.bungie.net" + bungieCharacter.getEmblemPath());
+        builder.emblemBackgroundPath("https://www.bungie.net" + bungieCharacter.getBackgroundPath());
         builder.light(bungieCharacter.getCharacterLevel().intValue());
         builder.level(bungieCharacter.getCharacterBase().getPowerLevel().intValue());
         builder.defense(bungieCharacter.getCharacterBase().getStats().getSTAT_DEFENSE().getValue().intValue());
