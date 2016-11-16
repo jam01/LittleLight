@@ -187,8 +187,9 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                 destinations.add(new ItemBagDestination("Vault", null, null, bag.withId()));
         }
 
-        mPager.setAdapter(new ItemBagViewAdapter(bagViews));
+        mPager.setAdapter(new ItemBagViewPagerAdapter(bagViews));
 
+        //Set icons on tabs
         List<Character> characters = new ArrayList<>(legend.withCharacters());
         for (int i = 0; i < tabs.getTabCount(); i++) {
             tabs.getTabAt(i).setCustomView(R.layout.view_tablayout_tab);

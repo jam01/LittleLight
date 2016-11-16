@@ -8,17 +8,23 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
+import android.widget.ImageView;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
+import com.jam01.littlelight.adapter.android.presentation.user.CircleTransform;
 import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
-import com.jam01.littlelight.domain.activity.Account;
+import com.jam01.littlelight.adapter.android.utils.SelectableSectionedRecyclerViewAdapter;
+import com.jam01.littlelight.adapter.common.presentation.ActivitiesDPO;
 import com.jam01.littlelight.domain.activity.Character;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,24 +84,16 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
-        tabs = ((UserActivity) getActivity()).getTabs();
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Little Light");
-        progressDialog.setMessage("Searching for Guardians");
+        tabs = ((UserActivity) getActivity()).getTabs();
+        tabs.removeAllTabs();
+
+        ((UserActivity) getActivity()).getSupportActionBar().setTitle("Activities");
 
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                presenter.refresh(accountId);
-            }
-        });
+        swipeContainer.setOnRefreshListener(() -> presenter.refresh(accountId));
 
         mPager.setOffscreenPageLimit(3);
-//        tabs.setSelectedTabIndicatorColor(Color.WHITE);
-//        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
-        tabs.setupWithViewPager(mPager);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -111,6 +109,7 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
                 swipeContainer.setEnabled(state == ViewPager.SCROLL_STATE_IDLE);
             }
         });
+        tabs.setupWithViewPager(mPager);
 
         return rootView;
     }
@@ -129,21 +128,45 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
     }
 
     @Override
-    public void renderActivity(final Account account) {
-        final List<Character> characterList = new ArrayList<>(account.withCharacters());
+    public void renderActivity(final ActivitiesDPO account) {
+        final List<Character> characterList = new ArrayList<>(account.activities.withCharacters());
         mPager.setAdapter(new PagerAdapter() {
             @Override
             public int getCount() {
-                return account.withCharacters().size();
+                return characterList.size();
             }
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
-                GridView rootView = new GridView(getContext());
-                rootView.setAdapter(new ActivityAdapter(getContext(), R.layout.view_activity_tile, new ArrayList<>(characterList.get(position).allActivities())));
-                rootView.setNumColumns(GridView.AUTO_FIT);
-                container.addView(rootView);
-                return rootView;
+                RecyclerView recyclerView = new RecyclerView(getContext());
+                final ActivityAdapter testAdapter = new ActivityAdapter(characterList.get(position).sortedActivities(),
+                        R.layout.view_item_header_row, R.layout.view_activity_tile, getContext());
+
+                DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+                int noOfColumns = (int) (dpWidth / (108 + 15));
+
+                GridLayoutManager gridManager = new GridLayoutManager(getContext(), noOfColumns);
+                gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                    @Override
+                    public int getSpanSize(int position) {
+                        switch (testAdapter.getItemViewType(position)) {
+                            case SelectableSectionedRecyclerViewAdapter.SECTION_TYPE:
+                                return noOfColumns;
+                            case SelectableSectionedRecyclerViewAdapter.ITEM_TYPE:
+                                return 1;
+                            default:
+                                return -1;
+                        }
+                    }
+                });
+
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setLayoutManager(gridManager);
+                recyclerView.setAdapter(testAdapter);
+
+                container.addView(recyclerView);
+                return recyclerView;
             }
 
             @Override
@@ -161,6 +184,19 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
                 collection.removeView((View) view);
             }
         });
+
+        //Set icons on tabs
+        List<com.jam01.littlelight.domain.legend.Character> characters = new ArrayList<>(account.legend.withCharacters());
+        for (int i = 0; i < tabs.getTabCount(); i++) {
+            tabs.getTabAt(i).setCustomView(R.layout.view_tablayout_tab);
+            Picasso.with(getContext())
+                    .load(characters.get(i).emblemPath())
+                    .transform(new CircleTransform())
+                    .fit()
+                    .into((ImageView) tabs.getTabAt(i)
+                            .getCustomView()
+                            .findViewById(R.id.ivTabIcon));
+        }
     }
 
     @Override

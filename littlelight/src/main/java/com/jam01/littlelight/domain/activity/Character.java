@@ -2,6 +2,8 @@ package com.jam01.littlelight.domain.activity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,4 +52,14 @@ public class Character {
         return activityMap.values();
     }
 
+    public List<Activity> sortedActivities() {
+        List<Activity> toReturn = new ArrayList<>(activityMap.values());
+        Collections.sort(toReturn, new Comparator<Activity>() {
+            @Override
+            public int compare(Activity o1, Activity o2) {
+                return o1.getActivityTypeInt() - o2.getActivityTypeInt();
+            }
+        });
+        return toReturn;
+    }
 }

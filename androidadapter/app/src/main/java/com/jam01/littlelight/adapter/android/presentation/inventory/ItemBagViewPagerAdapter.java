@@ -10,14 +10,14 @@ import java.util.List;
 /**
  * Created by jam01 on 11/15/16.
  */
-class ItemBagViewAdapter extends PagerAdapter {
+class ItemBagViewPagerAdapter extends PagerAdapter {
     private List<ItemBagView> bagViews;
 
-    public ItemBagViewAdapter(List<ItemBagView> bagViews) {
+    public ItemBagViewPagerAdapter(List<ItemBagView> bagViews) {
         this.bagViews = bagViews;
     }
 
-    public ItemBagViewAdapter() {
+    public ItemBagViewPagerAdapter() {
         this.bagViews = new ArrayList<>();
     }
 

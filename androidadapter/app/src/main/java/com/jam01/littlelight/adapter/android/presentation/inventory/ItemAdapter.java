@@ -50,10 +50,6 @@ public class ItemAdapter extends SelectableSectionedRecyclerViewAdapter<Item> {
             amount.setText(String.valueOf(item.getStackSize()));
             amount.setTextColor(Color.WHITE);
             amount.setBackgroundColor(mContext.getResources().getColor(R.color.colorTranslucid));
-//        } else if (item.isEquipped()) {
-//            amount.setTextColor(Color.WHITE);
-//            amount.setText("Equipped");
-//            amount.setBackgroundColor(0xAA000000);
         } else {
             amount.setText("");
             amount.setBackgroundColor(Color.TRANSPARENT);

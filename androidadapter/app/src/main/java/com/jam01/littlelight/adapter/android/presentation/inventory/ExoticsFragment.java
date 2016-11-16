@@ -22,6 +22,7 @@ import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
 import com.jam01.littlelight.adapter.android.utils.ItemClickSupport;
+import com.jam01.littlelight.adapter.android.utils.SelectableSectionedRecyclerViewAdapter;
 import com.jam01.littlelight.adapter.common.presentation.ExoticsDPO;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.ItemType;
@@ -84,24 +85,16 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
-        tabs = ((UserActivity) getActivity()).getTabs();
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Little Light");
-        progressDialog.setMessage("Searching for Guardians");
+        tabs = ((UserActivity) getActivity()).getTabs();
+        tabs.removeAllTabs();
+
+        ((UserActivity) getActivity()).getSupportActionBar().setTitle("Exotic Items");
 
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                presenter.refresh(accountId);
-            }
-        });
+        swipeContainer.setOnRefreshListener(() -> presenter.refresh(accountId));
 
         mPager.setOffscreenPageLimit(3);
-//        tabs.setSelectedTabIndicatorColor(Color.WHITE);
-//        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
-        tabs.setupWithViewPager(mPager);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -117,6 +110,7 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
                 swipeContainer.setEnabled(state == ViewPager.SCROLL_STATE_IDLE);
             }
         });
+        tabs.setupWithViewPager(mPager);
 
         return rootView;
     }
@@ -134,7 +128,7 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
         subLists.add(weaponItems);
 
         for (ItemType instance :
-                exoticsList.getExoticTypes()) {
+                exoticsList.exoticTypes) {
             if (instance.getClassType() == null)
                 weaponItems.add(instance);
             else
@@ -162,20 +156,20 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
             public Object instantiateItem(ViewGroup container, int position) {
                 RecyclerView recyclerView = new RecyclerView(getContext());
                 final ItemTypeAdapter testAdapter =
-                        new ItemTypeAdapter(subLists.get(position), exoticsList.getExoticItems(), R.layout.view_item_header_row, R.layout.view_item_tile, getContext());
+                        new ItemTypeAdapter(subLists.get(position), exoticsList.exoticItems, R.layout.view_item_header_row, R.layout.view_item_tile, getContext());
 
                 DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
                 float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-                int noOfColumns = (int) (dpWidth / 90);
+                int noOfColumns = (int) (dpWidth / 108);
 
                 GridLayoutManager gridManager = new GridLayoutManager(getContext(), noOfColumns);
                 gridManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                     @Override
                     public int getSpanSize(int position) {
                         switch (testAdapter.getItemViewType(position)) {
-                            case ItemBagView.SECTION_TYPE:
+                            case SelectableSectionedRecyclerViewAdapter.SECTION_TYPE:
                                 return noOfColumns;
-                            case ItemBagView.ITEM_TYPE:
+                            case SelectableSectionedRecyclerViewAdapter.ITEM_TYPE:
                                 return 1;
                             default:
                                 return -1;

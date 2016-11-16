@@ -11,15 +11,18 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
+import com.jam01.littlelight.adapter.android.presentation.user.CircleTransform;
 import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.legend.Character;
 import com.jam01.littlelight.domain.legend.Legend;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,24 +82,17 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
-        tabs = ((UserActivity) getActivity()).getTabs();
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Little Light");
-        progressDialog.setMessage("Searching for Guardians");
+        tabs = ((UserActivity) getActivity()).getTabs();
+        tabs.removeAllTabs();
+
+        ((UserActivity) getActivity()).getSupportActionBar().setTitle("Legend");
+
 
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                presenter.refresh(accountId);
-            }
-        });
+        swipeContainer.setOnRefreshListener(() -> presenter.refresh(accountId));
 
         mPager.setOffscreenPageLimit(3);
-//        tabs.setSelectedTabIndicatorColor(Color.WHITE);
-//        tabs.setTabTextColors(ColorStateList.valueOf(Color.WHITE));
-        tabs.setupWithViewPager(mPager);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -112,6 +108,7 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
                 swipeContainer.setEnabled(state == ViewPager.SCROLL_STATE_IDLE);
             }
         });
+        tabs.setupWithViewPager(mPager);
 
         return rootView;
     }
@@ -131,9 +128,9 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
 
     @Override
     public void renderLegend(final Legend legend) {
+        //Set icons on tabs
+        List<Character> characters = new ArrayList<>(legend.withCharacters());
         mPager.setAdapter(new PagerAdapter() {
-                              List<Character> characters = new ArrayList<>(legend.withCharacters());
-
                               @Override
                               public int getCount() {
                                   return characters.size();
@@ -167,11 +164,6 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
                               }
 
                               @Override
-                              public CharSequence getPageTitle(int position) {
-                                  return characters.get(position).name();
-                              }
-
-                              @Override
                               public boolean isViewFromObject(View view, Object object) {
                                   return view == object;
                               }
@@ -182,6 +174,17 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
                               }
                           }
         );
+
+        for (int i = 0; i < tabs.getTabCount(); i++) {
+            tabs.getTabAt(i).setCustomView(R.layout.view_tablayout_tab);
+            Picasso.with(getContext())
+                    .load(characters.get(i).emblemPath())
+                    .transform(new CircleTransform())
+                    .fit()
+                    .into((ImageView) tabs.getTabAt(i)
+                            .getCustomView()
+                            .findViewById(R.id.ivTabIcon));
+        }
     }
 
     @Override

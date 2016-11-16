@@ -42,7 +42,7 @@ public class ActivityTranslator {
                     activityName = "Unknown Arena";
                     break;
             }
-            activityMap.put(activityName, new Activity(activityName, instance.isCompleted, "https://www.bungie.net" + instance.iconPath, null));
+            activityMap.put(activityName, new Activity(activityName, instance.isCompleted, "https://www.bungie.net" + instance.iconPath, null, "Weekly Missions", 1));
         }
 
         for (Map.Entry<String, JsonElement> instance : advisorsForCharacter.activityAdvisors.entrySet()) {
@@ -75,20 +75,20 @@ public class ActivityTranslator {
                 activityMap.put(activityName, new Activity(activityName,
                         false,
                         "https://www.bungie.net" + raidActivities.iconPath,
-                        levels));
+                        levels, "Raids", 2));
             }
 
             activityJson = instance.getValue().getAsJsonObject().get("dailyCrucible");
             if (activityJson != null) {
                 DailyCrucible dailyCrucible = gson.fromJson(activityJson, DailyCrucible.class);
-                activityMap.put("Daily Crucible", new Activity("Daily Crucible", dailyCrucible.isCompleted, "https://www.bungie.net" + dailyCrucible.iconPath, null));
+                activityMap.put("Daily Crucible", new Activity("Daily Crucible", dailyCrucible.isCompleted, "https://www.bungie.net" + dailyCrucible.iconPath, null, "Daily Missions", 0));
             }
 
 
             activityJson = instance.getValue().getAsJsonObject().get("dailyChapterActivities");
             if (activityJson != null) {
                 DailyChapterActivities dailyChapterActivities = gson.fromJson(activityJson, DailyChapterActivities.class);
-                activityMap.put("Daily Story", new Activity("Daily Story", dailyChapterActivities.isCompleted, "https://www.bungie.net" + dailyChapterActivities.iconPath, null));
+                activityMap.put("Daily Story", new Activity("Daily Story", dailyChapterActivities.isCompleted, "https://www.bungie.net" + dailyChapterActivities.iconPath, null, "Daily Missions", 0));
             }
 
 
@@ -100,7 +100,7 @@ public class ActivityTranslator {
                     levels.put(tierInstance.difficultyIdentifier, tierInstance.isCompleted);
                 }
 
-                activityMap.put("Weekly Heroic", new Activity("Weekly Heroic", false, "https://www.bungie.net" + heroicStrike.iconPath, levels));
+                activityMap.put("Weekly Heroic", new Activity("Weekly Heroic", false, "https://www.bungie.net" + heroicStrike.iconPath, levels, "Weekly Missions", 1));
             }
 
 
@@ -112,7 +112,7 @@ public class ActivityTranslator {
                     levels.put(tierInstance.difficultyIdentifier, tierInstance.isCompleted);
                 }
 
-                activityMap.put("Weekly Nightfall", new Activity("Weekly Nightfall", false, "https://www.bungie.net" + nightfall.iconPath, levels));
+                activityMap.put("Weekly Nightfall", new Activity("Weekly Nightfall", false, "https://www.bungie.net" + nightfall.iconPath, levels, "Weekly Missions", 1));
             }
         }
         return activityMap;

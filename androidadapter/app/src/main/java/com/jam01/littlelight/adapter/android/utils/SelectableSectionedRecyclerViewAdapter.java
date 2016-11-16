@@ -18,8 +18,8 @@ import java.util.TreeMap;
 
 // See: https://gist.github.com/gabrielemariotti/4c189fb1124df4556058
 public abstract class SelectableSectionedRecyclerViewAdapter<T> extends SelectableAdapter<RecyclerView.ViewHolder> {
-    static final int SECTION_TYPE = 0;
-    static final int ITEM_TYPE = 1;
+    public static final int SECTION_TYPE = 0;
+    public static final int ITEM_TYPE = 1;
     static final int SHIFT_UP = -1;
     static final int SHIFT_DOWN = 1;
     private final int headerResource;

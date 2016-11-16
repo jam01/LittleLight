@@ -1,8 +1,9 @@
 package com.jam01.littlelight.adapter.android.presentation.activity;
 
+import com.jam01.littlelight.adapter.common.presentation.ActivitiesDPO;
 import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.ActivityService;
-import com.jam01.littlelight.domain.activity.Account;
+import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import javax.inject.Inject;
@@ -24,14 +25,16 @@ public class ActivityPresenter {
     private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
     private OnActivityAction activityAction = new OnActivityAction();
+    private LegendService legendService;
 
     @Inject
-    public ActivityPresenter(ActivityService service) {
+    public ActivityPresenter(ActivityService service, LegendService legendService) {
         this.service = service;
+        this.legendService = legendService;
     }
 
     public void refresh(final AccountId anAccountId) {
-        subscriptions.add(Single.defer(() -> Single.just(service.ofAccount(anAccountId)))
+        subscriptions.add(Single.defer(() -> Single.just(new ActivitiesDPO(legendService.ofAccount(anAccountId), service.ofAccount(anAccountId))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(activityAction, errorAction));
@@ -55,7 +58,7 @@ public class ActivityPresenter {
             subscriptions = new CompositeDisposable();
         }
 
-        subscriptions.add(Single.defer(() -> Single.just(service.ofAccount(anAccountId)))
+        subscriptions.add(Single.defer(() -> Single.just(new ActivitiesDPO(legendService.ofAccount(anAccountId), service.ofAccount(anAccountId))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(activityAction, errorAction));
@@ -63,16 +66,16 @@ public class ActivityPresenter {
 
     public interface ActivityView {
 
-        void renderActivity(Account account);
+        void renderActivity(ActivitiesDPO account);
 
         void showLoading(boolean show);
 
         void showError(String localizedMessage);
     }
 
-    private class OnActivityAction implements Consumer<Account> {
+    private class OnActivityAction implements Consumer<ActivitiesDPO> {
         @Override
-        public void accept(Account account) {
+        public void accept(ActivitiesDPO account) {
             view.renderActivity(account);
             view.showLoading(false);
         }

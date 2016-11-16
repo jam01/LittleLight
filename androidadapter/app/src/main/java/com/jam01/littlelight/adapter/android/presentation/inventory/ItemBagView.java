@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 
 import com.jam01.littlelight.R;
+import com.jam01.littlelight.adapter.android.utils.SelectableSectionedRecyclerViewAdapter;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
 
@@ -16,8 +17,6 @@ import java.util.List;
  * Created by jam01 on 10/2/16.
  */
 public class ItemBagView extends RecyclerView {
-    static final int SECTION_TYPE = 0;
-    static final int ITEM_TYPE = 1;
     private final String TAG = this.getClass().getSimpleName();
     private ItemBag itemBag;
     private ItemAdapter adapter;
@@ -36,18 +35,15 @@ public class ItemBagView extends RecyclerView {
             @Override
             public int getSpanSize(int position) {
                 switch (adapter.getItemViewType(position)) {
-                    case ItemBagView.SECTION_TYPE:
+                    case SelectableSectionedRecyclerViewAdapter.SECTION_TYPE:
                         return noOfColumns;
-                    case ItemBagView.ITEM_TYPE:
+                    case SelectableSectionedRecyclerViewAdapter.ITEM_TYPE:
                         return 1;
                     default:
                         return -1;
                 }
             }
         });
-//        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this.getContext(),
-//                gridManager.getOrientation());
-//        this.addItemDecoration(dividerItemDecoration);
 
         this.setHasFixedSize(true);
         this.setLayoutManager(gridManager);
