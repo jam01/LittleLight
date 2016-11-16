@@ -2,7 +2,16 @@
 <resources>
     <color name="material_blue_grey_950">#607d8b</color>
     <color name="default_primary">#607d8b</color>
-    <color name="material_blue_grey_500">#607d8b</color>
+    <color name="material_blue_grey_500">#3f51b5</color>
     <color name="material_blue_grey_700">#455a64</color>
     <color name="material_blue_grey_100">#cfd8dc</color>
+    <color name="colorPrimary">#424242</color>
+    <color name="colorSecondary">#0d47a1</color>
+    <color name="colorAccent">#ffb300</color>
+    <color name="navColor">#0a2b5f</color>
+    <color name="statusBarColor">#424242</color>
+    <color name="colorPrimaryDark">#212121</color>
+    <color name="primaryColor">#bdbdbd</color>
+    <color name="navBarColor">#424242</color>
+    <color name="accent_material_dark">#ffcf40</color>
 </resources>

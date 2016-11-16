@@ -55,6 +55,7 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
                 .transform(new CircleTransform())
                 .fit()
                 .into((ImageView) toReturn.findViewById(R.id.ivAccountIcon));
+        ((ImageView) toReturn.findViewById(R.id.ivRemove)).setImageResource(R.drawable.ic_delete_white_24dp);//.setImageDrawable(mContext.getDrawable(R.drawable.ic_remove_white_24dp));
         toReturn.findViewById(R.id.ivRemove).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

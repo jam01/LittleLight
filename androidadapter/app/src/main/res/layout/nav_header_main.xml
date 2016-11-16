@@ -28,22 +28,19 @@
                 android:id="@+id/tvAccountNameSelected"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_weight="9"
-                android:paddingTop="5dp"
+                android:layout_centerVertical="true"
                 android:text="Little Light"
-                android:textColor="?android:attr/textColorPrimaryInverse" />
+                android:textAppearance="?android:textAppearanceMedium" />
 
             <ImageView
                 android:id="@+id/ivSpinnerArrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:layout_weight="1"
+                android:layout_centerVertical="true"
                 android:src="@drawable/abc_spinner_mtrl_am_alpha" />
         </RelativeLayout>
 
@@ -67,7 +64,8 @@
         <com.jam01.littlelight.adapter.android.utils.NonScrollableListView
             android:id="@+id/lvAccountList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:dividerHeight="0dp" />
 
         <RelativeLayout
             android:id="@+id/bAddAccount"
@@ -84,7 +82,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
                 android:soundEffectsEnabled="true"
-                app:srcCompat="@drawable/ic_add_black_24dp" />
+                app:srcCompat="@drawable/ic_add_white_24dp" />
 
             <TextView
                 android:id="@+id/textView2"

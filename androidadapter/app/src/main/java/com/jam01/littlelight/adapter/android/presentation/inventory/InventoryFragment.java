@@ -62,7 +62,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private ActionMode actionMode = null;
     private Map<String, ItemBagView> bagViewMap;
     private List<ItemBagDestination> destinations;
-//    private ItemBagDestinationAdapter bagDestinationAdapter;
 
     public InventoryFragment() {
         // Required empty public constructor
@@ -104,6 +103,9 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
         tabs = ((UserActivity) getActivity()).getTabs();
+        tabs.removeAllTabs();
+
+        ((UserActivity) getActivity()).getSupportActionBar().setTitle("Inventory");
 
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(() -> presenter.refresh(accountId));
@@ -127,9 +129,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                 swipeContainer.setEnabled(state == ViewPager.SCROLL_STATE_IDLE);
             }
         });
-//        itemBagViewAdapter = new ItemBagViewAdapter();
-//        mPager.setAdapter(itemBagViewAdapter);
-
         tabs.setupWithViewPager(mPager);
 
         return rootView;

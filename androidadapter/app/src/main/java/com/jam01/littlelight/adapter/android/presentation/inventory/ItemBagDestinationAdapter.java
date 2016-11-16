@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jam01.littlelight.R;
-import com.jam01.littlelight.adapter.android.presentation.user.CircleTransform;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -43,13 +42,10 @@ public class ItemBagDestinationAdapter extends ArrayAdapter<ItemBagDestination> 
         Picasso.with(mContext)
                 .load(toDraw.iconPath)
                 .placeholder(R.drawable.vault)
-                .transform(new CircleTransform())
                 .fit()
                 .into((ImageView) toReturn.findViewById(R.id.ivItemBagIcon));
         Picasso.with(mContext)
                 .load(toDraw.emblemPath)
-//                .transform(new CircleTransform())
-//                .fit()
                 .into(new Target() {
                     @Override
                     public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {

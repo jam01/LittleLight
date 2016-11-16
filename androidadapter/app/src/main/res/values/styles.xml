@@ -2,9 +2,9 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/material_blue_grey_500</item>
-        <item name="colorPrimaryDark">@color/material_blue_grey_700</item>
-        <item name="colorAccent">@color/material_blue_grey_100</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@android:color/primary_text_light</item>
         <item name="android:colorBackground">@color/background_material_light</item>
         <item name="windowActionModeOverlay">true</item>
@@ -13,5 +13,13 @@
         <item name="android:textColorSecondary">@android:color/secondary_text_light</item>
         <item name="android:textColorSecondaryInverse">@android:color/secondary_text_dark</item>
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="android:textColorPrimaryInverse">@android:color/primary_text_dark</item>
+    </style>
+
+    <style name="DeadOrbit" parent="Theme.AppCompat.NoActionBar">
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 </resources>
