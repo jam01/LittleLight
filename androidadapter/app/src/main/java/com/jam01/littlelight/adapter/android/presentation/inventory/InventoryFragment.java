@@ -160,14 +160,15 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         Inventory inventory = inventoryDPO.inventory;
         Legend legend = inventoryDPO.legend;
 
-        List<ItemBagView> bagViews = new ArrayList<>(inventory.allItemBags().size());
+        List<ItemBag> bags = new ArrayList<>(inventory.allItemBags());
+        List<ItemBagView> bagViews = new ArrayList<>(bags.size());
         bagViewMap = new HashMap<>(bagViews.size());
         ItemClickListener clickListener = new ItemClickListener();
         ItemLongClickListener longClickListener = new ItemLongClickListener();
 
         destinations = new ArrayList<>(bagViews.size());
 
-        for (ItemBag bag : inventory.allItemBags()) {
+        for (ItemBag bag : bags) {
             ItemBagView bagView = new ItemBagView(bag, getContext());
             ItemClickSupport.addTo(bagView)
                     .setOnItemClickListener(clickListener)
@@ -190,12 +191,11 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         mPager.setAdapter(new ItemBagViewPagerAdapter(bagViews));
 
         //Set icons on tabs
-        List<Character> characters = new ArrayList<>(legend.withCharacters());
         for (int i = 0; i < tabs.getTabCount(); i++) {
             tabs.getTabAt(i).setCustomView(R.layout.view_tablayout_tab);
             if (i < tabs.getTabCount() - 1)
                 Picasso.with(getContext())
-                        .load(characters.get(i).emblemPath())
+                        .load(legend.withId(((com.jam01.littlelight.domain.inventory.Character) bags.get(i)).characterId()).emblemPath())
                         .transform(new CircleTransform())
                         .fit()
                         .into((ImageView) tabs.getTabAt(i)

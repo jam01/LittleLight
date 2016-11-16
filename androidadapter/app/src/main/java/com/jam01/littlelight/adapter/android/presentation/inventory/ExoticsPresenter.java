@@ -1,5 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.inventory;
 
+import com.jam01.littlelight.adapter.android.utils.IllegalNetworkStateException;
 import com.jam01.littlelight.adapter.common.presentation.ExoticsDPO;
 import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.InventoryService;
@@ -35,11 +36,11 @@ public class ExoticsPresenter {
 
 
     public void unbindView() {
-        view.showLoading(false);
-        view = null;
         if (!subscriptions.isDisposed()) {
             subscriptions.dispose();
         }
+        view.showLoading(false);
+        view = null;
     }
 
     public void onStart(final AccountId accountId) {
@@ -85,6 +86,10 @@ public class ExoticsPresenter {
             if (throwable instanceof BungieResponseException) {
                 throwable.printStackTrace();
                 view.showError(throwable.getLocalizedMessage());
+                view.showLoading(false);
+            } else if (throwable instanceof IllegalNetworkStateException) {
+                throwable.printStackTrace();
+                view.showError("There was an error with that Network request, check you connectivity and try again");
                 view.showLoading(false);
             } else {
                 throwable.printStackTrace();

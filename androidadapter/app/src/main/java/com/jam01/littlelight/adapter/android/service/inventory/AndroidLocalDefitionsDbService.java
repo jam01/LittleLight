@@ -10,6 +10,7 @@ import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.representation.ItemDefinition;
 import com.bungie.netplatform.destiny.representation.ItemInstance;
 import com.google.gson.Gson;
+import com.jam01.littlelight.adapter.android.utils.IllegalNetworkStateException;
 import com.jam01.littlelight.adapter.common.service.inventory.LocalDefinitionsDbService;
 
 import java.io.BufferedInputStream;
@@ -42,7 +43,35 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
         this.mContext = context;
         this.bungieApi = destinyApi;
 
-        database = Executors.newCachedThreadPool().submit(new Callable<SQLiteDatabase>() {
+        database = dbFuture();
+    }
+
+    private SQLiteDatabase getDatabase() {
+        //If we've already tried then return it or get it again if it failed because of a network exception
+        if (database.isDone()) {
+            try {
+                return database.get();
+            } catch (InterruptedException | ExecutionException e) {
+                if (e.getCause() instanceof IllegalNetworkStateException) {
+                    database = dbFuture();
+                    return getDatabase();
+                } else throw new IllegalStateException(e);
+            }
+        }
+        // If we haven't tried then return a new one or rethrow the network exception
+        else {
+            try {
+                return database.get();
+            } catch (InterruptedException | ExecutionException e) {
+                if (e.getCause() instanceof IllegalNetworkStateException) {
+                    throw new IllegalNetworkStateException(e.getCause().getCause().getMessage(), e.getCause().getCause());
+                } else throw new IllegalStateException(e);
+            }
+        }
+    }
+
+    private Future<SQLiteDatabase> dbFuture() {
+        return Executors.newCachedThreadPool().submit(new Callable<SQLiteDatabase>() {
             @Override
             public SQLiteDatabase call() throws Exception {
                 String latestDbPath = bungieApi.latestManifestUrl().getResponse().getAsJsonObject("mobileWorldContentPaths").get("en").getAsString();
@@ -61,7 +90,7 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
     public List<ItemDefinition> getDefinitionsFor(List<ItemInstance> instanceList) {
         List<ItemDefinition> definitions = new ArrayList<>(instanceList.size());
         try {
-            SQLiteDatabase definitionsDb = database.get();
+            SQLiteDatabase definitionsDb = getDatabase();
             for (ItemInstance instance : instanceList) {
                 Cursor resultSet = definitionsDb.rawQuery("SELECT json FROM DestinyInventoryItemDefinition WHERE id = " + Long.valueOf(instance.getItemHash().toString(), 10).intValue(),
                         null);
@@ -75,10 +104,6 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
 //            definitionsDb.close();
         } catch (SQLiteException exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
         }
         return definitions;
     }
@@ -88,7 +113,7 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
         if (exotics == null) {
             exotics = new ArrayList<>();
             try {
-                SQLiteDatabase definitionsDb = database.get();
+                SQLiteDatabase definitionsDb = getDatabase();
                 Cursor resultSet = definitionsDb.rawQuery("SELECT json FROM DestinyInventoryItemDefinition",
                         null);
                 while (resultSet.moveToNext()) {
@@ -104,10 +129,6 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
 //            definitionsDb.close();
             } catch (SQLiteException exception) {
                 throw new IllegalStateException(exception.getMessage(), exception);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
             }
         }
         return exotics;

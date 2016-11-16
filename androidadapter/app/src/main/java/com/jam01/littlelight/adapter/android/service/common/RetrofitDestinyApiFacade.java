@@ -11,6 +11,7 @@ import com.bungie.netplatform.destiny.representation.DataResponse;
 import com.bungie.netplatform.destiny.representation.UserResponse;
 import com.bungie.netplatform.destiny.representation.Vault;
 import com.google.gson.JsonObject;
+import com.jam01.littlelight.adapter.android.utils.IllegalNetworkStateException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +44,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.requestVault(membershipType, cookies, xcsrf).execute().body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -54,7 +55,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
                     .execute()
                     .body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -63,7 +64,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.requestEquip(command, cookies, xcsrf).execute().body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -72,7 +73,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.requestTransfer(command, cookies, xcsrf).execute().body();//.getErrorCode() == 1;
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -81,7 +82,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.requestAccount(membershipType, membershipId, cookies, xcsrf).execute().body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -90,7 +91,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.requestUser(cookies, xcsrf).execute().body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -99,7 +100,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.requestMembershiIds(cookies, xcsrf).execute().body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -108,7 +109,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.requestManifestUrl().execute().body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -119,7 +120,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
                     .execute()
                     .body();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 
@@ -128,7 +129,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         try {
             return bungieApi.downloadManifestWithDynamicUrl(manifestUrl).execute().body().byteStream();
         } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
+            throw new IllegalNetworkStateException(e.getMessage(), e);
         }
     }
 

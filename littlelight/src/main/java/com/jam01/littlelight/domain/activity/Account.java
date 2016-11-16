@@ -3,6 +3,7 @@ package com.jam01.littlelight.domain.activity;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class Account {
     }
 
     public Collection<Character> withCharacters() {
-        return characterMap.values();
+        return Collections.unmodifiableCollection(characterMap.values());
     }
 
     public AccountId withId() {

@@ -4,6 +4,7 @@ import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +27,15 @@ public class Legend {
     }
 
     public Collection<Character> withCharacters() {
-        return characterMap.values();
+        return Collections.unmodifiableCollection(characterMap.values());
+    }
+
+    public Character withId(String id) {
+        for (Character charac : withCharacters()) {
+            if (charac.characterId().equals(id))
+                return charac;
+        }
+        return null;
     }
 
     public AccountId withId() {

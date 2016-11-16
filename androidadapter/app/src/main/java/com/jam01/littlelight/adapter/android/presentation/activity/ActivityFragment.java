@@ -24,6 +24,7 @@ import com.jam01.littlelight.adapter.android.utils.SelectableSectionedRecyclerVi
 import com.jam01.littlelight.adapter.common.presentation.ActivitiesDPO;
 import com.jam01.littlelight.domain.activity.Character;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.jam01.littlelight.domain.legend.Legend;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -129,6 +130,7 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
 
     @Override
     public void renderActivity(final ActivitiesDPO account) {
+        Legend legend = account.legend;
         final List<Character> characterList = new ArrayList<>(account.activities.withCharacters());
         mPager.setAdapter(new PagerAdapter() {
             @Override
@@ -186,11 +188,10 @@ public class ActivityFragment extends Fragment implements ActivityPresenter.Acti
         });
 
         //Set icons on tabs
-        List<com.jam01.littlelight.domain.legend.Character> characters = new ArrayList<>(account.legend.withCharacters());
         for (int i = 0; i < tabs.getTabCount(); i++) {
             tabs.getTabAt(i).setCustomView(R.layout.view_tablayout_tab);
             Picasso.with(getContext())
-                    .load(characters.get(i).emblemPath())
+                    .load(legend.withId(characterList.get(i).characterId()).emblemPath())
                     .transform(new CircleTransform())
                     .fit()
                     .into((ImageView) tabs.getTabAt(i)

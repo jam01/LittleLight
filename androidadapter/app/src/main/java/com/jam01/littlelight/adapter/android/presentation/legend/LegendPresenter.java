@@ -1,5 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.legend;
 
+import com.jam01.littlelight.adapter.android.utils.IllegalNetworkStateException;
 import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -58,11 +59,11 @@ public class LegendPresenter {
     }
 
     public void unbindView() {
-        view.showLoading(false);
-        view = null;
         if (!subscriptions.isDisposed()) {
             subscriptions.dispose();
         }
+        view.showLoading(false);
+        view = null;
     }
 
     public void refresh(final AccountId anAccountId) {
@@ -95,6 +96,10 @@ public class LegendPresenter {
             if (throwable instanceof BungieResponseException) {
                 throwable.printStackTrace();
                 view.showError(throwable.getLocalizedMessage());
+                view.showLoading(false);
+            } else if (throwable instanceof IllegalNetworkStateException) {
+                throwable.printStackTrace();
+                view.showError("There was an error with that Network request, check you connectivity and try again");
                 view.showLoading(false);
             } else {
                 throwable.printStackTrace();
