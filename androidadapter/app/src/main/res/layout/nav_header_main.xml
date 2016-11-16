@@ -64,7 +64,7 @@
         android:orientation="vertical"
         android:visibility="gone">
 
-        <com.jam01.littlelight.adapter.android.presentation.inventory.NonScrollableListView
+        <com.jam01.littlelight.adapter.android.utils.NonScrollableListView
             android:id="@+id/lvAccountList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />

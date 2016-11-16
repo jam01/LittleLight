@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.bungie.netplatform.destiny.representation.Globals;
 import com.jam01.littlelight.R;
+import com.jam01.littlelight.adapter.android.utils.SelectableSectionedRecyclerViewAdapter;
 import com.jam01.littlelight.domain.inventory.ItemType;
 import com.squareup.picasso.Picasso;
 

@@ -92,6 +92,7 @@ public class AdapterModule {
     @Singleton
     Picasso providesPicasso(Context context, OkHttpClient okHttpClient) {
         return new Picasso.Builder(context)
+                .loggingEnabled(false)
                 .downloader(new OkHttp3Downloader(okHttpClient))
 //                .indicatorsEnabled(true)
                 .build();

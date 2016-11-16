@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.inventory;
+package com.jam01.littlelight.adapter.android.utils;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -1,5 +1,7 @@
 package com.jam01.littlelight.adapter.android.service.inventory;
 
+import android.util.Log;
+
 import com.bungie.netplatform.destiny.api.DestinyApi;
 import com.bungie.netplatform.destiny.api.EquipCommand;
 import com.bungie.netplatform.destiny.api.TransferCommand;
@@ -38,6 +40,7 @@ import io.reactivex.schedulers.Schedulers;
 public class ACLInventoryService implements DestinyInventoryService {
     private final DestinyApi destinyApi;
     private final LocalDefinitionsDbService definitionsService;
+    private final String TAG = this.getClass().getSimpleName();
 
     public ACLInventoryService(DestinyApi destinyApi1, LocalDefinitionsDbService localDefinitionsDbService) {
         this.destinyApi = destinyApi1;
@@ -75,6 +78,7 @@ public class ACLInventoryService implements DestinyInventoryService {
                                 charId,
                                 credentials.asCookieVal(),
                                 credentials.xcsrf()))
+                                .doOnError(throwable -> Log.d(TAG, "synchronizeInventoryFor: should be retrying now"))
                                 .retry(3)
                                 .map(inventoryResponse -> {
                                     BungieResponseValidator.validate(inventoryResponse, anAccount);

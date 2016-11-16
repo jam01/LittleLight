@@ -1,19 +1,16 @@
 package com.jam01.littlelight.adapter.android.presentation.inventory;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,12 +28,15 @@ import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.user.CircleTransform;
 import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
+import com.jam01.littlelight.adapter.android.utils.ItemClickSupport;
+import com.jam01.littlelight.adapter.android.utils.SelectableAdapter;
 import com.jam01.littlelight.adapter.common.presentation.InventoryDPO;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
 import com.jam01.littlelight.domain.legend.Character;
+import com.jam01.littlelight.domain.legend.Legend;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -55,15 +55,14 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private static final String MEMBERSHIP_TYPE = "param1";
     private static final String MEMBERSHIP_ID = "param2";
     private InventoryPresenter presenter;
-    private ProgressDialog progressDialog;
     private ViewPager mPager;
     private TabLayout tabs;
     private SwipeRefreshLayout swipeContainer;
     private AccountId accountId;
     private ActionMode actionMode = null;
-    private Map<String, ItemBagView> itemAdapterMap;
-//    private List<>
-
+    private Map<String, ItemBagView> bagViewMap;
+    private List<ItemBagDestination> destinations;
+//    private ItemBagDestinationAdapter bagDestinationAdapter;
 
     public InventoryFragment() {
         // Required empty public constructor
@@ -103,22 +102,13 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
-        tabs = ((UserActivity) getActivity()).getTabs();
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        progressDialog = new ProgressDialog(getContext());
-        progressDialog.setTitle("Little Light");
-        progressDialog.setMessage("Searching for Guardians");
+        tabs = ((UserActivity) getActivity()).getTabs();
 
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                presenter.refresh(accountId);
-            }
-        });
+        swipeContainer.setOnRefreshListener(() -> presenter.refresh(accountId));
 
         mPager.setOffscreenPageLimit(3);
-        tabs.setupWithViewPager(mPager);
         mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -137,13 +127,16 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                 swipeContainer.setEnabled(state == ViewPager.SCROLL_STATE_IDLE);
             }
         });
+//        itemBagViewAdapter = new ItemBagViewAdapter();
+//        mPager.setAdapter(itemBagViewAdapter);
+
+        tabs.setupWithViewPager(mPager);
 
         return rootView;
     }
 
     @Override
     public void onStart() {
-        Log.d(TAG, "onStart: ");
         super.onStart();
         presenter.bindView(this);
         presenter.onStart(accountId);
@@ -151,7 +144,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-        Log.d(TAG, "setUserVisibleHint: ");
         super.setUserVisibleHint(isVisibleToUser);
         if (!isVisibleToUser && actionMode != null) {
             actionMode.finish();
@@ -166,79 +158,50 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void renderInventory(InventoryDPO inventoryDPO) {
-        final Inventory inventory = inventoryDPO.inventory;
-        itemAdapterMap = new HashMap<>(inventory.allItemBags().size());
-        mPager.setAdapter(new PagerAdapter() {
-                              List<ItemBag> bags = new ArrayList<>(inventory.allItemBags());
+        Inventory inventory = inventoryDPO.inventory;
+        Legend legend = inventoryDPO.legend;
 
-                              @Override
-                              public int getCount() {
-                                  return inventory.allItemBags().size();
-                              }
+        List<ItemBagView> bagViews = new ArrayList<>(inventory.allItemBags().size());
+        bagViewMap = new HashMap<>(bagViews.size());
+        ItemClickListener clickListener = new ItemClickListener();
+        ItemLongClickListener longClickListener = new ItemLongClickListener();
 
-                              @Override
-                              public Object instantiateItem(ViewGroup container, int position) {
-                                  ItemBagView itemBagView = new ItemBagView(bags.get(position), getContext());
+        destinations = new ArrayList<>(bagViews.size());
 
-                                  ItemClickSupport.addTo(itemBagView)
-                                          .setOnItemClickListener(new ItemClickListener())
-                                          .setOnItemLongClickListener(new ItemLongClickListener());
+        for (ItemBag bag : inventory.allItemBags()) {
+            ItemBagView bagView = new ItemBagView(bag, getContext());
+            ItemClickSupport.addTo(bagView)
+                    .setOnItemClickListener(clickListener)
+                    .setOnItemLongClickListener(longClickListener);
+            bagViews.add(bagView);
+            bagViewMap.put(bag.withId(), bagView);
 
-                                  itemAdapterMap.put(bags.get(position).withId(), itemBagView);
-                                  container.addView(itemBagView);
-                                  return itemBagView;
-                              }
+            //Populate destinationsList
+            if (bag instanceof com.jam01.littlelight.domain.inventory.Character)
+                for (Character character : legend.withCharacters()) {
+                    if (character.characterId().equals(((com.jam01.littlelight.domain.inventory.Character) bag).characterId())) {
+                        destinations.add(new ItemBagDestination(character.name(), character.emblemPath(), character.emblemBackgroundPath(), bag.withId()));
+                        break;
+                    }
+                }
+            else
+                destinations.add(new ItemBagDestination("Vault", null, null, bag.withId()));
+        }
 
-//                              @Override
-//                              public CharSequence getPageTitle(int position) {
-//                                  if (bags.get(position) instanceof Character) {
-//                                      return "Character" + position;
-//                                  } else if (bags.get(position) instanceof Vault) {
-//                                      return "Vault";
-//                                  } else
-//                                      return super.getPageTitle(position);
-//                              }
+        mPager.setAdapter(new ItemBagViewAdapter(bagViews));
 
-                              @Override
-                              public boolean isViewFromObject(View view, Object object) {
-                                  return view == object;
-                              }
-
-                              @Override
-                              public void destroyItem(ViewGroup collection, int position, Object view) {
-                                  collection.removeView((View) view);
-                              }
-                          }
-        );
-
-        List<Character> characters = new ArrayList<>(inventoryDPO.legend.withCharacters());
-
-//        int pix = (int) ((32 * getContext().getResources().getDisplayMetrics().density) + 0.5);
-
+        List<Character> characters = new ArrayList<>(legend.withCharacters());
         for (int i = 0; i < tabs.getTabCount(); i++) {
-            tabs.getTabAt(i).setCustomView(R.layout.tab);
+            tabs.getTabAt(i).setCustomView(R.layout.view_tablayout_tab);
+            if (i < tabs.getTabCount() - 1)
+                Picasso.with(getContext())
+                        .load(characters.get(i).emblemPath())
+                        .transform(new CircleTransform())
+                        .fit()
+                        .into((ImageView) tabs.getTabAt(i)
+                                .getCustomView()
+                                .findViewById(R.id.ivTabIcon));
         }
-
-        for (int i = 0; i < characters.size(); i++) {
-            Picasso.with(getContext())
-                    .load(characters.get(i).emblemPath())
-                    .transform(new CircleTransform())
-                    .fit()
-                    .into((ImageView) tabs.getTabAt(i)
-                            .getCustomView()
-                            .findViewById(R.id.ivTabIcon));
-        }
-    }
-
-    @Override
-    public void renderEmblem(String url) {
-//        Bitmap bitmap = imageContainer.getBitmap();
-//        int tabsHeight = (int) (48 * mContext.getResources().getDisplayMetrics().density);
-//        if (bitmap != null) {
-//            bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), mActionBar.getHeight() + tabsHeight, false);
-//            mActionBar.setBackgroundDrawable(new BitmapDrawable(Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight() - tabsHeight)));
-//            tabs.setBackgroundDrawable(new BitmapDrawable(Bitmap.createBitmap(bitmap, 0, bitmap.getHeight() - tabsHeight, bitmap.getWidth(), tabsHeight)));
-//        }
     }
 
     @Override
@@ -253,22 +216,22 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
     @Override
     public void removeItem(Item itemTransferred, String fromItemBagId) {
-        itemAdapterMap.get(fromItemBagId).removeItem(itemTransferred);
+        bagViewMap.get(fromItemBagId).removeItem(itemTransferred);
     }
 
     @Override
     public void addItem(Item itemTransferred, String toItemBagId) {
-        itemAdapterMap.get(toItemBagId).addItem(itemTransferred);
+        bagViewMap.get(toItemBagId).addItem(itemTransferred);
     }
 
     @Override
     public void updateItem(Item itemUnequipped, String onBagId) {
-        itemAdapterMap.get(onBagId).updateItem(itemUnequipped);
+        bagViewMap.get(onBagId).updateItem(itemUnequipped);
     }
 
     @Override
     public void replaceItems(ItemBag itemBagUpdated) {
-        itemAdapterMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.orderedItems()));
+        bagViewMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.orderedItems()));
     }
 
     /**
@@ -282,7 +245,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     private void toggleSelection(SelectableAdapter adapter, int position) {
         adapter.toggleSelection(position);
         int count = 0;
-        for (ItemBagView instance : itemAdapterMap.values()) {
+        for (ItemBagView instance : bagViewMap.values()) {
             count += instance.getSelectedItemCount();
         }
         if (count == 0) {
@@ -349,7 +312,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                         }
                         command.maxedOnly = maxedOnly.isChecked();
 
-                        for (ItemBagView adapter : itemAdapterMap.values()) {
+                        for (ItemBagView adapter : bagViewMap.values()) {
                             adapter.filter(command);
                         }
                     }
@@ -357,14 +320,7 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
 
         );
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                }
-
-        );
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.create().show();
         return true;
     }
@@ -394,34 +350,27 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_send:
-                    String[] destinationArray = new String[itemAdapterMap.values().size()];
-                    for (int i = 0; i < itemAdapterMap.values().size(); i++) {
-                        destinationArray[i] = (String) itemAdapterMap.keySet().toArray()[i];
-                    }
-                    final List<Item> toTransfer = new ArrayList<>();
-                    for (ItemBagView instance : itemAdapterMap.values()) {
+                    List<Item> toTransfer = new ArrayList<>();
+                    for (ItemBagView instance : bagViewMap.values()) {
                         for (Integer itemPosition : instance.getSelectedItems()) {
                             toTransfer.add(instance.getItem(itemPosition));
                         }
                     }
 
                     new AlertDialog.Builder(getActivity())
-                            .setTitle("Transfer to")
-                            .setItems(destinationArray, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    presenter.sendItems(toTransfer, (String) itemAdapterMap.keySet().toArray()[which]);
-                                }
+                            .setTitle("Transfer to:")
+                            .setAdapter(new ItemBagDestinationAdapter(getContext(), R.layout.view_itembagdestination_row, destinations), (dialog, which) -> {
+                                presenter.sendItems(toTransfer, destinations.get(which).itemBagId);
+                                mode.finish();
                             })
-                            .create()
                             .show();
-                    mode.finish();
             }
             return true;
         }
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            for (ItemBagView instance : itemAdapterMap.values()) {
+            for (ItemBagView instance : bagViewMap.values()) {
                 instance.clearSelection();
             }
             actionMode = null;
@@ -493,4 +442,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
             return true;
         }
     }
+
+
 }

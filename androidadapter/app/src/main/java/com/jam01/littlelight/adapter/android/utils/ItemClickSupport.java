@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.inventory;
+package com.jam01.littlelight.adapter.android.utils;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;

@@ -117,8 +117,6 @@ public class InventoryPresenter {
     public interface InventoryView {
         void renderInventory(InventoryDPO inventory);
 
-        void renderEmblem(String url);
-
         void showLoading(boolean show);
 
         void showError(String localizedMessage);

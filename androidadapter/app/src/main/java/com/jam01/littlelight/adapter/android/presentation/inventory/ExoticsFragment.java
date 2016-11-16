@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.user.UserActivity;
+import com.jam01.littlelight.adapter.android.utils.ItemClickSupport;
 import com.jam01.littlelight.adapter.common.presentation.ExoticsDPO;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.inventory.ItemType;
