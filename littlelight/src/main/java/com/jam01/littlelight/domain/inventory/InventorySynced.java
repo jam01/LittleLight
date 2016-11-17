@@ -7,12 +7,12 @@ import java.util.Date;
 /**
  * Created by jam01 on 9/26/16.
  */
-public class ItemBagUpdated implements DomainEvent {
-    private final ItemBag itemBagUpdated;
+public class InventorySynced implements DomainEvent {
+    private final Inventory inventoryUpdated;
     private final Date occuredOn;
 
-    public ItemBagUpdated(ItemBag itemBagUpdated) {
-        this.itemBagUpdated = itemBagUpdated;
+    public InventorySynced(Inventory inventoryUpdated) {
+        this.inventoryUpdated = inventoryUpdated;
         this.occuredOn = new Date();
     }
 
@@ -21,7 +21,7 @@ public class ItemBagUpdated implements DomainEvent {
         return occuredOn;
     }
 
-    public ItemBag getItemBagUpdated() {
-        return itemBagUpdated;
+    public Inventory getInventoryUpdated() {
+        return inventoryUpdated;
     }
 }

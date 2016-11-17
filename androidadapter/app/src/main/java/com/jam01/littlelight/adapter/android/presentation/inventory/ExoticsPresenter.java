@@ -5,6 +5,11 @@ import com.jam01.littlelight.adapter.common.presentation.ExoticsDPO;
 import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.InventoryService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.jam01.littlelight.domain.inventory.Inventory;
+import com.jam01.littlelight.domain.inventory.InventorySynced;
+import com.jam01.littlelight.domain.inventory.Item;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -43,24 +48,44 @@ public class ExoticsPresenter {
         view = null;
     }
 
-    public void onStart(final AccountId accountId) {
+    public void onStart(final AccountId anAccountId) {
         view.showLoading(true);
         if (subscriptions.isDisposed()) {
             subscriptions = new CompositeDisposable();
         }
 
-        // TODO: 11/8/16 Make this a zip rx
-        subscriptions.add(Single.defer(() -> Single.just(new ExoticsDPO(service.exoticsOf(accountId), service.exotics())))
+        subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(domainEvent -> {
+                    if (domainEvent instanceof InventorySynced) {
+                        Inventory inventory = ((InventorySynced) domainEvent).getInventoryUpdated();
+                        renderExotics(inventory.getExotics());
+                    }
+                }, errorAction));
+
+        Inventory inventory = service.ofAccount(anAccountId);
+        if (inventory != null)
+            renderExotics(inventory.getExotics());
+        else syncInventoryAsync(anAccountId);
+    }
+
+    private void renderExotics(List<Item> exotics) {
+        subscriptions.add(Single.defer(() -> Single.just(new ExoticsDPO(exotics, service.exotics())))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(exoticsAction, errorAction));
     }
 
-    public void refresh(AccountId accountId) {
-        subscriptions.add(Single.defer(() -> Single.just(new ExoticsDPO(service.exoticsOf(accountId), service.exotics())))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(exoticsAction, errorAction));
+    public void refresh(AccountId anAccountId) {
+        Inventory inventory = service.ofAccount(anAccountId);
+        if (inventory != null)
+            renderExotics(inventory.getExotics());
+        else syncInventoryAsync(anAccountId);
+    }
+
+    private void syncInventoryAsync(AccountId anAccountId) {
+
     }
 
     public interface ExoticsView {

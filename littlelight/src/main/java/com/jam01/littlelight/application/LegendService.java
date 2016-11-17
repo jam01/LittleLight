@@ -28,9 +28,9 @@ public class LegendService {
     }
 
     public Legend ofAccount(AccountId anAccountId) {
-        if (!legendRepo.hasOfAccount(anAccountId)) {
-            synchronizeLegendOf(anAccountId);
-        }
+//        if (!legendRepo.hasOfAccount(anAccountId)) {
+//            synchronizeLegendOf(anAccountId);
+//        }
         return legendRepo.ofId(anAccountId);
     }
 

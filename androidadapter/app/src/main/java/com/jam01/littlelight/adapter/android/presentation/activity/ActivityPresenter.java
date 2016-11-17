@@ -6,9 +6,12 @@ import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.ActivityService;
 import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.jam01.littlelight.domain.legend.Legend;
+import com.jam01.littlelight.domain.legend.LegendUpdated;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -35,10 +38,10 @@ public class ActivityPresenter {
     }
 
     public void refresh(final AccountId anAccountId) {
-        subscriptions.add(Single.defer(() -> Single.just(new ActivitiesDPO(legendService.ofAccount(anAccountId), service.ofAccount(anAccountId))))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(activityAction, errorAction));
+        Legend legend = legendService.ofAccount(anAccountId);
+        if (legend != null)
+            renderAccount(legend, anAccountId);
+        else syncLegendAsync(anAccountId);
     }
 
     public void bindView(ActivityView inventoryView) {
@@ -59,7 +62,32 @@ public class ActivityPresenter {
             subscriptions = new CompositeDisposable();
         }
 
-        subscriptions.add(Single.defer(() -> Single.just(new ActivitiesDPO(legendService.ofAccount(anAccountId), service.ofAccount(anAccountId))))
+        //Register for events
+        subscriptions.add(legendService.subscribeToInventoryEvents(anAccountId).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(domainEvent -> {
+                    if (domainEvent instanceof LegendUpdated) {
+                        Legend legend = ((LegendUpdated) domainEvent).getLegendUpdated();
+                        renderAccount(legend, anAccountId);
+                    }
+                }));
+
+        Legend legend = legendService.ofAccount(anAccountId);
+        if (legend != null)
+            renderAccount(legend, anAccountId);
+        else syncLegendAsync(anAccountId);
+    }
+
+    private void syncLegendAsync(AccountId anAccountId) {
+        subscriptions.add(Completable.fromAction(() -> legendService.synchronizeLegendOf(anAccountId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                }, errorAction));
+    }
+
+    private void renderAccount(Legend legend, AccountId anAccountId) {
+        subscriptions.add(Single.defer(() -> Single.just(new ActivitiesDPO(legend, service.ofAccount(anAccountId))))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(activityAction, errorAction));

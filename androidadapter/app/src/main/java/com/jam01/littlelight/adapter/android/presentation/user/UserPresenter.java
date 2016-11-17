@@ -38,11 +38,11 @@ public class UserPresenter {
     }
 
     public void unbindView() {
-        view.showLoading(false);
-        view = null;
         if (!subscriptions.isDisposed()) {
             subscriptions.dispose();
         }
+        view.showLoading(false);
+        view = null;
     }
 
     public void onStart() {

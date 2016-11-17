@@ -14,6 +14,7 @@ import com.bungie.netplatform.destiny.representation.ItemInstance;
 import com.jam01.littlelight.adapter.common.service.BungieResponseValidator;
 import com.jam01.littlelight.adapter.common.service.inventory.ItemBagTranslator;
 import com.jam01.littlelight.adapter.common.service.inventory.LocalDefinitionsDbService;
+import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.Account;
 import com.jam01.littlelight.domain.identityaccess.AccountCredentials;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
@@ -21,6 +22,7 @@ import com.jam01.littlelight.domain.inventory.Character;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.InventoryRepository;
+import com.jam01.littlelight.domain.inventory.InventorySynced;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
 import com.jam01.littlelight.domain.inventory.ItemType;
@@ -123,6 +125,8 @@ public class ACLInventoryService implements DestinyInventoryService {
         } else {
             repository.add(toReturn);
         }
+
+        DomainEventPublisher.instanceOf().publish(new InventorySynced(toReturn));
     }
 
     @Override

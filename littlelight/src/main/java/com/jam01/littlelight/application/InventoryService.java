@@ -8,9 +8,9 @@ import com.jam01.littlelight.domain.inventory.Character;
 import com.jam01.littlelight.domain.inventory.DestinyInventoryService;
 import com.jam01.littlelight.domain.inventory.Inventory;
 import com.jam01.littlelight.domain.inventory.InventoryRepository;
+import com.jam01.littlelight.domain.inventory.InventorySynced;
 import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemBag;
-import com.jam01.littlelight.domain.inventory.ItemBagUpdated;
 import com.jam01.littlelight.domain.inventory.ItemEquipped;
 import com.jam01.littlelight.domain.inventory.ItemTransferred;
 import com.jam01.littlelight.domain.inventory.ItemType;
@@ -39,9 +39,9 @@ public class InventoryService {
     }
 
     public Inventory ofAccount(AccountId anAccountId) {
-        if (!inventoryRepo.hasOfAccount(anAccountId)) {
-            synchronizeInventoryOf(anAccountId);
-        }
+//        if (!inventoryRepo.hasOfAccount(anAccountId)) {
+//            synchronizeInventoryOf(anAccountId);
+//        }
         return inventoryRepo.ofAccount(anAccountId);
     }
 
@@ -90,8 +90,8 @@ public class InventoryService {
                                     || ((ItemTransferred) domainEvent).onAccountId().equals(subscriberAccountId));
                         if (domainEvent instanceof ItemEquipped)
                             return ((ItemEquipped) domainEvent).getAccountId().equals(subscriberAccountId);
-                        if (domainEvent instanceof ItemBagUpdated)
-                            return ((ItemBagUpdated) domainEvent).getItemBagUpdated().ofAccount().equals(subscriberAccountId);
+                        if (domainEvent instanceof InventorySynced)
+                            return ((InventorySynced) domainEvent).getInventoryUpdated().withAccountId().equals(subscriberAccountId);
                         return false;
                     }
                 });

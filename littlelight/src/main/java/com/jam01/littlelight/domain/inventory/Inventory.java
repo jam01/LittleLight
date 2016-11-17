@@ -65,7 +65,7 @@ public class Inventory {
     public void updateFrom(Inventory newState) {
         for (ItemBag instance : itemBags()) {
             instance.updateFrom(newState.bagWithId(instance.withId()));
-            DomainEventPublisher.instanceOf().publish(new ItemBagUpdated(instance));
+//            DomainEventPublisher.instanceOf().publish(new InventorySynced(instance));
         }
     }
 

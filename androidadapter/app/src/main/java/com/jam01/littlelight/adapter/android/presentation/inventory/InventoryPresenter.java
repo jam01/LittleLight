@@ -6,18 +6,19 @@ import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.InventoryService;
 import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
+import com.jam01.littlelight.domain.inventory.Inventory;
+import com.jam01.littlelight.domain.inventory.InventorySynced;
 import com.jam01.littlelight.domain.inventory.Item;
-import com.jam01.littlelight.domain.inventory.ItemBag;
-import com.jam01.littlelight.domain.inventory.ItemBagUpdated;
 import com.jam01.littlelight.domain.inventory.ItemEquipped;
 import com.jam01.littlelight.domain.inventory.ItemTransferred;
+import com.jam01.littlelight.domain.legend.Legend;
+import com.jam01.littlelight.domain.legend.LegendUpdated;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
 import io.reactivex.Completable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Action;
@@ -34,7 +35,6 @@ public class InventoryPresenter {
     private InventoryView view;
     private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
-    private OnInventoryAction inventoryAction = new OnInventoryAction();
     private OnCompletedAction completedAction = new OnCompletedAction();
 
     @Inject
@@ -53,6 +53,7 @@ public class InventoryPresenter {
             subscriptions = new CompositeDisposable();
         }
 
+        //Register for events
         subscriptions.add(inventoryService.subscribeToInventoryEvents(anAccountId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -67,17 +68,53 @@ public class InventoryPresenter {
                         view.updateItem(itemEquipped.getItemEquipped(), itemEquipped.getOnBagId());
                         view.updateItem(itemEquipped.getItemUnequipped(), itemEquipped.getOnBagId());
                     }
-                    if (domainEvent instanceof ItemBagUpdated) {
-                        ItemBagUpdated itemBagUpdated = (ItemBagUpdated) domainEvent;
-                        view.updateBag(itemBagUpdated.getItemBagUpdated());
+                    if (domainEvent instanceof InventorySynced) {
+                        Inventory inventory = ((InventorySynced) domainEvent).getInventoryUpdated();
+                        Legend legend = legendService.ofAccount(anAccountId);
+
+                        if (legend != null) {
+                            renderInventory(inventory, legend);
+                        }
                     }
                 }, errorAction));
 
+        //Register for events
+        subscriptions.add(legendService.subscribeToInventoryEvents(anAccountId).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(domainEvent -> {
+                    if (domainEvent instanceof LegendUpdated) {
+                        Legend legend = ((LegendUpdated) domainEvent).getLegendUpdated();
+                        Inventory inventory = inventoryService.ofAccount(anAccountId);
 
-        subscriptions.add(Single.defer(() -> Single.just(new InventoryDPO(inventoryService.ofAccount(anAccountId), legendService.ofAccount(anAccountId))))
+                        if (inventory != null) {
+                            renderInventory(inventory, legend);
+                        }
+                    }
+                }));
+
+        //Render dpo if we have necessary objects or trigger sync for missing ones
+        Inventory inventory = inventoryService.ofAccount(anAccountId);
+        Legend legend = legendService.ofAccount(anAccountId);
+        if (inventory != null && legend != null)
+            renderInventory(inventory, legend);
+        else {
+            if (legend == null)
+                syncLegendAsync(anAccountId);
+            if (inventory == null)
+                syncInventoryAsync(anAccountId);
+        }
+    }
+
+    private void renderInventory(Inventory inventory, Legend legend) {
+        view.renderInventory(new InventoryDPO(inventory, legend));
+        view.showLoading(false);
+    }
+
+    private void syncLegendAsync(AccountId anAccountId) {
+        subscriptions.add(Completable.fromAction(() -> legendService.synchronizeLegendOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(inventoryAction, errorAction));
+                .subscribe(completedAction, errorAction));
     }
 
     public void unbindView() {
@@ -97,7 +134,7 @@ public class InventoryPresenter {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(completedAction, errorAction));
+                .subscribe(() -> view.showLoading(false), errorAction));
     }
 
     public void equipItem(final Item item, final String characterId) {
@@ -109,6 +146,14 @@ public class InventoryPresenter {
     }
 
     public void refresh(final AccountId anAccountId) {
+        //Trigger sync for inventory, and legend only if necessary
+        syncInventoryAsync(anAccountId);
+
+        if (legendService.ofAccount(anAccountId) == null)
+            syncLegendAsync(anAccountId);
+    }
+
+    private void syncInventoryAsync(AccountId anAccountId) {
         subscriptions.add(Completable.fromAction(() -> inventoryService.synchronizeInventoryOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -128,35 +173,25 @@ public class InventoryPresenter {
 
         void updateItem(Item itemUnequipped, String onBagId);
 
-        void updateBag(ItemBag itemBagUpdated);
     }
 
     private class OnCompletedAction implements Action {
         @Override
         public void run() throws Exception {
-            view.showLoading(false);
-        }
-    }
-
-    private class OnInventoryAction implements Consumer<InventoryDPO> {
-        @Override
-        public void accept(InventoryDPO account) {
-            view.renderInventory(account);
-            view.showLoading(false);
+//            view.showLoading(false);
         }
     }
 
     private class OnErrorAction implements Consumer<Throwable> {
         @Override
         public void accept(Throwable throwable) throws Exception {
+            view.showLoading(false);
             if (throwable instanceof BungieResponseException) {
                 throwable.printStackTrace();
                 view.showError(throwable.getLocalizedMessage());
-                view.showLoading(false);
             } else if (throwable instanceof IllegalNetworkStateException) {
                 throwable.printStackTrace();
                 view.showError("There was an error with that Network request, check you connectivity and try again");
-                view.showLoading(false);
             } else {
                 throwable.printStackTrace();
                 throw new IllegalStateException("Something went wrong, Little Light will check the cause and address the issue.", throwable);
