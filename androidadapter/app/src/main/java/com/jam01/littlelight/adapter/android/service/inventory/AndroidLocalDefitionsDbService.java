@@ -35,11 +35,12 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
     private final Context mContext;
     private final DestinyApi bungieApi;
     private final String TAG = this.getClass().getSimpleName();
+    private final Gson gson;
     private Future<SQLiteDatabase> database;
     private List<ItemDefinition> exotics;
-    private Gson gson = new Gson();
 
-    public AndroidLocalDefitionsDbService(Context context, DestinyApi destinyApi) {
+    public AndroidLocalDefitionsDbService(Context context, DestinyApi destinyApi, Gson gson) {
+        this.gson = gson;
         this.mContext = context;
         this.bungieApi = destinyApi;
 

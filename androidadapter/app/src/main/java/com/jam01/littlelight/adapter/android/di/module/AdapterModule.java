@@ -43,8 +43,8 @@ public class AdapterModule {
 
     @Provides
     @Singleton
-    LocalDefinitionsDbService providesLocalDefinitionsDbService(Context context, DestinyApi destinyApi) {
-        return new AndroidLocalDefitionsDbService(context, destinyApi);
+    LocalDefinitionsDbService providesLocalDefinitionsDbService(Context context, DestinyApi destinyApi, Gson gson) {
+        return new AndroidLocalDefitionsDbService(context, destinyApi, gson);
     }
 
     @Provides

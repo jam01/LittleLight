@@ -3,6 +3,7 @@ package com.jam01.littlelight.adapter.android.di.module;
 import android.content.Context;
 
 import com.bungie.netplatform.destiny.api.DestinyApi;
+import com.google.gson.Gson;
 import com.jam01.littlelight.adapter.android.persistence.identityaccess.DiskUser;
 import com.jam01.littlelight.adapter.android.service.inventory.ACLInventoryService;
 import com.jam01.littlelight.adapter.common.persistence.inventory.InMemoryInventoryRepository;
@@ -56,8 +57,8 @@ public class DomainModule {
 
     @Provides
     @Singleton
-    User providesUser(Context context) {
-        return new DiskUser(context);
+    User providesUser(Context context, Gson gson) {
+        return new DiskUser(context, gson);
     }
 
     @Provides

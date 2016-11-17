@@ -27,9 +27,9 @@ public class DiskUser implements User {
     private final Gson gson;
     private final String TAG = this.getClass().getSimpleName();
 
-    public DiskUser(Context mContext) {
+    public DiskUser(Context mContext, Gson gson) {
         disk = mContext.getSharedPreferences("user", Context.MODE_PRIVATE);
-        this.gson = new Gson();
+        this.gson = gson;
         accountMap = new HashMap<>();
         load();
     }
