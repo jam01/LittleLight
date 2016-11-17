@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.ColorUtils;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -186,32 +187,42 @@ public class ExoticsFragment extends Fragment implements ExoticsPresenter.Exotic
                             @Override
                             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                                 final ItemType selectedItem = ((ItemTypeAdapter) recyclerView.getAdapter()).getItem(position);
-                                View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
-                                TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
+                                if (selectedItem != null) {
+                                    View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
+                                    TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
+                                    TextView subType = (TextView) dialogView.findViewById(R.id.tvDDSubType);
 
-                                title.setText(selectedItem.getItemName());
+                                    title.setText(selectedItem.getItemName());
+                                    subType.setText(selectedItem.getItemSubType());
 
-                                switch (selectedItem.getTierTypeName()) {
-                                    case "Common":
-                                        title.setBackgroundColor(getResources().getColor(R.color.colorCommonItem));
-                                        break;
-                                    case "Uncommon":
-                                        title.setBackgroundColor(getResources().getColor(R.color.colorUncommonItem));
-                                        break;
-                                    case "Rare":
-                                        title.setBackgroundColor(getResources().getColor(R.color.colorRareItem));
-                                        break;
-                                    case "Legendary":
-                                        title.setBackgroundColor(getResources().getColor(R.color.colorLegendaryItem));
-                                        break;
-                                    case "Exotic":
-                                        title.setBackgroundColor(getResources().getColor(R.color.colorExoticItem));
-                                        break;
+                                    int bakgroundColor;
+                                    switch (selectedItem.getTierTypeName()) {
+                                        case "Common":
+                                            bakgroundColor = getResources().getColor(R.color.colorCommonItem);
+                                            break;
+                                        case "Uncommon":
+                                            bakgroundColor = getResources().getColor(R.color.colorUncommonItem);
+                                            break;
+                                        case "Rare":
+                                            bakgroundColor = getResources().getColor(R.color.colorRareItem);
+                                            break;
+                                        case "Legendary":
+                                            bakgroundColor = getResources().getColor(R.color.colorLegendaryItem);
+                                            break;
+                                        case "Exotic":
+                                            bakgroundColor = getResources().getColor(R.color.colorExoticItem);
+                                            break;
+                                        default:
+                                            bakgroundColor = getResources().getColor(R.color.colorCommonItem);
+                                            break;
+                                    }
+                                    dialogView.setBackgroundColor(ColorUtils.compositeColors(getResources().getColor(R.color.colorTranslucid), bakgroundColor));
+
+                                    new AlertDialog.Builder(getContext())
+                                            .setView(dialogView)
+                                            .create()
+                                            .show();
                                 }
-                                new AlertDialog.Builder(getContext())
-                                        .setView(dialogView)
-                                        .create()
-                                        .show();
                             }
                         });
 

@@ -1,47 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="180dp"
-    android:layout_height="90dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:background="#b87f7c79"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="24dp">
 
-    <TextView
-        android:id="@+id/tvDTitle"
+    <RelativeLayout
+        android:id="@+id/rlDialogTitle"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_horizontal"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvDTitle"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="20dp"
+            android:text="Title"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/tvDDSubType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/tvDTitle"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="center_horizontal"
+            android:text=" 123"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlDialogDamage"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/rlDialogTitle"
         android:layout_weight="1"
-        android:textAlignment="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#ffffffff" />
+        android:visibility="gone">
 
-    <TextView
-        android:id="@+id/tvDDamage"
+        <TextView
+            android:id="@+id/vDDmgDef"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="false"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="24dp"
+            android:text="Damage"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/tvDDamage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_horizontal"
+            android:text=" 123"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rlDialogDamageType"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="2dp"
+        android:layout_height="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/rlDialogDamage"
         android:layout_weight="1"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffffff"
-        android:visibility="gone" />
+        android:visibility="gone">
 
-    <TextView
-        android:id="@+id/tvDDType"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="2dp"
-        android:layout_weight="1"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffffff"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="false"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="24dp"
+            android:text="Damage Type"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <Button
-        android:id="@+id/bIDetail"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/equip"
-        android:visibility="gone" />
-</LinearLayout>
+        <TextView
+            android:id="@+id/tvDDamageType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_horizontal"
+            android:text=" 123"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
+
+</RelativeLayout>

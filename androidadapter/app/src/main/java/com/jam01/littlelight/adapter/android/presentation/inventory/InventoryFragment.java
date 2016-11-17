@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.ColorUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -230,8 +231,10 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
     }
 
     @Override
-    public void replaceItems(ItemBag itemBagUpdated) {
-        bagViewMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.orderedItems()));
+    public void updateBag(ItemBag itemBagUpdated) {
+        if (bagViewMap.containsKey(itemBagUpdated.withId())) {
+            bagViewMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.orderedItems()));
+        }
     }
 
     /**
@@ -388,41 +391,55 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
                 } else {
                     View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_item_details, null);
                     TextView title = (TextView) dialogView.findViewById(R.id.tvDTitle);
-                    TextView second = (TextView) dialogView.findViewById(R.id.tvDDamage);
-                    TextView third = (TextView) dialogView.findViewById(R.id.tvDDType);
+                    TextView subType = (TextView) dialogView.findViewById(R.id.tvDDSubType);
+                    TextView damage = (TextView) dialogView.findViewById(R.id.tvDDamage);
+                    TextView damageType = (TextView) dialogView.findViewById(R.id.tvDDamageType);
+                    TextView dmgDef = (TextView) dialogView.findViewById(R.id.vDDmgDef);
+
+                    ViewGroup damageViewGroup = (ViewGroup) dialogView.findViewById(R.id.rlDialogDamage);
+                    ViewGroup damageTypeViewGroup = (ViewGroup) dialogView.findViewById(R.id.rlDialogDamageType);
 
                     title.setText(selectedItem.getItemName());
+                    subType.setText(selectedItem.getItemSubType());
 
-                    switch (selectedItem.getItemType()) {
+                    switch (selectedItem.getItemSuperType()) {
                         case "Armor":
-                            second.setText("Defense: " + selectedItem.getDamage());
-                            second.setVisibility(View.VISIBLE);
+                            dmgDef.setText("Defense");
+                            damage.setText(String.valueOf(selectedItem.getDamage()));
+                            damageViewGroup.setVisibility(View.VISIBLE);
                             break;
-                        case "Weapon":
-                            second.setText("Attack: " + selectedItem.getDamage());
-                            second.setVisibility(View.VISIBLE);
-                            third.setText("Damage Type: ");
-                            third.append(selectedItem.getDamageType());
-                            third.setVisibility(View.VISIBLE);
+                        case "Weapons":
+                            dmgDef.setText("Attack");
+                            damage.setText(String.valueOf(selectedItem.getDamage()));
+                            damageViewGroup.setVisibility(View.VISIBLE);
+                            damageType.setText(String.valueOf(selectedItem.getDamageType()));
+                            damageTypeViewGroup.setVisibility(View.VISIBLE);
                             break;
                     }
+
+                    int bakgroundColor;
                     switch (selectedItem.getTierTypeName()) {
                         case "Common":
-                            title.setBackgroundColor(getResources().getColor(R.color.colorCommonItem));
+                            bakgroundColor = getResources().getColor(R.color.colorCommonItem);
                             break;
                         case "Uncommon":
-                            title.setBackgroundColor(getResources().getColor(R.color.colorUncommonItem));
+                            bakgroundColor = getResources().getColor(R.color.colorUncommonItem);
                             break;
                         case "Rare":
-                            title.setBackgroundColor(getResources().getColor(R.color.colorRareItem));
+                            bakgroundColor = getResources().getColor(R.color.colorRareItem);
                             break;
                         case "Legendary":
-                            title.setBackgroundColor(getResources().getColor(R.color.colorLegendaryItem));
+                            bakgroundColor = getResources().getColor(R.color.colorLegendaryItem);
                             break;
                         case "Exotic":
-                            title.setBackgroundColor(getResources().getColor(R.color.colorExoticItem));
+                            bakgroundColor = getResources().getColor(R.color.colorExoticItem);
+                            break;
+                        default:
+                            bakgroundColor = getResources().getColor(R.color.colorCommonItem);
                             break;
                     }
+                    dialogView.setBackgroundColor(ColorUtils.compositeColors(getResources().getColor(R.color.colorTranslucid), bakgroundColor));
+
                     new AlertDialog.Builder(getContext())
                             .setView(dialogView)
                             .create()

@@ -5,5 +5,5 @@
     <color name="colorRareItem">#5075a2</color>
     <color name="colorLegendaryItem">#522f65</color>
     <color name="colorExoticItem">#ceae33</color>
-    <color name="colorTranslucid">#50000000</color>
+    <color name="colorTranslucid">#4d000000</color>
 </resources>

@@ -69,7 +69,7 @@ public class InventoryPresenter {
                     }
                     if (domainEvent instanceof ItemBagUpdated) {
                         ItemBagUpdated itemBagUpdated = (ItemBagUpdated) domainEvent;
-                        view.replaceItems(itemBagUpdated.getItemBagUpdated());
+                        view.updateBag(itemBagUpdated.getItemBagUpdated());
                     }
                 }, errorAction));
 
@@ -128,7 +128,7 @@ public class InventoryPresenter {
 
         void updateItem(Item itemUnequipped, String onBagId);
 
-        void replaceItems(ItemBag itemBagUpdated);
+        void updateBag(ItemBag itemBagUpdated);
     }
 
     private class OnCompletedAction implements Action {
