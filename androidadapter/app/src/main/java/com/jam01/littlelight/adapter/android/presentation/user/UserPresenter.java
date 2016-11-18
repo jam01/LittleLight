@@ -1,5 +1,6 @@
 package com.jam01.littlelight.adapter.android.presentation.user;
 
+import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.adapter.android.utils.IllegalNetworkStateException;
 import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.UserService;
@@ -8,6 +9,10 @@ import com.jam01.littlelight.domain.identityaccess.AccountCredentialsExpired;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.identityaccess.AccountUpdated;
 import com.jam01.littlelight.domain.identityaccess.User;
+
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -27,6 +32,8 @@ public class UserPresenter {
     private UserService service;
     private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
+    private Set<AccountId> expiredQueue = new LinkedHashSet<>();
+    private boolean updatingCredentials = false;
 
     @Inject
     public UserPresenter(final UserService service) {
@@ -57,7 +64,8 @@ public class UserPresenter {
                     if (domainEvent instanceof AccountUpdated) {
                         view.updateAccount(((AccountUpdated) domainEvent).getAccountUpdated());
                     } else if (domainEvent instanceof AccountCredentialsExpired) {
-                        view.showWebSignInForUpdatingCredentials(((AccountCredentialsExpired) domainEvent).getExpiredAccount().withId());
+                        expiredQueue.add(((AccountCredentialsExpired) domainEvent).getExpiredAccount().withId());
+                        handleExpiredQueue();
                     }
                 }, errorAction));
 
@@ -69,12 +77,48 @@ public class UserPresenter {
 
         view.setUser(service.getUser());
         if (service.userAccounts().isEmpty()) {
-            view.showWebSignIn();
+            onAddAccount();
+        }
+    }
+
+    public void handleExpiredQueue() {
+        Iterator iterator = expiredQueue.iterator();
+        if (!updatingCredentials && iterator.hasNext()) {
+            updatingCredentials = true;
+            view.showUpdateCredentialsNowDialog(service.getUser().ofId((AccountId) iterator.next()).withName());
+        }
+    }
+
+    public void onUpdateCredentialsNow(boolean now) {
+        Iterator iterator = expiredQueue.iterator();
+        if (now) {
+            AccountId accountId = (AccountId) iterator.next();
+            view.showWebSignIn(accountId.withMembershipType() == 2 ? Endpoints.PSN_AUTH_URL : Endpoints.XBOX_AUTH_URL, new AccountCredentialsCallback() {
+                @Override
+                void onDismissed() {
+                    iterator.remove();
+                    updatingCredentials = false;
+                    handleExpiredQueue();
+                }
+
+                @Override
+                void onResult(String[] cookies) {
+                    service.updateCredentials(accountId, cookies);
+                    iterator.remove();
+                    updatingCredentials = false;
+                    handleExpiredQueue();
+                }
+            });
+        } else {
+            iterator.next();
+            iterator.remove();
+            updatingCredentials = false;
+            handleExpiredQueue();
         }
     }
 
     public void onAddAccount() {
-        view.showWebSignIn();
+        view.showChoosePlatformDialog(new String[]{"PlayStation Network", "Xbox Live"});
     }
 
     public void onRemoveAccount(Account account) {
@@ -82,32 +126,30 @@ public class UserPresenter {
         view.removeAccount(account);
     }
 
-    public void onWebSignInCompleted(final int membershipType, final String[] cookies) {
-        subscriptions.add(Single.defer(() -> Single.just(service.registerFromCredentials(membershipType, cookies)))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(account -> {
-                    view.addAccount(account);
-                    view.displayAccount(account);
-                    view.showLoading(false);
-                }, errorAction));
-        view.showLoading(true);
-    }
+    public void onPlatformChosen(int platform) {
+        view.showWebSignIn(platform == 0 ? Endpoints.PSN_AUTH_URL : Endpoints.XBOX_AUTH_URL, new AccountCredentialsCallback() {
+            @Override
+            void onDismissed() {
+                return;
+            }
 
-    public void onWebCredentialsUpdated(final AccountId accountId, final String[] cookies) {
-        subscriptions.add(Completable.fromAction(() -> service.updateCredentials(accountId, cookies))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> {
-                    view.showLoading(false);
-                }, errorAction));
-        view.showLoading(true);
+            @Override
+            void onResult(String[] cookies) {
+                subscriptions.add(Single.defer(() -> Single.just(service.registerFromCredentials(platform == 0 ? 2 : 1, cookies)))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(account -> {
+                            view.addAccount(account);
+                            view.displayAccount(account);
+                            view.showLoading(false);
+                        }, errorAction));
+                view.showLoading(true);
+            }
+        });
     }
 
     public interface MainView {
-        void showWebSignInForUpdatingCredentials(AccountId accountId);
-
-        void showWebSignIn();
+        void showChoosePlatformDialog(String[] platforms);
 
         void setUser(User user);
 
@@ -122,6 +164,10 @@ public class UserPresenter {
         void displayAccount(Account account);
 
         void showLoading(boolean bool);
+
+        void showWebSignIn(String url, AccountCredentialsCallback accountCredentialsCallback);
+
+        void showUpdateCredentialsNowDialog(String accountName);
     }
 
     private class OnErrorAction implements Consumer<Throwable> {
@@ -140,5 +186,11 @@ public class UserPresenter {
                 throw new IllegalStateException(throwable);
             }
         }
+    }
+
+    public abstract class AccountCredentialsCallback {
+        abstract void onDismissed();
+
+        abstract void onResult(String[] cookies);
     }
 }

@@ -8,7 +8,6 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.webkit.CookieManager;
 import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
@@ -17,10 +16,11 @@ import android.webkit.WebViewClient;
 import com.bungie.netplatform.destiny.representation.Endpoints;
 
 public class SignInFragment extends DialogFragment {
-    private static final String URL = "url";
+    private final static String URL = "url";
+    private final String TAG = this.getClass().getSimpleName();
     private WebView webView;
     private String url;
-    private OnCookiesInterceptedListener listener;
+    private UserPresenter.AccountCredentialsCallback callback;
 
     public static SignInFragment newInstance(String url) {
         SignInFragment fragment = new SignInFragment();
@@ -41,7 +41,6 @@ public class SignInFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         webView = new WebView(getContext());
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setSavePassword(false);
@@ -50,7 +49,9 @@ public class SignInFragment extends DialogFragment {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 if (url.equals(Endpoints.BASE_URL)) {
-                    listener.onCookiesIntercepted(collectCookies());
+                    callback.onResult(collectCookies());
+                    callback = null;
+                    dismiss();
                 } else
                     super.onPageStarted(view, url, favicon);
             }
@@ -58,7 +59,9 @@ public class SignInFragment extends DialogFragment {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.equals(Endpoints.BASE_URL)) {
-                    listener.onCookiesIntercepted(collectCookies());
+                    callback.onResult(collectCookies());
+                    callback = null;
+                    dismiss();
                     return true;
                 }
                 return false;
@@ -97,11 +100,14 @@ public class SignInFragment extends DialogFragment {
         return cookies.split(" ");
     }
 
-    public void setOnCookiesInterceptedListener(OnCookiesInterceptedListener listener) {
-        this.listener = listener;
+    public void setCallback(UserPresenter.AccountCredentialsCallback callback) {
+        this.callback = callback;
     }
 
-    public interface OnCookiesInterceptedListener {
-        void onCookiesIntercepted(String[] cookies);
+    @Override
+    public void onDestroy() {
+        if (callback != null)
+            callback.onDismissed();
+        super.onDestroy();
     }
 }

@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -21,7 +23,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.bungie.netplatform.destiny.representation.Endpoints;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.activity.ActivityFragment;
@@ -205,62 +206,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    // TODO: 10/8/16 Pretty this up
-    @Override
-    public void showWebSignIn() {
-        final int[] membershipType = new int[1];
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        dialogBuilder.setTitle("Little Light")
-                .setIcon(R.mipmap.ic_launcher)
-                .setMessage("Where should I look for you, Guardian?")
-                .setPositiveButton("PSN", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        membershipType[0] = 2;
-                        final SignInFragment signInFragment = SignInFragment.newInstance(Endpoints.PSN_AUTH_URL);
-                        signInFragment.setOnCookiesInterceptedListener(new SignInFragment.OnCookiesInterceptedListener() {
-                            @Override
-                            public void onCookiesIntercepted(String[] cookies) {
-                                presenter.onWebSignInCompleted(membershipType[0], cookies);
-                                signInFragment.dismiss();
-                            }
-                        });
-                        signInFragment.show(getSupportFragmentManager(), "SignInDialog");
-                    }
-                })
-                .setNegativeButton("Xbox Live", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        membershipType[0] = 1;
-                        final SignInFragment signInFragment = SignInFragment.newInstance(Endpoints.XBOX_AUTH_URL);
-                        signInFragment.setOnCookiesInterceptedListener(new SignInFragment.OnCookiesInterceptedListener() {
-                            @Override
-                            public void onCookiesIntercepted(String[] cookies) {
-                                presenter.onWebSignInCompleted(membershipType[0], cookies);
-                                signInFragment.dismiss();
-                            }
-                        });
-                        signInFragment.show(getSupportFragmentManager(), "SignInDialog");
-                    }
-                })
-                .create()
-                .show();
-
-    }
-
-    @Override
-    public void showWebSignInForUpdatingCredentials(final AccountId accountId) {
-        final SignInFragment signInFragment = SignInFragment.newInstance(accountId.withMembershipType() == 2 ? Endpoints.PSN_AUTH_URL : Endpoints.XBOX_AUTH_URL);
-        signInFragment.setOnCookiesInterceptedListener(new SignInFragment.OnCookiesInterceptedListener() {
-            @Override
-            public void onCookiesIntercepted(String[] cookies) {
-                presenter.onWebCredentialsUpdated(accountId, cookies);
-                signInFragment.dismiss();
-            }
-        });
-        signInFragment.show(getSupportFragmentManager(), "SignInDialog");
-    }
-
     @Override
     public void setUser(User user) {
         final Context context = this;
@@ -345,6 +290,37 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         } else {
             findViewById(R.id.pbMain).setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void showChoosePlatformDialog(String[] platforms) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose your platform")
+                .setItems(platforms, (dialogInterface, i) -> presenter.onPlatformChosen(i))
+                .show();
+    }
+
+    @Override
+    public void showWebSignIn(String url, UserPresenter.AccountCredentialsCallback accountCredentialsCallback) {
+        FragmentManager fragManager = getSupportFragmentManager();
+        FragmentTransaction fragTransaction = fragManager.beginTransaction();
+
+        SignInFragment signInFragment = SignInFragment.newInstance(url);
+        signInFragment.setCallback(accountCredentialsCallback);
+
+        fragTransaction.add(R.id.drawer_layout, signInFragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void showUpdateCredentialsNowDialog(String accountName) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Account credentials expired")
+                .setMessage("Credentials for " + accountName + " expired. Would you like to update them now?")
+                .setPositiveButton("Yes", (dialogInterface, i) -> presenter.onUpdateCredentialsNow(true))
+                .setNegativeButton("Remind me later", (dialogInterface, i) -> presenter.onUpdateCredentialsNow(false))
+                .show();
     }
 
     public TabLayout getTabs() {
