@@ -71,7 +71,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
     @Override
     public BungieResponse<Integer> transferItem(TransferCommand command, String cookies, String xcsrf) {
         try {
-            return bungieApi.requestTransfer(command, cookies, xcsrf).execute().body();//.getErrorCode() == 1;
+            return bungieApi.requestTransfer(command, cookies, xcsrf).execute().body();
         } catch (IOException e) {
             throw new IllegalNetworkStateException(e.getMessage(), e);
         }
@@ -133,7 +133,7 @@ public class RetrofitDestinyApiFacade implements DestinyApi {
         }
     }
 
-    public interface RetrofitDestinyApi {
+    private interface RetrofitDestinyApi {
         String apiKey = "someKey";
 
         @Headers("X-API-KEY: " + apiKey)

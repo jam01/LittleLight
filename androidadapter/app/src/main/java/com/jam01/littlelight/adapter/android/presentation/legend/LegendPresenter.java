@@ -10,7 +10,6 @@ import com.jam01.littlelight.domain.legend.LegendSynced;
 import javax.inject.Inject;
 
 import io.reactivex.Completable;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
@@ -47,31 +46,38 @@ public class LegendPresenter {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(domainEvent -> {
                     if (domainEvent instanceof LegendSynced) {
-                        view.renderLegend(((LegendSynced) domainEvent).getLegendUpdated());
+                        renderLegend(((LegendSynced) domainEvent).getLegendUpdated());
                     }
                 }, errorAction));
 
+        Legend legend = service.ofAccount(anAccountId);
+        if (legend != null)
+            renderLegend(legend);
+        else
+            syncLegendAsync(anAccountId);
+    }
 
-        subscriptions.add(Single.defer(() -> Single.just(service.ofAccount(anAccountId)))
+    private void renderLegend(Legend legendUpdated) {
+        view.renderLegend(legendUpdated);
+        view.showLoading(false);
+    }
+
+    private void syncLegendAsync(AccountId anAccountId) {
+        Completable.fromAction(() -> service.synchronizeLegendOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(legendAction, errorAction));
+                .subscribe(() -> {
+                }, errorAction);
     }
 
     public void unbindView() {
-        if (!subscriptions.isDisposed()) {
-            subscriptions.dispose();
-        }
+        subscriptions.clear();
         view.showLoading(false);
         view = null;
     }
 
-    public void refresh(final AccountId anAccountId) {
-        subscriptions.add(Completable.fromAction(() -> service.synchronizeLegendOf(anAccountId))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> view.showLoading(false), errorAction));
-
+    public void refresh(AccountId anAccountId) {
+        syncLegendAsync(anAccountId);
     }
 
     public interface LegendView {
@@ -108,4 +114,3 @@ public class LegendPresenter {
         }
     }
 }
-

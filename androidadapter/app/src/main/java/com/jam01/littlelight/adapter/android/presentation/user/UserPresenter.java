@@ -45,9 +45,7 @@ public class UserPresenter {
     }
 
     public void unbindView() {
-        if (!subscriptions.isDisposed()) {
-            subscriptions.dispose();
-        }
+        subscriptions.clear();
         view.showLoading(false);
         view = null;
     }
@@ -69,11 +67,11 @@ public class UserPresenter {
                     }
                 }, errorAction));
 
-        subscriptions.add(Completable.fromAction(() -> service.synchronizeUserAccounts())
+        Completable.fromAction(() -> service.synchronizeUserAccounts())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                }, errorAction));
+                }, errorAction);
 
 
         User user = service.getUser();
@@ -82,8 +80,6 @@ public class UserPresenter {
         if (user.allRegisteredAccounts().isEmpty()) {
             onAddAccount();
         }
-//        else
-//            view.displayAccount(user.allRegisteredAccounts().iterator().next());
     }
 
     public void handleExpiredQueue() {

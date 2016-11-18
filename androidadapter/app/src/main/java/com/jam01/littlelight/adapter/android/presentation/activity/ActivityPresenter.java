@@ -49,9 +49,7 @@ public class ActivityPresenter {
     }
 
     public void unbindView() {
-        if (!subscriptions.isDisposed()) {
-            subscriptions.dispose();
-        }
+        subscriptions.clear();
         view.showLoading(false);
         view = null;
     }

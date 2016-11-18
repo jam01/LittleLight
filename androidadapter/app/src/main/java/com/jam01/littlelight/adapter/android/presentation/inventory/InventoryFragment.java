@@ -230,13 +230,6 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         bagViewMap.get(onBagId).updateItem(itemUnequipped);
     }
 
-//    @Override
-//    public void updateBag(ItemBag itemBagUpdated) {
-//        if (bagViewMap.containsKey(itemBagUpdated.withId())) {
-//            bagViewMap.get(itemBagUpdated.withId()).replaceAll(new ArrayList<>(itemBagUpdated.orderedItems()));
-//        }
-//    }
-
     /**
      * Toggle the selection state of an item.
      * <p>
@@ -459,6 +452,4 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
             return true;
         }
     }
-
-
 }

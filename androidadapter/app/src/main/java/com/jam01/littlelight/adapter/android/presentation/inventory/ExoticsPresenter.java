@@ -42,9 +42,7 @@ public class ExoticsPresenter {
 
 
     public void unbindView() {
-        if (!subscriptions.isDisposed()) {
-            subscriptions.dispose();
-        }
+        subscriptions.clear();
         view.showLoading(false);
         view = null;
     }
@@ -86,11 +84,11 @@ public class ExoticsPresenter {
     }
 
     private void syncInventoryAsync(AccountId anAccountId) {
-        subscriptions.add(Completable.fromAction(() -> service.synchronizeInventoryOf(anAccountId))
+        Completable.fromAction(() -> service.synchronizeInventoryOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                }, errorAction));
+                }, errorAction);
     }
 
     public interface ExoticsView {
