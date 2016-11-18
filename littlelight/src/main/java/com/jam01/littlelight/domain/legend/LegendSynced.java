@@ -7,11 +7,11 @@ import java.util.Date;
 /**
  * Created by jam01 on 11/1/16.
  */
-public class LegendUpdated implements DomainEvent {
+public class LegendSynced implements DomainEvent {
     private final Date occuredOn;
     private final Legend legendUpdated;
 
-    public LegendUpdated(Legend legend) {
+    public LegendSynced(Legend legend) {
         occuredOn = new Date();
         legendUpdated = legend;
     }

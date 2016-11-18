@@ -7,7 +7,7 @@ import com.jam01.littlelight.application.ActivityService;
 import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.legend.Legend;
-import com.jam01.littlelight.domain.legend.LegendUpdated;
+import com.jam01.littlelight.domain.legend.LegendSynced;
 
 import javax.inject.Inject;
 
@@ -63,11 +63,11 @@ public class ActivityPresenter {
         }
 
         //Register for events
-        subscriptions.add(legendService.subscribeToInventoryEvents(anAccountId).subscribeOn(Schedulers.io())
+        subscriptions.add(legendService.subscribeToLegendEvents(anAccountId).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(domainEvent -> {
-                    if (domainEvent instanceof LegendUpdated) {
-                        Legend legend = ((LegendUpdated) domainEvent).getLegendUpdated();
+                    if (domainEvent instanceof LegendSynced) {
+                        Legend legend = ((LegendSynced) domainEvent).getLegendUpdated();
                         renderAccount(legend, anAccountId);
                     }
                 }));

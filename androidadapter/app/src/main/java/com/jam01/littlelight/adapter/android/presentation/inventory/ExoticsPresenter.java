@@ -13,6 +13,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -85,7 +86,11 @@ public class ExoticsPresenter {
     }
 
     private void syncInventoryAsync(AccountId anAccountId) {
-
+        subscriptions.add(Completable.fromAction(() -> service.synchronizeInventoryOf(anAccountId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> {
+                }, errorAction));
     }
 
     public interface ExoticsView {

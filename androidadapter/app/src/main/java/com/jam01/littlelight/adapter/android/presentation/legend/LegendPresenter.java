@@ -5,7 +5,7 @@ import com.jam01.littlelight.adapter.common.service.BungieResponseException;
 import com.jam01.littlelight.application.LegendService;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 import com.jam01.littlelight.domain.legend.Legend;
-import com.jam01.littlelight.domain.legend.LegendUpdated;
+import com.jam01.littlelight.domain.legend.LegendSynced;
 
 import javax.inject.Inject;
 
@@ -42,12 +42,12 @@ public class LegendPresenter {
             subscriptions = new CompositeDisposable();
         }
 
-        subscriptions.add(service.subscribeToInventoryEvents(anAccountId)
+        subscriptions.add(service.subscribeToLegendEvents(anAccountId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(domainEvent -> {
-                    if (domainEvent instanceof LegendUpdated) {
-                        view.renderLegend(((LegendUpdated) domainEvent).getLegendUpdated());
+                    if (domainEvent instanceof LegendSynced) {
+                        view.renderLegend(((LegendSynced) domainEvent).getLegendUpdated());
                     }
                 }, errorAction));
 

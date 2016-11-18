@@ -16,16 +16,10 @@
             android:id="@+id/nav_activities"
             android:icon="@drawable/grey_activities"
             android:title="Activities" />
-        <!--<item-->
-        <!--android:id="@+id/nav_slideshow"-->
-        <!--android:icon="@drawable/ic_menu_slideshow"-->
-        <!--android:title="Slideshow" />-->
-        <!--<item-->
-        <!--android:id="@+id/nav_manage"-->
-        <!--android:icon="@drawable/ic_menu_manage"-->
-        <!--android:title="Tools" />-->
     </group>
-    <group android:id="@+id/others">
+    <group
+        android:id="@+id/others"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/nav_exotics"
             android:icon="@drawable/ic_menu_gallery"

@@ -39,7 +39,7 @@ public class ItemAdapter extends SelectableSectionedRecyclerViewAdapter<Item> {
         Picasso.with(mContext)
                 .load(item.getIconUrl())
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                .placeholder(R.mipmap.ic_launcher)
+//                .placeholder(R.mipmap.ic_launcher)
                 .fit()
                 .into(icon);
 

@@ -1,5 +1,7 @@
 package com.jam01.littlelight.adapter.android.presentation.inventory;
 
+import android.util.Log;
+
 import com.jam01.littlelight.adapter.android.utils.IllegalNetworkStateException;
 import com.jam01.littlelight.adapter.common.presentation.InventoryDPO;
 import com.jam01.littlelight.adapter.common.service.BungieResponseException;
@@ -12,7 +14,7 @@ import com.jam01.littlelight.domain.inventory.Item;
 import com.jam01.littlelight.domain.inventory.ItemEquipped;
 import com.jam01.littlelight.domain.inventory.ItemTransferred;
 import com.jam01.littlelight.domain.legend.Legend;
-import com.jam01.littlelight.domain.legend.LegendUpdated;
+import com.jam01.littlelight.domain.legend.LegendSynced;
 
 import java.util.List;
 
@@ -79,18 +81,18 @@ public class InventoryPresenter {
                 }, errorAction));
 
         //Register for events
-        subscriptions.add(legendService.subscribeToInventoryEvents(anAccountId).subscribeOn(Schedulers.io())
+        subscriptions.add(legendService.subscribeToLegendEvents(anAccountId).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(domainEvent -> {
-                    if (domainEvent instanceof LegendUpdated) {
-                        Legend legend = ((LegendUpdated) domainEvent).getLegendUpdated();
+                    if (domainEvent instanceof LegendSynced) {
+                        Legend legend = ((LegendSynced) domainEvent).getLegendUpdated();
                         Inventory inventory = inventoryService.ofAccount(anAccountId);
 
                         if (inventory != null) {
                             renderInventory(inventory, legend);
                         }
                     }
-                }));
+                }, errorAction));
 
         //Render dpo if we have necessary objects or trigger sync for missing ones
         Inventory inventory = inventoryService.ofAccount(anAccountId);
@@ -187,12 +189,15 @@ public class InventoryPresenter {
         public void accept(Throwable throwable) throws Exception {
             view.showLoading(false);
             if (throwable instanceof BungieResponseException) {
+                Log.d(TAG, "accept: BungieResponseException");
                 throwable.printStackTrace();
                 view.showError(throwable.getLocalizedMessage());
             } else if (throwable instanceof IllegalNetworkStateException) {
+                Log.d(TAG, "accept: IllegalNetworkStatException");
                 throwable.printStackTrace();
                 view.showError("There was an error with that Network request, check you connectivity and try again");
             } else {
+                Log.d(TAG, "accept: Something else");
                 throwable.printStackTrace();
                 throw new IllegalStateException("Something went wrong, Little Light will check the cause and address the issue.", throwable);
             }

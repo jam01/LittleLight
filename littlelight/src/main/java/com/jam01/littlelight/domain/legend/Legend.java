@@ -1,6 +1,5 @@
 package com.jam01.littlelight.domain.legend;
 
-import com.jam01.littlelight.domain.DomainEventPublisher;
 import com.jam01.littlelight.domain.identityaccess.AccountId;
 
 import java.util.Collection;
@@ -54,7 +53,5 @@ public class Legend {
         for (Character instance : newState.withCharacters()) {
             characterMap.put(instance.characterId(), instance);
         }
-
-        DomainEventPublisher.instanceOf().publish(new LegendUpdated(this));
     }
 }

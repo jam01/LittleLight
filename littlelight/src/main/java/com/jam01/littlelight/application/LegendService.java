@@ -7,7 +7,7 @@ import com.jam01.littlelight.domain.identityaccess.User;
 import com.jam01.littlelight.domain.legend.DestinyLegendService;
 import com.jam01.littlelight.domain.legend.Legend;
 import com.jam01.littlelight.domain.legend.LegendRepository;
-import com.jam01.littlelight.domain.legend.LegendUpdated;
+import com.jam01.littlelight.domain.legend.LegendSynced;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Predicate;
@@ -38,13 +38,13 @@ public class LegendService {
         destinyService.synchronizeLegendFor(user.ofId(anAccountId), legendRepo);
     }
 
-    public Observable<DomainEvent> subscribeToInventoryEvents(final AccountId subscriberAccountId) {
+    public Observable<DomainEvent> subscribeToLegendEvents(final AccountId subscriberAccountId) {
         return DomainEventPublisher.instanceOf().getEvents()
                 .filter(new Predicate<DomainEvent>() {
                     @Override
                     public boolean test(DomainEvent domainEvent) throws Exception {
-                        if (domainEvent instanceof LegendUpdated)
-                            return ((LegendUpdated) domainEvent).getLegendUpdated().withId().equals(subscriberAccountId);
+                        if (domainEvent instanceof LegendSynced)
+                            return ((LegendSynced) domainEvent).getLegendUpdated().withId().equals(subscriberAccountId);
                         return false;
                     }
                 });

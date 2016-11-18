@@ -75,10 +75,15 @@ public class UserPresenter {
                 .subscribe(() -> {
                 }, errorAction));
 
-        view.setUser(service.getUser());
-        if (service.userAccounts().isEmpty()) {
+
+        User user = service.getUser();
+        view.setUser(user);
+
+        if (user.allRegisteredAccounts().isEmpty()) {
             onAddAccount();
         }
+//        else
+//            view.displayAccount(user.allRegisteredAccounts().iterator().next());
     }
 
     public void handleExpiredQueue() {
