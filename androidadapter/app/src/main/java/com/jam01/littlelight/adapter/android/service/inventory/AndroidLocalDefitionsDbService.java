@@ -3,6 +3,7 @@ package com.jam01.littlelight.adapter.android.service.inventory;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabaseCorruptException;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 
@@ -103,6 +104,10 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
                 resultSet.close();
             }
 //            definitionsDb.close();
+        } catch (SQLiteDatabaseCorruptException exception) {
+            //Force a re-download
+            database = dbFuture();
+            return getExoticDefinitions();
         } catch (SQLiteException exception) {
             throw new IllegalStateException(exception.getMessage(), exception);
         }
@@ -128,6 +133,10 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
                 }
                 resultSet.close();
 //            definitionsDb.close();
+            } catch (SQLiteDatabaseCorruptException exception) {
+                //Force a re-download
+                database = dbFuture();
+                return getExoticDefinitions();
             } catch (SQLiteException exception) {
                 throw new IllegalStateException(exception.getMessage(), exception);
             }
