@@ -83,7 +83,7 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
                 }
                 return SQLiteDatabase.openDatabase(mContext.getDatabasePath(dbName).getPath(),
                         null,
-                        SQLiteDatabase.OPEN_READONLY);
+                        SQLiteDatabase.OPEN_READONLY + SQLiteDatabase.NO_LOCALIZED_COLLATORS);
             }
         });
     }
@@ -161,6 +161,7 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
     }
 
     private void saveManifest(InputStream inputStream) {
+        Log.d(TAG, "saveManifest: downloading");
         try {
             //Setting up the location for the file
             String location = mContext.getDatabasePath("manifest").getParent().concat("/");
@@ -229,6 +230,7 @@ public class AndroidLocalDefitionsDbService implements LocalDefinitionsDbService
                 Log.d(TAG, "Saved manifest DB to file at: " + location + unzippedFile.getName());
             }
         } catch (IOException e) {
+            Log.d(TAG, "saveManifest: failed");
             e.printStackTrace();
         }
     }
