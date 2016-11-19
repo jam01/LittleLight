@@ -24,7 +24,7 @@ public class LegendPresenter {
     private LegendView view;
     private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
-    private OnLegendAction legendAction = new OnLegendAction();
+//    private OnLegendAction legendAction = new OnLegendAction();
 
     @Inject
     public LegendPresenter(LegendService legendService) {
@@ -88,13 +88,13 @@ public class LegendPresenter {
         void showError(String localizedMessage);
     }
 
-    private class OnLegendAction implements Consumer<Legend> {
-        @Override
-        public void accept(Legend account) {
-            view.renderLegend(account);
-            view.showLoading(false);
-        }
-    }
+//    private class OnLegendAction implements Consumer<Legend> {
+//        @Override
+//        public void accept(Legend account) {
+//            view.renderLegend(account);
+//            view.showLoading(false);
+//        }
+//    }
 
     private class OnErrorAction implements Consumer<Throwable> {
         @Override

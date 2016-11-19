@@ -10,6 +10,8 @@
 # Add any project specific keep options here:
 
 -dontobfuscate
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
 
 ###---------------Begin: proguard configuration for Gson  ----------
  # Gson uses generic type information stored in a class file when working with fields. Proguard
