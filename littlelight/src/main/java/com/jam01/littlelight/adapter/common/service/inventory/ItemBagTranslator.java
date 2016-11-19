@@ -93,7 +93,9 @@ public class ItemBagTranslator {
 
         }
         return new ItemType(definition.getItemHash(), definition.getItemName(), definition.getBucketTypeHash(),
-                definition.getMaxStackSize().intValue(), "https://www.bungie.net" + definition.getIcon(), definition.getTierTypeName(),
+                definition.getMaxStackSize().intValue(), "https://www.bungie.net" + definition.getIcon(),
+                // TODO: 11/19/16 figure out what items are coming up without a tier type name
+                definition.getTierTypeName() != null ? definition.getTierTypeName() : "Unknown",
                 Globals.classTypes.get(definition.getClassType()), definition.getEquippable(), Globals.buckets.get(definition.getBucketTypeHash()),
                 definition.getItemTypeName(), itemSuperType);
     }

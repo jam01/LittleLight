@@ -10,6 +10,7 @@
 # Add any project specific keep options here:
 
 -dontobfuscate
+
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
 
