@@ -110,26 +110,6 @@ public class InventoryPresenter {
         view.showLoading(false);
     }
 
-    private void syncLegendAsync(AccountId anAccountId) {
-        Completable.fromAction(() -> legendService.synchronizeLegendOf(anAccountId))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(completedAction, errorAction);
-    }
-
-    private void syncInventoryAsync(AccountId anAccountId) {
-        Completable.fromAction(() -> inventoryService.synchronizeInventoryOf(anAccountId))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(completedAction, errorAction);
-    }
-
-    public void unbindView() {
-        subscriptions.clear();
-        view.showLoading(false);
-        view = null;
-    }
-
     public void sendItems(final List<Item> toTransfer, final String toItemBagId) {
         view.showLoading(true);
         // TODO: 11/10/16 Use streams to map items to their Ids whenever streams is available
@@ -156,6 +136,35 @@ public class InventoryPresenter {
 
         if (legendService.ofAccount(anAccountId) == null)
             syncLegendAsync(anAccountId);
+    }
+
+    private void syncLegendAsync(AccountId anAccountId) {
+        //We don't add these to the subscriptions because we want them to continue running.
+        Completable.fromAction(() -> legendService.synchronizeLegendOf(anAccountId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(completedAction, t -> {
+                    //If it fails after the view is unbound we might get a NPE so we check first
+                    if (view != null) {
+                        errorAction.accept(t);
+                    }
+                });
+    }
+
+    private void syncInventoryAsync(AccountId anAccountId) {
+        Completable.fromAction(() -> inventoryService.synchronizeInventoryOf(anAccountId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(completedAction, t -> {
+                    if (view != null)
+                        errorAction.accept(t);
+                });
+    }
+
+    public void unbindView() {
+        subscriptions.clear();
+        view.showLoading(false);
+        view = null;
     }
 
     public interface InventoryView {
@@ -192,7 +201,7 @@ public class InventoryPresenter {
                 view.showError("There was an error with that Network request, check you connectivity and try again");
             } else {
                 throwable.printStackTrace();
-                throw new IllegalStateException("Something went wrong, Little Light will check the cause and address the issue.", throwable);
+                throw new IllegalStateException(TAG + ": Rethrowing an unhandled exception ", throwable);
             }
         }
     }

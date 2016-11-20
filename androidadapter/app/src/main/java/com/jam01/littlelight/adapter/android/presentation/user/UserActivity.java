@@ -303,8 +303,8 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Account credentials expired")
                 .setMessage("Credentials for " + accountName + " expired. Would you like to update them now?")
-                .setPositiveButton("Yes", (dialogInterface, i) -> presenter.onUpdateCredentialsNow(true))
-                .setNegativeButton("Remind me later", (dialogInterface, i) -> presenter.onUpdateCredentialsNow(false))
+                .setPositiveButton("Yes", (dialogInterface, i) -> presenter.onUpdateCredentialsResponse(true))
+                .setNegativeButton("Remind me later", (dialogInterface, i) -> presenter.onUpdateCredentialsResponse(false))
                 .show();
     }
 

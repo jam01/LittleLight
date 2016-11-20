@@ -17,8 +17,8 @@ android {
         applicationId "com.jam01.littlelight"
         minSdkVersion 11
         targetSdkVersion 25
-        versionCode 511
-        versionName "5.1.1"
+        versionCode 512
+        versionName "5.1.2"
 
         vectorDrawables.useSupportLibrary = true
         jackOptions {

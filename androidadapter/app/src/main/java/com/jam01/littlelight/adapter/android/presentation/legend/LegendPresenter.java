@@ -24,7 +24,6 @@ public class LegendPresenter {
     private LegendView view;
     private CompositeDisposable subscriptions = new CompositeDisposable();
     private OnErrorAction errorAction = new OnErrorAction();
-//    private OnLegendAction legendAction = new OnLegendAction();
 
     @Inject
     public LegendPresenter(LegendService legendService) {
@@ -62,22 +61,25 @@ public class LegendPresenter {
         view.showLoading(false);
     }
 
+    public void refresh(AccountId anAccountId) {
+        syncLegendAsync(anAccountId);
+    }
+
     private void syncLegendAsync(AccountId anAccountId) {
         Completable.fromAction(() -> service.synchronizeLegendOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                }, errorAction);
+                }, t -> {
+                    if (view != null)
+                        errorAction.accept(t);
+                });
     }
 
     public void unbindView() {
         subscriptions.clear();
         view.showLoading(false);
         view = null;
-    }
-
-    public void refresh(AccountId anAccountId) {
-        syncLegendAsync(anAccountId);
     }
 
     public interface LegendView {
@@ -87,14 +89,6 @@ public class LegendPresenter {
 
         void showError(String localizedMessage);
     }
-
-//    private class OnLegendAction implements Consumer<Legend> {
-//        @Override
-//        public void accept(Legend account) {
-//            view.renderLegend(account);
-//            view.showLoading(false);
-//        }
-//    }
 
     private class OnErrorAction implements Consumer<Throwable> {
         @Override
@@ -109,7 +103,7 @@ public class LegendPresenter {
                 view.showLoading(false);
             } else {
                 throwable.printStackTrace();
-                throw new IllegalStateException("Something went wrong, Little Light will check the cause and address the issue.", throwable);
+                throw new IllegalStateException(TAG + ": Rethrowing an unhandled exception ", throwable);
             }
         }
     }

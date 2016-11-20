@@ -40,13 +40,6 @@ public class ExoticsPresenter {
         this.view = exoticsView;
     }
 
-
-    public void unbindView() {
-        subscriptions.clear();
-        view.showLoading(false);
-        view = null;
-    }
-
     public void onStart(final AccountId anAccountId) {
         view.showLoading(true);
         if (subscriptions.isDisposed()) {
@@ -88,7 +81,16 @@ public class ExoticsPresenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                }, errorAction);
+                }, t -> {
+                    if (view != null)
+                        errorAction.accept(t);
+                });
+    }
+
+    public void unbindView() {
+        subscriptions.clear();
+        view.showLoading(false);
+        view = null;
     }
 
     public interface ExoticsView {
@@ -121,7 +123,7 @@ public class ExoticsPresenter {
                 view.showLoading(false);
             } else {
                 throwable.printStackTrace();
-                throw new IllegalStateException("Something went wrong, Little Light will check the cause and address the issue.", throwable);
+                throw new IllegalStateException(TAG + ": Rethrowing an unhandled exception ", throwable);
             }
         }
     }

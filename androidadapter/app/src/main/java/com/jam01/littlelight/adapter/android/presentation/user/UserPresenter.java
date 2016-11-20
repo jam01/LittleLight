@@ -36,18 +36,12 @@ public class UserPresenter {
     private boolean updatingCredentials = false;
 
     @Inject
-    public UserPresenter(final UserService service) {
+    public UserPresenter(UserService service) {
         this.service = service;
     }
 
     public void bindView(MainView mainView) {
         view = mainView;
-    }
-
-    public void unbindView() {
-        subscriptions.clear();
-        view.showLoading(false);
-        view = null;
     }
 
     public void onStart() {
@@ -71,8 +65,10 @@ public class UserPresenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(() -> {
-                }, errorAction);
-
+                }, t -> {
+                    if (view != null)
+                        errorAction.accept(t);
+                });
 
         User user = service.getUser();
         view.setUser(user);
@@ -80,6 +76,37 @@ public class UserPresenter {
         if (user.allRegisteredAccounts().isEmpty()) {
             onAddAccount();
         }
+    }
+
+    public void onAddAccount() {
+        view.showChoosePlatformDialog(new String[]{"PlayStation Network", "Xbox Live"});
+    }
+
+    public void onPlatformChosen(int platform) {
+        view.showWebSignIn(platform == 0 ? Endpoints.PSN_AUTH_URL : Endpoints.XBOX_AUTH_URL, new AccountCredentialsCallback() {
+            @Override
+            void onDismissed() {
+                return;
+            }
+
+            @Override
+            void onResult(String[] cookies) {
+                subscriptions.add(Single.defer(() -> Single.just(service.registerFromCredentials(platform == 0 ? 2 : 1, cookies)))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(account -> {
+                            view.addAccount(account);
+                            view.displayAccount(account);
+                            view.showLoading(false);
+                        }, errorAction));
+                view.showLoading(true);
+            }
+        });
+    }
+
+    public void onRemoveAccount(Account account) {
+        service.unregister(account.withId());
+        view.removeAccount(account);
     }
 
     public void handleExpiredQueue() {
@@ -90,7 +117,7 @@ public class UserPresenter {
         }
     }
 
-    public void onUpdateCredentialsNow(boolean now) {
+    public void onUpdateCredentialsResponse(boolean now) {
         Iterator iterator = expiredQueue.iterator();
         if (now) {
             AccountId accountId = (AccountId) iterator.next();
@@ -118,38 +145,14 @@ public class UserPresenter {
         }
     }
 
-    public void onAddAccount() {
-        view.showChoosePlatformDialog(new String[]{"PlayStation Network", "Xbox Live"});
-    }
-
-    public void onRemoveAccount(Account account) {
-        service.unregister(account.withId());
-        view.removeAccount(account);
-    }
-
-    public void onPlatformChosen(int platform) {
-        view.showWebSignIn(platform == 0 ? Endpoints.PSN_AUTH_URL : Endpoints.XBOX_AUTH_URL, new AccountCredentialsCallback() {
-            @Override
-            void onDismissed() {
-                return;
-            }
-
-            @Override
-            void onResult(String[] cookies) {
-                subscriptions.add(Single.defer(() -> Single.just(service.registerFromCredentials(platform == 0 ? 2 : 1, cookies)))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(account -> {
-                            view.addAccount(account);
-                            view.displayAccount(account);
-                            view.showLoading(false);
-                        }, errorAction));
-                view.showLoading(true);
-            }
-        });
+    public void unbindView() {
+        subscriptions.clear();
+        view.showLoading(false);
+        view = null;
     }
 
     public interface MainView {
+
         void showChoosePlatformDialog(String[] platforms);
 
         void setUser(User user);
@@ -169,6 +172,13 @@ public class UserPresenter {
         void showWebSignIn(String url, AccountCredentialsCallback accountCredentialsCallback);
 
         void showUpdateCredentialsNowDialog(String accountName);
+
+    }
+
+    public abstract class AccountCredentialsCallback {
+        abstract void onDismissed();
+
+        abstract void onResult(String[] cookies);
     }
 
     private class OnErrorAction implements Consumer<Throwable> {
@@ -184,14 +194,9 @@ public class UserPresenter {
                 view.showLoading(false);
             } else {
                 throwable.printStackTrace();
-                throw new IllegalStateException(throwable);
+                throw new IllegalStateException(TAG + ": Rethrowing an unhandled exception ", throwable);
             }
         }
-    }
 
-    public abstract class AccountCredentialsCallback {
-        abstract void onDismissed();
-
-        abstract void onResult(String[] cookies);
     }
 }

@@ -37,21 +37,8 @@ public class ActivityPresenter {
         this.legendService = legendService;
     }
 
-    public void refresh(final AccountId anAccountId) {
-        Legend legend = legendService.ofAccount(anAccountId);
-        if (legend != null)
-            renderAccount(legend, anAccountId);
-        else syncLegendAsync(anAccountId);
-    }
-
     public void bindView(ActivityView inventoryView) {
         this.view = inventoryView;
-    }
-
-    public void unbindView() {
-        subscriptions.clear();
-        view.showLoading(false);
-        view = null;
     }
 
     public void onStart(final AccountId anAccountId) {
@@ -76,7 +63,22 @@ public class ActivityPresenter {
         else syncLegendAsync(anAccountId);
     }
 
+    private void renderAccount(Legend legend, AccountId anAccountId) {
+        subscriptions.add(Single.defer(() -> Single.just(new ActivitiesDPO(legend, service.ofAccount(anAccountId))))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(activityAction, errorAction));
+    }
+
+    public void refresh(final AccountId anAccountId) {
+        Legend legend = legendService.ofAccount(anAccountId);
+        if (legend != null)
+            renderAccount(legend, anAccountId);
+        else syncLegendAsync(anAccountId);
+    }
+
     private void syncLegendAsync(AccountId anAccountId) {
+        //All activity calls are live so we don't need to continue requests after unbound view
         subscriptions.add(Completable.fromAction(() -> legendService.synchronizeLegendOf(anAccountId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -84,11 +86,10 @@ public class ActivityPresenter {
                 }, errorAction));
     }
 
-    private void renderAccount(Legend legend, AccountId anAccountId) {
-        subscriptions.add(Single.defer(() -> Single.just(new ActivitiesDPO(legend, service.ofAccount(anAccountId))))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(activityAction, errorAction));
+    public void unbindView() {
+        subscriptions.clear();
+        view.showLoading(false);
+        view = null;
     }
 
     public interface ActivityView {
@@ -121,7 +122,7 @@ public class ActivityPresenter {
                 view.showLoading(false);
             } else {
                 throwable.printStackTrace();
-                throw new IllegalStateException("Something went wrong, Little Light will check the cause and address the issue.", throwable);
+                throw new IllegalStateException(TAG + ": Rethrowing an unhandled exception ", throwable);
             }
         }
     }
