@@ -19,10 +19,10 @@ public abstract class ItemBag {
 
     static {
         ITEM_ORDER = new ArrayList<>();
-        ITEM_ORDER.add(3284755031L);//"Subclass");
         ITEM_ORDER.add(1498876634L);//"Primary Weapons");
         ITEM_ORDER.add(2465295065L);//"Secondary Weapons");
         ITEM_ORDER.add(953998645L);//"Heavy Weapons");
+        ITEM_ORDER.add(3284755031L);//"Subclass");
         ITEM_ORDER.add(4023194814L);//"Ghosts");
         ITEM_ORDER.add(3448274439L);//"Helmets");
         ITEM_ORDER.add(3551918588L);//"Arms");

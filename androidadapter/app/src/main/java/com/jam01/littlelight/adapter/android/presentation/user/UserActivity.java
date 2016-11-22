@@ -2,9 +2,9 @@ package com.jam01.littlelight.adapter.android.presentation.user;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -23,7 +23,7 @@ import android.widget.TextView;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.LittleLight;
 import com.jam01.littlelight.adapter.android.presentation.activity.ActivityFragment;
-import com.jam01.littlelight.adapter.android.presentation.inventory.ExoticsFragment;
+import com.jam01.littlelight.adapter.android.presentation.exotics.ExoticsFragment;
 import com.jam01.littlelight.adapter.android.presentation.inventory.InventoryFragment;
 import com.jam01.littlelight.adapter.android.presentation.legend.LegendFragment;
 import com.jam01.littlelight.domain.identityaccess.Account;
@@ -44,7 +44,6 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
     private View headerView;
     private View spinnerArrow;
     private ImageView selectedAccountAvatar;
-    private TabLayout tabs;
     private String TAG = this.getClass().getSimpleName();
     private int lastCheckedNavId = -1;
     private NavigationView mNavigationView;
@@ -75,7 +74,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
         accountListView = (ListView) headerView.findViewById(R.id.lvAccountList);
         spinnerArrow = headerView.findViewById(R.id.ivSpinnerArrow);
         selectedAccountAvatar = (ImageView) headerView.findViewById(R.id.ivAccountPic);
-        tabs = (TabLayout) findViewById(R.id.tabs);
+//        tabs = (TabLayout) findViewById(R.id.tabs);
 
         headerView.findViewById(R.id.bAddAccount).setOnClickListener(v -> {
             setAccountsViewVisibility(false);
@@ -308,7 +307,7 @@ public class UserActivity extends AppCompatActivity implements NavigationView.On
                 .show();
     }
 
-    public TabLayout getTabs() {
-        return tabs;
+    public AppBarLayout getAppBar() {
+        return (AppBarLayout) findViewById(R.id.app_bar);
     }
 }

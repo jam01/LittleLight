@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.inventory;
+package com.jam01.littlelight.adapter.android.presentation.exotics;
 
 import com.jam01.littlelight.adapter.android.utils.IllegalNetworkStateException;
 import com.jam01.littlelight.adapter.common.presentation.ExoticsDPO;

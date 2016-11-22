@@ -1,4 +1,4 @@
-package com.jam01.littlelight.adapter.android.presentation.inventory;
+package com.jam01.littlelight.adapter.android.presentation.exotics;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,7 +7,6 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bungie.netplatform.destiny.representation.Globals;
 import com.jam01.littlelight.R;
 import com.jam01.littlelight.adapter.android.utils.SelectableSectionedRecyclerViewAdapter;
 import com.jam01.littlelight.domain.inventory.ItemType;
@@ -29,7 +28,7 @@ public class ItemTypeAdapter extends SelectableSectionedRecyclerViewAdapter<Item
 
     @Override
     protected void onBindHeaderViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
-        ((HeaderViewHolder) viewHolder).mTextView.setText(Globals.buckets.get(mItems.get(viewPositionToItemPosition(position)).getTypeHash()));
+        ((HeaderViewHolder) viewHolder).mTextView.setText(mItems.get(viewPositionToItemPosition(position)).getItemType());
     }
 
     @Override

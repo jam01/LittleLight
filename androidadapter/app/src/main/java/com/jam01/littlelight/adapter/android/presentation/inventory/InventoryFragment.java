@@ -103,9 +103,8 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        tabs = ((UserActivity) getActivity()).getTabs();
-        tabs.removeAllTabs();
-
+        tabs = new TabLayout(getContext());
+        ((UserActivity) getActivity()).getAppBar().addView(tabs);
         ((UserActivity) getActivity()).getSupportActionBar().setTitle("Inventory");
 
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
@@ -148,6 +147,12 @@ public class InventoryFragment extends Fragment implements InventoryPresenter.In
         if (!isVisibleToUser && actionMode != null) {
             actionMode.finish();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        ((UserActivity) getActivity()).getAppBar().removeView(tabs);
+        super.onDestroyView();
     }
 
     @Override

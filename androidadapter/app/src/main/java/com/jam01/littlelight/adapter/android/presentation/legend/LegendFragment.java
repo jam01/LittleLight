@@ -1,6 +1,5 @@
 package com.jam01.littlelight.adapter.android.presentation.legend;
 
-import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -38,7 +37,6 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
     private static final String MEMBERSHIP_TYPE = "param1";
     private static final String MEMBERSHIP_ID = "param2";
     private LegendPresenter presenter;
-    private ProgressDialog progressDialog;
     private ViewPager mPager;
     private TabLayout tabs;
     private SwipeRefreshLayout swipeContainer;
@@ -83,9 +81,8 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_generic, container, false);
         mPager = (ViewPager) rootView.findViewById(R.id.pager);
-        tabs = ((UserActivity) getActivity()).getTabs();
-        tabs.removeAllTabs();
-
+        tabs = new TabLayout(getContext());
+        ((UserActivity) getActivity()).getAppBar().addView(tabs);
         ((UserActivity) getActivity()).getSupportActionBar().setTitle("Legend");
 
 
@@ -118,6 +115,12 @@ public class LegendFragment extends Fragment implements LegendPresenter.LegendVi
         super.onStart();
         presenter.bindView(this);
         presenter.onStart(accountId);
+    }
+
+    @Override
+    public void onDestroyView() {
+        ((UserActivity) getActivity()).getAppBar().removeView(tabs);
+        super.onDestroyView();
     }
 
     @Override
