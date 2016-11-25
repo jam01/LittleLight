@@ -36,10 +36,14 @@ public class ACLAccountService implements DestinyAccountService {
         }
 
         for (Map.Entry<String, JsonElement> entry : membershipIdsResponse.getResponse().entrySet()) {
-            if (Integer.valueOf(entry.getValue().toString()) == membershipType) {
+            if (entry.getValue().getAsInt() == membershipType) {
                 membershipId = entry.getKey();
                 break;
             }
+        }
+
+        if (membershipId == null) {
+            throw new IllegalStateException("No entry for memType: " + membershipType + " in response: " + membershipIdsResponse.getResponse().toString());
         }
 
         BungieResponse<UserResponse> userResponse = destinyApi.getUser(credentials.asCookieVal(), credentials.xcsrf());
